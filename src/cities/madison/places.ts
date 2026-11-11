@@ -100,7 +100,7 @@ export const PLACES: Option[] = [
   }),
   place({
     id: 'bb-clarke', name: 'B.B. Clarke Beach', what: 'A pocket beach at the end of a neighborhood street',
-    category: 'water', hood: 'Willy Street', lat: 43.076, lng: -89.369, price: 0, setting: 'out', minutes: [30, 75], kids: 2,
+    category: 'water', hood: 'Willy Street', lat: 43.0778, lng: -89.3684, price: 0, setting: 'out', minutes: [30, 75], kids: 2,
     moods: 'nature kids move think', hours: [{ season: '06-01..09-07', hours: PARK }], trust: 'solid', needs: ['warm', 'daylight'], best: ['hot'],
     story: "A small beach at the end of a residential street, with a swimming raft and a view straight across Lake Monona. It belongs to the neighborhood, and they'll share.",
     nudge: "Check the county's beach conditions before you go; blue-green algae closes it some days. Swim out to the raft. Walk up to Willy Street afterward with wet hair.",

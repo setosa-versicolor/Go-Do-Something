@@ -1,8 +1,8 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { city, places } from '../cities/madison';
+import { city, places, shape } from '../cities/madison';
 import { loadEvents, SOURCES } from '../core/events';
-import { directionsUrl, miles, travelLabel, type LatLng, type Mode } from '../core/geo';
+import { directionsUrl, miles, offsetMiles, travelLabel, type LatLng, type Mode } from '../core/geo';
 import { append, MAX_SAVED, pendingCheckIn, summarize, type Entry, type Verb } from '../core/history';
 import { parseIntent, resolveStart } from '../core/intent';
 import { match, statusLine, type Pick, type Request, type Result } from '../core/match';
@@ -261,8 +261,7 @@ export function App() {
   };
   const pins: Pin[] = results
     ? view.result.picks.map((p) => ({
-        east: (p.option.lng - city.center.lng) * 69.17 * Math.cos((city.center.lat * Math.PI) / 180),
-        north: (p.option.lat - city.center.lat) * 69.05,
+        ...offsetMiles(city.center, p.option),
         color: PIN_COLOR[GROUP[p.option.category]]!,
       }))
     : [];
@@ -405,6 +404,7 @@ export function App() {
           <button class="link" onClick={() => setSheet(true)}>Saved ({memory.saved.length}/{MAX_SAVED}) · Been ({memory.went.size})</button>
           <button class="link" onClick={() => { const next: Theme = theme === 'auto' ? 'dark' : theme === 'dark' ? 'light' : 'auto'; setTheme(next); saveTheme(next); }}>Theme: {theme}</button>
         </div>
+        <p>Map shapes © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors.</p>
         {results && <p>“Usually open” means the hours haven't been checked by hand yet, so confirm before a long trip. Travel times are estimates. Your history stays on this device.</p>}
       </footer>
 
@@ -461,7 +461,7 @@ function Scene(props: { pose: Pose; sky: SkyInput; pins: Pin[]; active: number |
     import('./scene')
       .then((m) => {
         if (gone || !canvas.current) return;
-        model.current = m.createDiorama(canvas.current, {
+        model.current = m.createDiorama(canvas.current, shape, {
           onPin: (i) => latest.current.onPin(i),
           onBalloon: () => latest.current.onBalloon(),
           onTouch: () => setHint(false),
@@ -479,7 +479,7 @@ function Scene(props: { pose: Pose; sky: SkyInput; pins: Pin[]; active: number |
   }, []);
 
   const s = props.sky;
-  useEffect(() => model.current?.setSky(s), [on, Math.round(s.time / 60_000), s.wet, s.snowing, s.frozen, Math.round(s.snowIn)]);
+  useEffect(() => model.current?.setSky(s), [on, Math.round(s.time / 60_000), s.wet, s.snowing, s.frozen, Math.round(s.snowIn), s.month]);
   useEffect(() => model.current?.setPose(props.pose), [on, props.pose]);
   useEffect(() => model.current?.setPins(props.pins), [on, props.pins.map((p) => `${p.east.toFixed(3)},${p.north.toFixed(3)}`).join('|')]);
   useEffect(() => model.current?.focus(props.active), [on, props.active]);

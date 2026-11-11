@@ -33,14 +33,22 @@ To turn on deploys: repo Settings → Pages → Source: GitHub Actions.
 
 ## The model
 
-The top of the page is a small 3D model of Madison (`src/ui/scene.ts`, three.js, loaded on demand): the Capitol on the isthmus between the lakes, under the real sky for the time and weather, with rain, snow and winter ice when the forecast says so. One unit is one mile, so a place's coordinates drop straight onto it.
+The top of the page is a small 3D model of Madison (`src/ui/scene.ts`, three.js, loaded on demand), under the real sky for the time, season and weather. One unit is one mile, so a place's coordinates drop straight onto it.
+
+What's real: the shorelines of the four lakes, the Yahara River and the main roads come from OpenStreetMap, simplified and stored as miles from the Capitol in `src/cities/madison/shape.json`. The landmarks (Camp Randall, the Kohl Center, Monona Terrace, the Union Terrace, Bascom Hill, Olbrich, the airport, the big parks and preserves) are placed by hand in `shape.ts`. What's invented: every individual house, tree, barn and downtown block is scattered by a seeded random number generator inside those real outlines, so the town looks the same on every visit but no single building is a real one.
 
 - Drag to look around.
-- Tap the Capitol, a sailboat or the water for a small reaction. Tap the sun or moon to run the day forward.
+- Tap a landmark or a lake for its name. Tap the Capitol, a sailboat, the plane or the water for a small reaction. Tap the sun or moon to run the day forward.
 - Tap the balloon to ask for a surprise.
-- When three picks are dealt, each stands as a numbered beacon where it really is. Tap a beacon to bring up its card; swipe the cards and the camera follows.
+- When three picks are dealt, each stands as a numbered beacon where it really is. Tap a beacon to bring up its card; swipe the cards and the camera leans toward that pick.
 
-It's decoration over a working page: everything it does is also a button below. Without WebGL the page keeps its painted sky, and with reduced motion the model holds still.
+By season and hour: leaves turn in October and come down in November, the lakes freeze and the boats become ice shanties in a cold winter, windows, street lights and headlights come on at dusk, and fireflies come out on dry summer nights.
+
+A beacon is only as good as the coordinate behind it. Places in the list were located from memory and are right to within a few blocks, not to the door; events are placed by their venue, or by the coordinates their feed supplies. A test fails if any place or venue lands in a lake, which is how one bad coordinate was already caught. Anything beyond about 12 miles is dropped before it gets here, and the detailed part of the model reaches a little past the edge of town.
+
+The scene knows nothing about Madison: it builds whatever `CityShape` it is handed (`src/core/types.ts`). It's decoration over a working page: everything it does is also a button below. Without WebGL the page keeps its painted sky, and with reduced motion the model holds still.
+
+To rebuild `shape.json`, fetch the lake polygons from Nominatim (`polygon_geojson=1`) and the `motorway|trunk|primary` ways from Overpass for the bounding box, convert to miles with `offsetMiles`, and simplify. Map data © OpenStreetMap contributors, under the Open Database License.
 
 ## How matching works
 

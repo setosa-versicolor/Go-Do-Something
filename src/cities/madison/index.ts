@@ -3,6 +3,7 @@ import type { City, Option } from '../../core/types';
 import { PLACES } from './places';
 import reviewData from './reviews.json';
 export { VENUES as venues } from './venues';
+export { shape } from './shape';
 
 export const city: City = {
   id: 'madison',

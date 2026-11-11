@@ -103,3 +103,33 @@ export interface City {
   center: LatLng;
   centerName: string;
 }
+
+/** A landmark the model knows how to build. Positions are miles east and north of the center. */
+export interface Landmark {
+  name: string;
+  kind: 'stadium' | 'arena' | 'terrace' | 'union' | 'tower' | 'hall' | 'glasshouse' | 'airport' | 'woods';
+  east: number;
+  north: number;
+  /** Radians, counter-clockwise from east, for things with a front. */
+  turn?: number;
+  /** Miles, for woods and anything else with an extent. */
+  radius?: number;
+}
+
+/**
+ * The lay of the land, for the 3D model. Everything is in miles east and
+ * north of the city center, as flat [east, north, east, north, …] lists.
+ */
+export interface CityShape {
+  /** What the building at the center is called when tapped. */
+  centerLabel: string;
+  lakes: { name: string; outline: number[] }[];
+  rivers: number[][];
+  /** Each road is [weight, east, north, east, north, …]; weight 2 is a highway. */
+  roads: number[][];
+  landmarks: Landmark[];
+  /** The street grid's angle downtown, radians. */
+  gridTurn: number;
+  /** Roughly how far out the houses go. */
+  urbanRadius: number;
+}
