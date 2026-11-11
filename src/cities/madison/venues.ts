@@ -1,0 +1,40 @@
+// Venues we know well enough to send someone to for an event. A listing at a
+// venue that isn't here is dropped: we can't say how far it is or what it's like.
+
+import type { Venue } from '../../core/events';
+
+export const VENUES: Venue[] = [
+  { match: 'cafe coda', lat: 43.0812, lng: -89.3655, hood: 'Willy Street', usual: 'music' },
+  { match: "mickey's tavern", lat: 43.0843, lng: -89.3615, hood: 'Willy Street', usual: 'music', bar: true, placeId: 'mickeys' },
+  { match: 'harmony bar', lat: 43.0925, lng: -89.349, hood: 'Atwood', usual: 'music', bar: true, placeId: 'harmony-bar' },
+  { match: 'high noon saloon', lat: 43.0797, lng: -89.3745, hood: 'Capitol East', usual: 'music', bar: true },
+  { match: 'majestic', lat: 43.0743, lng: -89.3812, hood: 'Downtown', usual: 'music', bar: true },
+  { match: 'sylvee', lat: 43.08, lng: -89.374, hood: 'Capitol East', usual: 'music' },
+  { match: 'orpheum', lat: 43.075, lng: -89.3885, hood: 'State Street', usual: 'show' },
+  { match: 'overture', lat: 43.0745, lng: -89.3883, hood: 'State Street', usual: 'show' },
+  { match: 'barrymore', lat: 43.0925, lng: -89.3518, hood: 'Atwood', usual: 'music' },
+  { match: 'atwood music hall', lat: 43.09, lng: -89.356, hood: 'Atwood', usual: 'music' },
+  { match: 'bur oak', lat: 43.0935, lng: -89.35, hood: 'Atwood', usual: 'music', bar: true },
+  { match: 'crystal corner', lat: 43.0818, lng: -89.364, hood: 'Willy Street', usual: 'music', bar: true },
+  { match: 'arts + literature lab', lat: 43.079, lng: -89.3735, hood: 'Capitol East' },
+  { match: 'gamma ray', lat: 43.0728, lng: -89.3845, hood: 'Downtown', usual: 'music', bar: true },
+  { match: 'comedy on state', lat: 43.075, lng: -89.388, hood: 'State Street', usual: 'show', bar: true },
+  { match: 'north street cabaret', lat: 43.101, lng: -89.352, hood: 'East Side', usual: 'music', bar: true },
+  { match: 'madison public market', lat: 43.0935, lng: -89.361, hood: 'East Side' },
+  { match: 'hamel music center', lat: 43.0735, lng: -89.398, hood: 'Campus', usual: 'music' },
+  { match: 'elvehjem', lat: 43.0739, lng: -89.399, hood: 'Campus', placeId: 'chazen' },
+  { match: 'chazen', lat: 43.0739, lng: -89.399, hood: 'Campus', placeId: 'chazen' },
+  { match: 'union south', lat: 43.0717, lng: -89.4078, hood: 'Campus' },
+  { match: 'memorial union', lat: 43.0766, lng: -89.3998, hood: 'Campus', placeId: 'rathskeller' },
+  { match: 'museum of contemporary art', lat: 43.0747, lng: -89.3885, hood: 'State Street', placeId: 'mmoca' },
+  { match: 'central library', lat: 43.0745, lng: -89.388, hood: 'Downtown', placeId: 'central-library' },
+  { match: "room of one's own", lat: 43.0937, lng: -89.3379, hood: 'Atwood', placeId: 'room-of-ones-own' },
+  { match: 'mystery to me', lat: 43.0645, lng: -89.418, hood: 'Monroe Street', placeId: 'mystery-to-me' },
+  { match: "leopold's", lat: 43.0679, lng: -89.4078, hood: 'Regent', placeId: 'leopolds' },
+  { match: 'garver', lat: 43.0945, lng: -89.332, hood: 'East Side', placeId: 'garver' },
+  { match: 'veterans museum', lat: 43.0756, lng: -89.3853, hood: 'Downtown', placeId: 'veterans-museum' },
+  { match: 'working draft', lat: 43.0805, lng: -89.365, hood: 'Willy Street', bar: true, placeId: 'working-draft' },
+  { match: 'olbrich', lat: 43.0926, lng: -89.3353, hood: 'East Side', placeId: 'olbrich-gardens' },
+  { match: 'mosse humanities', lat: 43.0738, lng: -89.4, hood: 'Campus' },
+  { match: 'mills hall', lat: 43.0738, lng: -89.4, hood: 'Campus', usual: 'music' },
+];

@@ -1,0 +1,1794 @@
+{
+ "generatedAt": 1794370851894,
+ "sources": {
+  "isthmus": 55,
+  "uw": 0
+ },
+ "events": [
+  {
+   "id": "isthmus:tango-tuesday:29905980",
+   "kind": "event",
+   "name": "Tango Tuesday",
+   "what": "Show at Cafe Coda",
+   "category": "show",
+   "hood": "Willy Street",
+   "lat": 43.0812,
+   "lng": -89.3655,
+   "story": "Lessons/practice 7 pm, open dance 8:30-10:30 pm Tuesdays, Cafe Coda. $10.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    210
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794358800000,
+    "end": 1794371400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/Madison-Tango-Society-practica-tuesdays/?occ_dtstart=2026-11-10T19:00",
+   "source": "isthmus",
+   "venue": "Cafe Coda"
+  },
+  {
+   "id": "isthmus:salsa-dance:29906010",
+   "kind": "event",
+   "name": "Salsa Dance",
+   "what": "Show at Cafe Coda",
+   "category": "show",
+   "hood": "Willy Street",
+   "lat": 43.0812,
+   "lng": -89.3655,
+   "story": "Lesson 7:30 pm, open dance 8:30 pm. $10.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794360600000,
+    "end": 1794371400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/salsa-dance-coda/?occ_dtstart=2026-11-10T19:30",
+   "source": "isthmus",
+   "venue": "Cafe Coda"
+  },
+  {
+   "id": "isthmus:bluegrass-jam:29907060",
+   "kind": "event",
+   "name": "Bluegrass Jam",
+   "what": "Live music at Harmony Bar and Grill",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0925,
+   "lng": -89.349,
+   "story": "1 pm Wednesdays. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794423600000,
+    "end": 1794430800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/bluegrass-jam-harmony/?occ_dtstart=2026-11-11T13:00",
+   "source": "isthmus",
+   "venue": "Harmony Bar and Grill",
+   "placeId": "harmony-bar"
+  },
+  {
+   "id": "isthmus:madison-public-farmers-market:29907240",
+   "kind": "event",
+   "name": "Madison Public Farmers' Market",
+   "what": "Market at Madison Public Market",
+   "category": "market",
+   "hood": "East Side",
+   "lat": 43.0935,
+   "lng": -89.361,
+   "story": "Rotating vendors, 4-7 pm Wednesdays.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "showoff": 0.6,
+    "eat": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794434400000,
+    "end": 1794445200000
+   },
+   "dropIn": true,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/madison-public-farmers-market/?occ_dtstart=2026-11-11T16:00",
+   "source": "isthmus",
+   "venue": "Madison Public Market"
+  },
+  {
+   "id": "isthmus:todo-parecia-posible:29907300",
+   "kind": "event",
+   "name": "Todo parecia posible",
+   "what": "Film at UW Union South-The Marquee",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0717,
+   "lng": -89.4078,
+   "story": "UW Puerto Rican Studies documentary screening; reception follows. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794438000000,
+    "end": 1794443400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/todo-parecia-posible/?occ_dtstart=2026-11-11T17:00",
+   "source": "isthmus",
+   "venue": "UW Union South-The Marquee"
+  },
+  {
+   "id": "isthmus:one-on-one-with-francesca-hong:29907330",
+   "kind": "event",
+   "name": "One-on-One with Francesca Hong",
+   "what": "Live music at Atwood Music Hall",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.09,
+   "lng": -89.356,
+   "story": "Isthmus event, with social and music by Eric De Los Santos at 5:30 pm, interview of Hong by Chali Pittman at 6:30 pm. $10.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794439800000,
+    "end": 1794447000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/one-on-one-with-francesca-hong/?occ_dtstart=2026-11-11T17:30",
+   "source": "isthmus",
+   "venue": "Atwood Music Hall"
+  },
+  {
+   "id": "isthmus:ced-ba-etch-:29907330",
+   "kind": "event",
+   "name": "Ced Ba'etch'",
+   "what": "Live music at Mickey's Tavern",
+   "category": "music",
+   "hood": "Willy Street",
+   "lat": 43.0843,
+   "lng": -89.3615,
+   "story": "Second &amp; fourth Wednesdays (usually). Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    150
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794439800000,
+    "end": 1794448800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/ced-baetch-second-wed/?occ_dtstart=2026-11-11T17:30",
+   "source": "isthmus",
+   "venue": "Mickey's Tavern",
+   "placeId": "mickeys"
+  },
+  {
+   "id": "isthmus:annie-the-oakies:29907390",
+   "kind": "event",
+   "name": "Annie & the Oakies",
+   "what": "Live music at Harmony Bar and Grill",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0925,
+   "lng": -89.349,
+   "story": "6:30 pm, second Wednesdays. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794443400000,
+    "end": 1794450600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/annie-the-oakies-harmony/?occ_dtstart=2026-11-11T18:30",
+   "source": "isthmus",
+   "venue": "Harmony Bar and Grill",
+   "placeId": "harmony-bar"
+  },
+  {
+   "id": "isthmus:open-mic:29907420",
+   "kind": "event",
+   "name": "Open Mic",
+   "what": "Live music at UW Memorial Union-Terrace",
+   "category": "music",
+   "hood": "Campus",
+   "lat": 43.0766,
+   "lng": -89.3998,
+   "story": "7 pm Wednesdays. Free",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794445200000,
+    "end": 1794452400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/open-mic-memorial-union/?occ_dtstart=2026-11-11T19:00",
+   "source": "isthmus",
+   "venue": "UW Memorial Union-Terrace",
+   "placeId": "rathskeller"
+  },
+  {
+   "id": "isthmus:gaslight:29907450",
+   "kind": "event",
+   "name": "Gaslight",
+   "what": "Show at Overture Center-Playhouse",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.0745,
+   "lng": -89.3883,
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "price": 3,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794447000000,
+    "end": 1794452400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/gaslight-forward/?occ_dtstart=2026-11-11T19:30",
+   "source": "isthmus",
+   "venue": "Overture Center-Playhouse"
+  },
+  {
+   "id": "isthmus:sold-out-neil-degrasse-tyson:29907450",
+   "kind": "event",
+   "name": "SOLD OUT: Neil DeGrasse Tyson",
+   "what": "Film at Orpheum Theater",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.075,
+   "lng": -89.3885,
+   "story": "Film at Orpheum Theater.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794447000000,
+    "end": 1794452400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/neil-degrasse-tyson/?occ_dtstart=2026-11-11T19:30",
+   "source": "isthmus",
+   "venue": "Orpheum Theater"
+  },
+  {
+   "id": "isthmus:jumptown-swing-dance:29907450",
+   "kind": "event",
+   "name": "Jumptown Swing Dance",
+   "what": "Show at Cafe Coda",
+   "category": "show",
+   "hood": "Willy Street",
+   "lat": 43.0812,
+   "lng": -89.3655,
+   "story": "Ages 18+, 7:30-10 pm Wednesdays. $10.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    150
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794447000000,
+    "end": 1794456000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/jumptown-swing-dance-wednesdays/?occ_dtstart=2026-11-11T19:30",
+   "source": "isthmus",
+   "venue": "Cafe Coda"
+  },
+  {
+   "id": "isthmus:low-cut-connie-free-dirt:29907480",
+   "kind": "event",
+   "name": "Low Cut Connie, Free Dirt",
+   "what": "Live music at High Noon Saloon",
+   "category": "music",
+   "hood": "Capitol East",
+   "lat": 43.0797,
+   "lng": -89.3745,
+   "story": "Live music at High Noon Saloon.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794448800000,
+    "end": 1794456000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/low-cut-connie-2026/?occ_dtstart=2026-11-11T20:00",
+   "source": "isthmus",
+   "venue": "High Noon Saloon"
+  },
+  {
+   "id": "isthmus:the-mic-on-state:29907480",
+   "kind": "event",
+   "name": "The Mic on State",
+   "what": "Film at Comedy on State",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.075,
+   "lng": -89.388,
+   "story": "8 pm Wednesdays. $5.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 0,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794448800000,
+    "end": 1794454200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/open-mic-comedy-on-state/?occ_dtstart=2026-11-11T20:00",
+   "source": "isthmus",
+   "venue": "Comedy on State"
+  },
+  {
+   "id": "isthmus:gaslight:29908560",
+   "kind": "event",
+   "name": "Gaslight",
+   "what": "Show at Overture Center-Playhouse",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.0745,
+   "lng": -89.3883,
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "price": 3,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794513600000,
+    "end": 1794519000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/gaslight-forward/?occ_dtstart=2026-11-12T14:00",
+   "source": "isthmus",
+   "venue": "Overture Center-Playhouse"
+  },
+  {
+   "id": "isthmus:democracy-commemoration-peoplehood:29908740",
+   "kind": "event",
+   "name": "Democracy, Commemoration, Peoplehood",
+   "what": "Talk at UW Elvehjem Building",
+   "category": "talk",
+   "hood": "Campus",
+   "lat": 43.0739,
+   "lng": -89.399,
+   "story": "UW Center for the Humanities (and partners) “1776/2026: The Declaration at 250” series talk by Jason Frank, Room L150.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "learn": 1,
+    "think": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794524400000,
+    "end": 1794529800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/democracy-commemoration-peoplehood/?occ_dtstart=2026-11-12T17:00",
+   "source": "isthmus",
+   "venue": "UW Elvehjem Building",
+   "placeId": "chazen"
+  },
+  {
+   "id": "isthmus:dylan-carlino:29908860",
+   "kind": "event",
+   "name": "Dylan Carlino",
+   "what": "Film at Comedy on State",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.075,
+   "lng": -89.388,
+   "story": "7 pm on 11/12 and 7 and 9:30 pm, 11/13-14. $30.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 0,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794531600000,
+    "end": 1794537000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/dylan-carlino-2026/?occ_dtstart=2026-11-12T19:00",
+   "source": "isthmus",
+   "venue": "Comedy on State"
+  },
+  {
+   "id": "isthmus:playin-the-standards-jam-with-jan-hora:29908860",
+   "kind": "event",
+   "name": "Playin' the Standards Jam with Jan Hora",
+   "what": "Live music at Cafe Coda",
+   "category": "music",
+   "hood": "Willy Street",
+   "lat": 43.0812,
+   "lng": -89.3655,
+   "story": "$15.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794531600000,
+    "end": 1794538800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/playin-the-standards-jam-jan-hora-coda/?occ_dtstart=2026-11-12T19:00",
+   "source": "isthmus",
+   "venue": "Cafe Coda"
+  },
+  {
+   "id": "isthmus:gaslight:29908890",
+   "kind": "event",
+   "name": "Gaslight",
+   "what": "Show at Overture Center-Playhouse",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.0745,
+   "lng": -89.3883,
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "price": 3,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794533400000,
+    "end": 1794538800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/gaslight-forward/?occ_dtstart=2026-11-12T19:30",
+   "source": "isthmus",
+   "venue": "Overture Center-Playhouse"
+  },
+  {
+   "id": "isthmus:amythyst-kiah-buffalo-nichols:29908920",
+   "kind": "event",
+   "name": "Amythyst Kiah, Buffalo Nichols",
+   "what": "Live music at The Bur Oak",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0935,
+   "lng": -89.35,
+   "story": "$25 ($20 adv.).",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794535200000,
+    "end": 1794542400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/amythyst-kiah-nov-12/?occ_dtstart=2026-11-12T20:00",
+   "source": "isthmus",
+   "venue": "The Bur Oak"
+  },
+  {
+   "id": "isthmus:choir-choir-choir-:29908920",
+   "kind": "event",
+   "name": "Choir! Choir! Choir!",
+   "what": "Live music at Atwood Music Hall",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.09,
+   "lng": -89.356,
+   "story": "\"Landslide: An Epic Fleetwood Mac Singalong.\" $37.50 ($32.50 adv.).",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794535200000,
+    "end": 1794542400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/choir-choir-choir-landslide/?occ_dtstart=2026-11-12T20:00",
+   "source": "isthmus",
+   "venue": "Atwood Music Hall"
+  },
+  {
+   "id": "isthmus:lily-rose-erin-kinsey:29908920",
+   "kind": "event",
+   "name": "Lily Rose, Erin Kinsey",
+   "what": "Live music at Majestic Theatre",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0743,
+   "lng": -89.3812,
+   "story": "Live music at Majestic Theatre.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794535200000,
+    "end": 1794542400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/lily-rose-2026/?occ_dtstart=2026-11-12T20:00",
+   "source": "isthmus",
+   "venue": "Majestic Theatre"
+  },
+  {
+   "id": "isthmus:mustard-plug-something-to-do-devon-kay-the-solut:29908920",
+   "kind": "event",
+   "name": "Mustard Plug, Something to Do, Devon Kay & the Solutions",
+   "what": "Live music at High Noon Saloon",
+   "category": "music",
+   "hood": "Capitol East",
+   "lat": 43.0797,
+   "lng": -89.3745,
+   "story": "Live music at High Noon Saloon.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794535200000,
+    "end": 1794542400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/mustard-plug-something-to-do-devon-kay-the-solutions/?occ_dtstart=2026-11-12T20:00",
+   "source": "isthmus",
+   "venue": "High Noon Saloon"
+  },
+  {
+   "id": "isthmus:sts9:29908920",
+   "kind": "event",
+   "name": "STS9",
+   "what": "Live music at The Sylvee",
+   "category": "music",
+   "hood": "Capitol East",
+   "lat": 43.08,
+   "lng": -89.374,
+   "story": "Live music at The Sylvee.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794535200000,
+    "end": 1794542400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/sts9-2026/?occ_dtstart=2026-11-12T20:00",
+   "source": "isthmus",
+   "venue": "The Sylvee"
+  },
+  {
+   "id": "isthmus:tim-whalen-trio:29908920",
+   "kind": "event",
+   "name": "Tim Whalen Trio",
+   "what": "Live music at North Street Cabaret",
+   "category": "music",
+   "hood": "East Side",
+   "lat": 43.101,
+   "lng": -89.352,
+   "story": "Jazz; recording on 11/12-13. $24.45 adv.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794535200000,
+    "end": 1794542400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/tim-whalen-trio-north-street-cabaret/?occ_dtstart=2026-11-12T20:00",
+   "source": "isthmus",
+   "venue": "North Street Cabaret"
+  },
+  {
+   "id": "isthmus:cap-alan-original-time-demonstrations-def-sonic:29909040",
+   "kind": "event",
+   "name": "Cap Alan, Original Time Demonstrations, Def Sonic",
+   "what": "Live music at Mickey's Tavern",
+   "category": "music",
+   "hood": "Willy Street",
+   "lat": 43.0843,
+   "lng": -89.3615,
+   "story": "Live music at Mickey's Tavern.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794542400000,
+    "end": 1794549600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/cap-alan-original-time-demonstrations-def-sonic/?occ_dtstart=2026-11-12T22:00",
+   "source": "isthmus",
+   "venue": "Mickey's Tavern",
+   "placeId": "mickeys"
+  },
+  {
+   "id": "isthmus:ben-knox-band:29910120",
+   "kind": "event",
+   "name": "Ben Knox Band",
+   "what": "Live music at UW Memorial Union - Der Rathskeller",
+   "category": "music",
+   "hood": "Campus",
+   "lat": 43.0766,
+   "lng": -89.3998,
+   "story": "Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794607200000,
+    "end": 1794614400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/ben-knox-band-uw-memorial-union/?occ_dtstart=2026-11-13T16:00",
+   "source": "isthmus",
+   "venue": "UW Memorial Union - Der Rathskeller",
+   "placeId": "rathskeller"
+  },
+  {
+   "id": "isthmus:doug-white-quartet:29910180",
+   "kind": "event",
+   "name": "Doug White Quartet",
+   "what": "Live music at Cafe Coda",
+   "category": "music",
+   "hood": "Willy Street",
+   "lat": 43.0812,
+   "lng": -89.3655,
+   "story": "Jazz. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794610800000,
+    "end": 1794618000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/doug-white-quartet-coda/?occ_dtstart=2026-11-13T17:00",
+   "source": "isthmus",
+   "venue": "Cafe Coda"
+  },
+  {
+   "id": "isthmus:vo5-rare-element-play-machine-blush-earthlight-b:29910240",
+   "kind": "event",
+   "name": "VO5, Rare Element, Play Machine, Blush, Earthlight, Bear in the Forest, Luca B, Black Star Drum Line, DJ Ka-BOOM!Box",
+   "what": "Live music at Atwood Music Hall",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.09,
+   "lng": -89.356,
+   "story": "Black Star Drum Line benefit concert hosted by Joey B. Banks. $30 ($25 adv.).",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    359
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794614400000,
+    "end": 1794635940000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/vo5-rare-element-play-machine-blush-earthlight-bear-in-the-f/?occ_dtstart=2026-11-13T18:00",
+   "source": "isthmus",
+   "venue": "Atwood Music Hall"
+  },
+  {
+   "id": "isthmus:aru-l-thr-gabriel-wade-quintet:29910300",
+   "kind": "event",
+   "name": "Aruṇ Lūthrā & Gabriel Wade Quintet",
+   "what": "Live music at Cafe Coda",
+   "category": "music",
+   "hood": "Willy Street",
+   "lat": 43.0812,
+   "lng": -89.3655,
+   "story": "7 &amp; 9 pm. $20.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794625200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/aru%E1%B9%87-luthra-gabriel-wade-quintet-coda/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "Cafe Coda"
+  },
+  {
+   "id": "isthmus:dylan-carlino:29910300",
+   "kind": "event",
+   "name": "Dylan Carlino",
+   "what": "Film at Comedy on State",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.075,
+   "lng": -89.388,
+   "story": "7 pm on 11/12 and 7 and 9:30 pm, 11/13-14. $30.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 0,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794623400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/dylan-carlino-2026/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "Comedy on State"
+  },
+  {
+   "id": "isthmus:our-land:29910300",
+   "kind": "event",
+   "name": "Our Land",
+   "what": "Film at Madison Museum of Contemporary Art",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.0747,
+   "lng": -89.3885,
+   "story": "MMoCA Cinema screening. NR, 2026.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794623400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/our-land/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "Madison Museum of Contemporary Art",
+   "placeId": "mmoca"
+  },
+  {
+   "id": "isthmus:gaslight:29910330",
+   "kind": "event",
+   "name": "Gaslight",
+   "what": "Show at Overture Center-Playhouse",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.0745,
+   "lng": -89.3883,
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "price": 3,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794619800000,
+    "end": 1794625200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/gaslight-forward/?occ_dtstart=2026-11-13T19:30",
+   "source": "isthmus",
+   "venue": "Overture Center-Playhouse"
+  },
+  {
+   "id": "isthmus:wisconsin-chamber-orchestra:29910330",
+   "kind": "event",
+   "name": "Wisconsin Chamber Orchestra",
+   "what": "Live music at Overture Center-Capitol Theater",
+   "category": "music",
+   "hood": "State Street",
+   "lat": 43.0745,
+   "lng": -89.3883,
+   "story": "\"Ravel Revelry,\" with guest pianist John Novacek.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794619800000,
+    "end": 1794627000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/wisconsin-chamber-orchestra-ravel-revelry/?occ_dtstart=2026-11-13T19:30",
+   "source": "isthmus",
+   "venue": "Overture Center-Capitol Theater"
+  },
+  {
+   "id": "isthmus:hottt-probs-heet-death-sex-scenes:29910360",
+   "kind": "event",
+   "name": "Hottt Probs, Heet Death, Sex Scenes",
+   "what": "Live music at High Noon Saloon",
+   "category": "music",
+   "hood": "Capitol East",
+   "lat": 43.0797,
+   "lng": -89.3745,
+   "story": "Live music at High Noon Saloon.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794628800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/hottt-probs-heet-death-sex-scenes/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "High Noon Saloon"
+  },
+  {
+   "id": "isthmus:kitchen-dwellers-dogs-in-a-pile:29910360",
+   "kind": "event",
+   "name": "Kitchen Dwellers, Dogs in a Pile",
+   "what": "Live music at The Sylvee",
+   "category": "music",
+   "hood": "Capitol East",
+   "lat": 43.08,
+   "lng": -89.374,
+   "story": "Kitchen Dwellers fly in a higher orbit than most of their peers on the jamgrass/spacegrass circuit. And by that we mean several galaxies higher.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794628800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/kitchen-dwellers-dogs-in-a-pile/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "The Sylvee"
+  },
+  {
+   "id": "isthmus:pheramones-ramones-tribute-insomniacs-green-day-:29910360",
+   "kind": "event",
+   "name": "Pheramones (Ramones tribute), Insomniacs (Green Day), Traefi (AFI)",
+   "what": "Live music at Gamma Ray Bar",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0728,
+   "lng": -89.3845,
+   "story": "Live music at Gamma Ray Bar.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794628800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/pheramones-ramones-tribute-insomniacs-green-day-traefi-afi/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "Gamma Ray Bar"
+  },
+  {
+   "id": "isthmus:steve-poltz:29910360",
+   "kind": "event",
+   "name": "Steve Poltz",
+   "what": "Live music at The Bur Oak",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0935,
+   "lng": -89.35,
+   "story": "$30 ($25 adv.).",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794628800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/steve-poltz-2026/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "The Bur Oak"
+  },
+  {
+   "id": "isthmus:the-widdler-esseks-fossils-unknown-prophet-tngl-:29910360",
+   "kind": "event",
+   "name": "The Widdler, Esseks, Fossils, Unknown Prophet, Tngl, Gravemynd, Liminal b2b Grounded Sound",
+   "what": "Live music at Majestic Theatre",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0743,
+   "lng": -89.3812,
+   "story": "Live music at Majestic Theatre.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794628800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/widdler-esseks-fossils-unknown-prophet-tngl-gravemynd/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "Majestic Theatre"
+  },
+  {
+   "id": "isthmus:tim-whalen-trio:29910360",
+   "kind": "event",
+   "name": "Tim Whalen Trio",
+   "what": "Live music at North Street Cabaret",
+   "category": "music",
+   "hood": "East Side",
+   "lat": 43.101,
+   "lng": -89.352,
+   "story": "Jazz; recording on 11/12-13. $24.45 adv.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794628800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/tim-whalen-trio-north-street-cabaret/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "North Street Cabaret"
+  },
+  {
+   "id": "isthmus:aru-l-thr-gabriel-wade-quintet:29910420",
+   "kind": "event",
+   "name": "Aruṇ Lūthrā & Gabriel Wade Quintet",
+   "what": "Live music at Cafe Coda",
+   "category": "music",
+   "hood": "Willy Street",
+   "lat": 43.0812,
+   "lng": -89.3655,
+   "story": "7 &amp; 9 pm. $20.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794625200000,
+    "end": 1794632400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/aru%E1%B9%87-luthra-gabriel-wade-quintet-coda/?occ_dtstart=2026-11-13T21:00",
+   "source": "isthmus",
+   "venue": "Cafe Coda"
+  },
+  {
+   "id": "isthmus:left-on-high-street:29910420",
+   "kind": "event",
+   "name": "Left on High Street",
+   "what": "Live music at Harmony Bar and Grill",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0925,
+   "lng": -89.349,
+   "story": "Classic rock/pop. $10.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    179
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794625200000,
+    "end": 1794635940000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/left-on-high-street-harmony/?occ_dtstart=2026-11-13T21:00",
+   "source": "isthmus",
+   "venue": "Harmony Bar and Grill",
+   "placeId": "harmony-bar"
+  },
+  {
+   "id": "isthmus:dylan-carlino:29910450",
+   "kind": "event",
+   "name": "Dylan Carlino",
+   "what": "Film at Comedy on State",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.075,
+   "lng": -89.388,
+   "story": "7 pm on 11/12 and 7 and 9:30 pm, 11/13-14. $30.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 0,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794627000000,
+    "end": 1794632400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/dylan-carlino-2026/?occ_dtstart=2026-11-13T21:30",
+   "source": "isthmus",
+   "venue": "Comedy on State"
+  },
+  {
+   "id": "isthmus:dj-wayne:29910540",
+   "kind": "event",
+   "name": "DJ Wayne",
+   "what": "Live music at Cafe Coda",
+   "category": "music",
+   "hood": "Willy Street",
+   "lat": 43.0812,
+   "lng": -89.3655,
+   "story": "Live music at Cafe Coda.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794632400000,
+    "end": 1794639600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/wayne-wonder-coda/?occ_dtstart=2026-11-13T23:00",
+   "source": "isthmus",
+   "venue": "Cafe Coda"
+  },
+  {
+   "id": "isthmus:kids-in-the-rotunda:29911170",
+   "kind": "event",
+   "name": "Kids in the Rotunda",
+   "what": "Film at Overture Center-Rotunda Stage",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.0745,
+   "lng": -89.3883,
+   "story": "Laura Doherty &amp; the Heartbeats, 9:30 am, 11 am &amp; 1 pm. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    270
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794670200000,
+    "end": 1794686400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/kids-in-the-rotunda-laura-doherty/?occ_dtstart=2026-11-14T09:30",
+   "source": "isthmus",
+   "venue": "Overture Center-Rotunda Stage"
+  },
+  {
+   "id": "isthmus:native-art-market:29911200",
+   "kind": "event",
+   "name": "Native Art Market",
+   "what": "Market at Arts + Literature Laboratory",
+   "category": "market",
+   "hood": "Capitol East",
+   "lat": 43.079,
+   "lng": -89.3735,
+   "story": "40-plus regional Indigenous artists.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    420
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "showoff": 0.6,
+    "eat": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794672000000,
+    "end": 1794697200000
+   },
+   "dropIn": true,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/native-art-market-fall/?occ_dtstart=2026-11-14T10:00",
+   "source": "isthmus",
+   "venue": "Arts + Literature Laboratory"
+  },
+  {
+   "id": "isthmus:our-land:29911410",
+   "kind": "event",
+   "name": "Our Land",
+   "what": "Film at Madison Museum of Contemporary Art",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.0747,
+   "lng": -89.3885,
+   "story": "MMoCA Cinema screening. NR, 2026.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794684600000,
+    "end": 1794690000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/our-land/?occ_dtstart=2026-11-14T13:30",
+   "source": "isthmus",
+   "venue": "Madison Museum of Contemporary Art",
+   "placeId": "mmoca"
+  },
+  {
+   "id": "isthmus:gaslight:29911440",
+   "kind": "event",
+   "name": "Gaslight",
+   "what": "Show at Overture Center-Playhouse",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.0745,
+   "lng": -89.3883,
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "price": 3,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794686400000,
+    "end": 1794691800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/gaslight-forward/?occ_dtstart=2026-11-14T14:00",
+   "source": "isthmus",
+   "venue": "Overture Center-Playhouse"
+  },
+  {
+   "id": "isthmus:madison-cocktail-festival:29911680",
+   "kind": "event",
+   "name": "Madison Cocktail Festival",
+   "what": "Market at Garver Feed Mill",
+   "category": "market",
+   "hood": "East Side",
+   "lat": 43.0945,
+   "lng": -89.332,
+   "story": "Samples from 20+ vendors. Tickets TBA.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    240
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "showoff": 0.6,
+    "eat": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794700800000,
+    "end": 1794715200000
+   },
+   "dropIn": true,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/madison-cocktail-festival/?occ_dtstart=2026-11-14T18:00",
+   "source": "isthmus",
+   "venue": "Garver Feed Mill",
+   "placeId": "garver"
+  },
+  {
+   "id": "isthmus:dylan-carlino:29911740",
+   "kind": "event",
+   "name": "Dylan Carlino",
+   "what": "Film at Comedy on State",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.075,
+   "lng": -89.388,
+   "story": "7 pm on 11/12 and 7 and 9:30 pm, 11/13-14. $30.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 0,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794709800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/dylan-carlino-2026/?occ_dtstart=2026-11-14T19:00",
+   "source": "isthmus",
+   "venue": "Comedy on State"
+  },
+  {
+   "id": "isthmus:isabella-isherwood:29911740",
+   "kind": "event",
+   "name": "Isabella Isherwood",
+   "what": "Live music at Cafe Coda",
+   "category": "music",
+   "hood": "Willy Street",
+   "lat": 43.0812,
+   "lng": -89.3655,
+   "story": "7 &amp; 9 pm. $25.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794711600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/isabella-isherwood-coda/?occ_dtstart=2026-11-14T19:00",
+   "source": "isthmus",
+   "venue": "Cafe Coda"
+  },
+  {
+   "id": "isthmus:the-madhatters:29911740",
+   "kind": "event",
+   "name": "The MadHatters",
+   "what": "Film at Overture Center-Capitol Theater",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.0745,
+   "lng": -89.3883,
+   "story": "A cappella. $22.69-$17.87.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794709800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/the-madhatters-overture/?occ_dtstart=2026-11-14T19:00",
+   "source": "isthmus",
+   "venue": "Overture Center-Capitol Theater"
+  },
+  {
+   "id": "isthmus:hips-don-t-lie:29911740",
+   "kind": "event",
+   "name": "Hips Don't Lie",
+   "what": "Show at High Noon Saloon",
+   "category": "show",
+   "hood": "Capitol East",
+   "lat": 43.0797,
+   "lng": -89.3745,
+   "story": "Shakira tribute, dance lesson 7 pm, concert 8 pm.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794715200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/hips-dont-lie-high-noon/?occ_dtstart=2026-11-14T19:00",
+   "source": "isthmus",
+   "venue": "High Noon Saloon"
+  },
+  {
+   "id": "isthmus:gaslight:29911770",
+   "kind": "event",
+   "name": "Gaslight",
+   "what": "Show at Overture Center-Playhouse",
+   "category": "show",
+   "hood": "State Street",
+   "lat": 43.0745,
+   "lng": -89.3883,
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "price": 3,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794706200000,
+    "end": 1794711600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/gaslight-forward/?occ_dtstart=2026-11-14T19:30",
+   "source": "isthmus",
+   "venue": "Overture Center-Playhouse"
+  },
+  {
+   "id": "isthmus:ethan-regan-lily-kershaw:29911800",
+   "kind": "event",
+   "name": "Ethan Regan, Lily Kershaw",
+   "what": "Live music at Majestic Theatre",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0743,
+   "lng": -89.3812,
+   "story": "Live music at Majestic Theatre.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794708000000,
+    "end": 1794715200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/ethan-regan-lily-kershaw/?occ_dtstart=2026-11-14T20:00",
+   "source": "isthmus",
+   "venue": "Majestic Theatre"
+  }
+ ]
+}

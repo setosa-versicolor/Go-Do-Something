@@ -1,0 +1,72 @@
+# Go Do Something · Madison
+
+> You have a free evening. Here's how to not waste it.
+
+Open it and get three things worth doing in Madison, WI, right now: open, reachable, different from each other, each with a reason it fits and exactly what to do when you get there. Three, never more. No feed.
+
+## Run it
+
+```sh
+npm install
+npm run dev        # the app, at localhost:5173
+npm test           # time zones, hours, seasons, events, matching, data
+npm run events     # refresh public/events.json from the live calendars
+npm run explain -- "date night" --at 2026-11-13T19:00 --hours 3 --mode walk --weather
+```
+
+`explain` runs the real matcher from the terminal and prints every score part and every rejection. In the browser, add `?debug` to the URL for the same thing under the cards.
+
+## How it's built
+
+A static site. No server, no database, no accounts, no API keys.
+
+| Piece | Where | Notes |
+| --- | --- | --- |
+| Places | `src/cities/madison/places.ts` | Hand-written. The content is the product. |
+| Events | `public/events.json` | Built by `scripts/fetch-events.ts` from the Isthmus calendar and the UW–Madison calendar, strictly filtered. |
+| Weather | Open-Meteo, from the browser | Free, no key. Sunrise and sunset are computed locally. |
+| Matching | `src/core/match.ts` | One pure function. The only copy of the logic. |
+| Memory | `localStorage` | Stays on the device. Location is used in memory only and never stored. |
+| Deploy | `.github/workflows/deploy.yml` | GitHub Pages, on push to `main` and every morning (to refresh events). Cost: nothing. |
+
+To turn on deploys: repo Settings → Pages → Source: GitHub Actions.
+
+## How matching works
+
+`match(request, world)` in `src/core/match.ts`, in four stages:
+
+1. **Assess.** Hard gates decide whether this person can actually do this thing at that time: open long enough once you arrive (in the city's time zone), in season, enough daylight, weather that suits it, close enough for the time and transport you have, fine for kids if kids are along. Every rejection is recorded with a reason.
+2. **Score.** Named, additive parts: `mood`, `moment` (sunset timing, weather, seasonal peaks, one-night events), `time`, `near`, `gem` (editorial weight), `taste` and `seen`/`been`/`skipped`/`saved` from history.
+3. **Choose.** The best fit; then the best fit that is a *different kind of thing*; then a "left turn" drawn at random (seeded) from what still clears the bar.
+4. **Explain.** One line per pick, built from the part that mattered most. No two cards share a reason.
+
+If fewer than three things pass, it shows fewer and says why. If nothing passes, it says that.
+
+What the person types, taps or picks all goes through one parser (`src/core/intent.ts`): chips are just canned words. All tunable numbers live in `TUNING` at the top of `match.ts`.
+
+It learns from a small on-device log (`src/core/history.ts`). Tapping Directions prompts a "Did you go?" check-in later; going and liking counts for much more than tapping.
+
+## Trust in the data
+
+Past versions were wrong quietly. The rules now:
+
+- **Time is always city time.** `src/core/time.ts` is the only place wall-clock time is computed, and tests run under several process time zones and both DST changes.
+- **Hours carry a trust level.** `hoursTrust: 'solid'` only for hours that come from a rule (city parks, 4 am to 10 pm) or were checked by hand. Everything else shows as "Usually open until…". **Most places are currently `unverified`: see below.**
+- **Unknown is not yes.** No weather means no sledding suggestion; a stale or malformed events file is ignored, not shown.
+- **Malformed data fails loudly.** Bad hours strings throw; `tests/data.test.ts` checks every place.
+
+### Known gaps
+
+- The ~60 places were written from general knowledge of Madison, not verified on the ground. Hours, a few specifics in the nudges, and whether each business is still operating need a hand check. When you check one, fix it, set `trust: 'solid'` and `checked: 'YYYY-MM-DD'`.
+- Coordinates are approximate (good to a few blocks). They're only used for travel estimates; directions search by name.
+- Travel times are straight-line estimates with a detour factor, not routing.
+- The target is 200+ places. Add them slowly.
+- Not built yet: itineraries, group decisions, live conditions (beach closures, ice).
+
+## Adding a place
+
+Copy an entry in `places.ts`. Write the **story** (why it's distinct) and the **nudge** (exactly what to do there): specific, opinionated, practical, never promotional. Mark moods with `!` for what the place is *for*. Run `npm test`.
+
+## Another city
+
+Add `src/cities/<city>/` with a `City` (name, time zone, center), places and venues. Nothing in `src/core` knows about Madison.
