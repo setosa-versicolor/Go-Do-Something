@@ -287,7 +287,7 @@ export const PLACES: Option[] = [
   }),
   place({
     id: 'lakeside-coffee', name: 'Lakeside St. Coffee House', what: 'A café with a porch on Monona Bay',
-    category: 'cafe', hood: 'South Side', lat: 43.052, lng: -89.393, price: 1, setting: 'both', minutes: [30, 75], kids: 1,
+    category: 'cafe', hood: 'South Side', lat: 43.0561, lng: -89.3892, price: 1, setting: 'both', minutes: [30, 75], kids: 1,
     moods: 'think! date cozy nature', hours: 'daily 07:00-18:00',
     story: "A neighborhood coffee house in an old storefront, looking across the street at Monona Bay. Unhurried in a way that places closer to campus can't afford to be.",
     nudge: "If it's warm, take your cup to the porch and face the bay. If it's not, take the window. Order something baked.",
@@ -438,7 +438,7 @@ export const PLACES: Option[] = [
   }),
   place({
     id: 'gibs', name: "Gib's Bar", what: 'Careful cocktails in an old Willy Street house',
-    category: 'bar', hood: 'Willy Street', lat: 43.0828, lng: -89.3622, price: 2, setting: 'in', minutes: [45, 90], kids: 0,
+    category: 'bar', hood: 'Willy Street', lat: 43.0857, lng: -89.3614, price: 2, setting: 'in', minutes: [45, 90], kids: 0,
     moods: 'date! drink! cozy', hours: 'tu-sa 17:00-24:00', best: ['night'], gem: 0.8,
     story: "A two-story house turned cocktail bar, with a short, serious menu downstairs and a living room of couches upstairs. The drinks are precise without anyone making a speech about them.",
     nudge: "Go upstairs and take a couch if one's free. Tell the bartender a spirit and a mood and let them choose. Have one more than you planned, slowly.",

@@ -1,9 +1,9 @@
 {
- "generatedAt": 1794407854448,
+ "generatedAt": 1794438113629,
  "sources": {
-  "isthmus": 56,
+  "isthmus": 173,
   "uw": 14,
-  "mcm": 27
+  "mcm": 30
  },
  "events": [
   {
@@ -106,39 +106,6 @@
    "placeId": "childrens-museum"
   },
   {
-   "id": "isthmus:bluegrass-jam:29907060",
-   "kind": "event",
-   "name": "Bluegrass Jam",
-   "what": "Live music at Harmony Bar and Grill",
-   "category": "music",
-   "hood": "Atwood",
-   "lat": 43.0925,
-   "lng": -89.349,
-   "story": "1 pm Wednesdays. Free.",
-   "price": 0,
-   "setting": "in",
-   "minutes": [
-    45,
-    120
-   ],
-   "kids": 0,
-   "moods": {
-    "lively": 1,
-    "date": 0.6
-   },
-   "gem": 0.4,
-   "when": {
-    "start": 1794423600000,
-    "end": 1794430800000
-   },
-   "dropIn": false,
-   "hoursTrust": "solid",
-   "url": "https://isthmus.com/events/bluegrass-jam-harmony/?occ_dtstart=2026-11-11T13:00",
-   "source": "isthmus",
-   "venue": "Harmony Bar and Grill",
-   "placeId": "harmony-bar"
-  },
-  {
    "id": "mcm:li-l-music-with-junko:29907090",
    "kind": "event",
    "name": "Li’l Music with Junko",
@@ -238,16 +205,16 @@
    "venue": "UW Union South-The Marquee"
   },
   {
-   "id": "isthmus:one-on-one-with-francesca-hong:29907330",
+   "id": "isthmus:madison-song-circle:29907300",
    "kind": "event",
-   "name": "One-on-One with Francesca Hong",
-   "what": "Live music at Atwood Music Hall",
+   "name": "Madison Song Circle",
+   "what": "Live music at Muso",
    "category": "music",
    "hood": "Atwood",
-   "lat": 43.09,
-   "lng": -89.356,
-   "story": "Isthmus event, with social and music by Eric De Los Santos at 5:30 pm, interview of Hong by Chali Pittman at 6:30 pm. $10.",
-   "price": 1,
+   "lat": 43.0932,
+   "lng": -89.3546,
+   "story": "5 pm Wednesdays. Free.",
+   "price": 0,
    "setting": "in",
    "minutes": [
     45,
@@ -260,14 +227,46 @@
    },
    "gem": 0.4,
    "when": {
+    "start": 1794438000000,
+    "end": 1794445200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/madison-song-circle-wednesdays/?occ_dtstart=2026-11-11T17:00",
+   "source": "isthmus",
+   "venue": "Muso"
+  },
+  {
+   "id": "isthmus:wendy-lynn-markus:29907330",
+   "kind": "event",
+   "name": "Wendy Lynn Markus",
+   "what": "Live music at Palette Bar & Grill",
+   "category": "music",
+   "hood": "Capitol East",
+   "lat": 43.0821,
+   "lng": -89.3729,
+   "story": "Electric violin. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
     "start": 1794439800000,
     "end": 1794447000000
    },
    "dropIn": false,
    "hoursTrust": "solid",
-   "url": "https://isthmus.com/events/one-on-one-with-francesca-hong/?occ_dtstart=2026-11-11T17:30",
+   "url": "https://isthmus.com/events/wendy-lynn-markus-palette/?occ_dtstart=2026-11-11T17:30",
    "source": "isthmus",
-   "venue": "Atwood Music Hall"
+   "venue": "Palette Bar & Grill"
   },
   {
    "id": "isthmus:ced-ba-etch-:29907330",
@@ -303,6 +302,103 @@
    "placeId": "mickeys"
   },
   {
+   "id": "isthmus:borris:29907360",
+   "kind": "event",
+   "name": "Borris",
+   "what": "Live music at Zafferano Ristorante, Fitchburg",
+   "category": "music",
+   "hood": "Fitchburg",
+   "lat": 43.0171,
+   "lng": -89.4242,
+   "story": "Piano, 6 pm Wednesdays.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794441600000,
+    "end": 1794448800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/borris-/?occ_dtstart=2026-11-11T18:00",
+   "source": "isthmus",
+   "venue": "Zafferano Ristorante, Fitchburg"
+  },
+  {
+   "id": "isthmus:jt-spartz:29907360",
+   "kind": "event",
+   "name": "JT Spartz",
+   "what": "Live music at The Green Room Public House",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0918,
+   "lng": -89.355,
+   "story": "Live music at The Green Room Public House.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794441600000,
+    "end": 1794448800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/jt-spartz-green-room/?occ_dtstart=2026-11-11T18:00",
+   "source": "isthmus",
+   "venue": "The Green Room Public House"
+  },
+  {
+   "id": "isthmus:uw-women-s-basketball:29907390",
+   "kind": "event",
+   "name": "UW Women's Basketball",
+   "what": "Game at Kohl Center",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0698,
+   "lng": -89.3959,
+   "story": "vs. Delaware.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "showoff": 0.6,
+    "kids": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794443400000,
+    "end": 1794448800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/uw-womens-basketball-delaware/?occ_dtstart=2026-11-11T18:30",
+   "source": "isthmus",
+   "venue": "Kohl Center"
+  },
+  {
    "id": "isthmus:annie-the-oakies:29907390",
    "kind": "event",
    "name": "Annie & the Oakies",
@@ -336,6 +432,70 @@
    "placeId": "harmony-bar"
   },
   {
+   "id": "isthmus:djs-dcviii:29907390",
+   "kind": "event",
+   "name": "DJs DCVIII",
+   "what": "DJ night at GlouGlou",
+   "category": "music",
+   "hood": "Monroe Street",
+   "lat": 43.0683,
+   "lng": -89.4236,
+   "story": "media release: DCVIII Vinyl Collective is a Madison based,<strong> all-vinyl group pulling from soul, Motown, funk, and lesser known cuts that don’t usually make it into the rotation.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "drink": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794443400000,
+    "end": 1794450600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/dcviii-glouglou/?occ_dtstart=2026-11-11T18:30",
+   "source": "isthmus",
+   "venue": "GlouGlou"
+  },
+  {
+   "id": "isthmus:military-monologues-volume-1:29907420",
+   "kind": "event",
+   "name": "Military Monologues: Volume 1",
+   "what": "Show at Madison College-Truax, Studio Theater",
+   "category": "show",
+   "hood": "North Side",
+   "lat": 43.1209,
+   "lng": -89.3268,
+   "story": "Written/performed by students and guest artists, 7 pm on 11/11-13 and 2 pm 11/14. $15 ($13 ages under 17 or 62 and up).",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794445200000,
+    "end": 1794450600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/military-monologues-volume-1/?occ_dtstart=2026-11-11T19:00",
+   "source": "isthmus",
+   "venue": "Madison College-Truax, Studio Theater"
+  },
+  {
    "id": "isthmus:open-mic:29907420",
    "kind": "event",
    "name": "Open Mic",
@@ -367,6 +527,70 @@
    "source": "isthmus",
    "venue": "UW Memorial Union-Terrace",
    "placeId": "rathskeller"
+  },
+  {
+   "id": "isthmus:remember-with-randy:29907420",
+   "kind": "event",
+   "name": "Remember with Randy",
+   "what": "Live music at VFW Post 7591-Cottage Grove Road",
+   "category": "music",
+   "hood": "East Side",
+   "lat": 43.0837,
+   "lng": -89.322,
+   "story": "media relase: REMEMBER WITH RANDY is a dynamic, fun and nostalgic journey into the past; our goal is to conjure great memories for the audience, and those wonderful feelings that accompany those memories.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794445200000,
+    "end": 1794456000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/remember-with-randy-vfw-7591/?occ_dtstart=2026-11-11T19:00",
+   "source": "isthmus",
+   "venue": "VFW Post 7591-Cottage Grove Road"
+  },
+  {
+   "id": "isthmus:taylor-schereck:29907420",
+   "kind": "event",
+   "name": "Taylor Schereck",
+   "what": "Live music at Paddy Mac's Pub, Verona",
+   "category": "music",
+   "hood": "Verona",
+   "lat": 42.9887,
+   "lng": -89.5466,
+   "story": "media release: Taylor Schereck is an acoustic rock/pop singer from the Madison area. Growing up in Mount Horeb, music was always an integral part of his life.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794445200000,
+    "end": 1794456000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/taylor-schereck-paddy-macs/?occ_dtstart=2026-11-11T19:00",
+   "source": "isthmus",
+   "venue": "Paddy Mac's Pub, Verona"
   },
   {
    "id": "isthmus:gaslight:29907450",
@@ -497,6 +721,102 @@
    "venue": "Comedy on State"
   },
   {
+   "id": "isthmus:austin-cebulske-quartet:29907480",
+   "kind": "event",
+   "name": "Austin Cebulske Quartet",
+   "what": "Live music at Lucille",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0745,
+   "lng": -89.3814,
+   "story": "Jazz standards. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794448800000,
+    "end": 1794456000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/austin-cebulske-quartet-lucille/?occ_dtstart=2026-11-11T20:00",
+   "source": "isthmus",
+   "venue": "Lucille"
+  },
+  {
+   "id": "isthmus:vinyl-listening-session:29907510",
+   "kind": "event",
+   "name": "Vinyl Listening Session",
+   "what": "Live music at Lola's Hi/Lo Lounge",
+   "category": "music",
+   "hood": "North Side",
+   "lat": 43.1078,
+   "lng": -89.3633,
+   "story": "Classic LP spin (click through for schedule), 8:30 pm Wednesdays, Lola's Hi/Lo Lounge. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794450600000,
+    "end": 1794457800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/vinyl-listening-session-lolas/?occ_dtstart=2026-11-11T20:30",
+   "source": "isthmus",
+   "venue": "Lola's Hi/Lo Lounge"
+  },
+  {
+   "id": "isthmus:jim-ripp:29907540",
+   "kind": "event",
+   "name": "Jim Ripp",
+   "what": "Live music at Ivory Room",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0744,
+   "lng": -89.387,
+   "story": "Piano.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794452400000,
+    "end": 1794459600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/jim-ripp-ivory-room/?occ_dtstart=2026-11-11T21:00",
+   "source": "isthmus",
+   "venue": "Ivory Room"
+  },
+  {
    "id": "mcm:tales-with-teresa:29908290",
    "kind": "event",
    "name": "Tales with Teresa",
@@ -596,6 +916,70 @@
    "placeId": "childrens-museum"
   },
   {
+   "id": "isthmus:bird-nature-adventure:29908440",
+   "kind": "event",
+   "name": "Bird & Nature Adventure",
+   "what": "Talk at Warner Park Community Recreation Center",
+   "category": "talk",
+   "hood": "North Side",
+   "lat": 43.1325,
+   "lng": -89.368,
+   "story": "Madison Friends of Urban Nature outing or talk, second Thursdays. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "learn": 1,
+    "think": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794506400000,
+    "end": 1794511800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/bird-nature-outing-second-thursdays-senior/?occ_dtstart=2026-11-12T12:00",
+   "source": "isthmus",
+   "venue": "Warner Park Community Recreation Center"
+  },
+  {
+   "id": "isthmus:west-side-bluegrass-jam:29908500",
+   "kind": "event",
+   "name": "West Side Bluegrass Jam",
+   "what": "Live music at Ten Pin Alley, Fitchburg",
+   "category": "music",
+   "hood": "Fitchburg",
+   "lat": 43.008,
+   "lng": -89.4814,
+   "story": "With host Kaia Updike, 1 pm Thursdays. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794510000000,
+    "end": 1794517200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/west-side-bluegrass-jam-thursdays/?occ_dtstart=2026-11-12T13:00",
+   "source": "isthmus",
+   "venue": "Ten Pin Alley, Fitchburg"
+  },
+  {
    "id": "isthmus:gaslight:29908560",
    "kind": "event",
    "name": "Gaslight",
@@ -626,6 +1010,70 @@
    "url": "https://isthmus.com/events/gaslight-forward/?occ_dtstart=2026-11-12T14:00",
    "source": "isthmus",
    "venue": "Overture Center-Playhouse"
+  },
+  {
+   "id": "isthmus:cajun-jam:29908650",
+   "kind": "event",
+   "name": "Cajun Jam",
+   "what": "Live music at Muso",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0932,
+   "lng": -89.3546,
+   "story": "All playing levels welcome. Free/donations.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794519000000,
+    "end": 1794526200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/cajun-jam-muso/?occ_dtstart=2026-11-12T15:30",
+   "source": "isthmus",
+   "venue": "Muso"
+  },
+  {
+   "id": "isthmus:who-is-a-farmer-:29908710",
+   "kind": "event",
+   "name": "Who is a Farmer?",
+   "what": "Talk at Wisconsin Historical Society",
+   "category": "talk",
+   "hood": "Campus",
+   "lat": 43.0751,
+   "lng": -89.4002,
+   "story": "WHS \"Perspectives\" series: Pop-up historical exhibit open 4:30-7:30 pm, plus panel discussion 5:30 pm. $15.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 1,
+   "moods": {
+    "learn": 1,
+    "think": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794522600000,
+    "end": 1794533400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/perspectives-who-is-a-farmer/?occ_dtstart=2026-11-12T16:30",
+   "source": "isthmus",
+   "venue": "Wisconsin Historical Society"
   },
   {
    "id": "isthmus:democracy-commemoration-peoplehood:29908740",
@@ -661,6 +1109,38 @@
    "placeId": "chazen"
   },
   {
+   "id": "isthmus:jazz-jam:29908740",
+   "kind": "event",
+   "name": "Jazz Jam",
+   "what": "Live music at Zuzu Cafe",
+   "category": "music",
+   "hood": "Vilas",
+   "lat": 43.0621,
+   "lng": -89.4083,
+   "story": "5 pm Thursdays. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794524400000,
+    "end": 1794531600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/jazz-jam-thursdays/?occ_dtstart=2026-11-12T17:00",
+   "source": "isthmus",
+   "venue": "Zuzu Cafe"
+  },
+  {
    "id": "mcm:braaains-with-uw-neuroscience-outreach:29908740",
    "kind": "event",
    "name": "Braaains! with UW Neuroscience Outreach",
@@ -694,6 +1174,102 @@
    "placeId": "childrens-museum"
   },
   {
+   "id": "isthmus:tony-casta-eda-latin-jazz-band:29908770",
+   "kind": "event",
+   "name": "Tony Castañeda Latin Jazz Band",
+   "what": "Live music at Cardinal Bar",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0758,
+   "lng": -89.3772,
+   "story": "5:30 pm Thursdays.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794526200000,
+    "end": 1794533400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/tony-castaneda-latin-jazz-band-thursdays/?occ_dtstart=2026-11-12T17:30",
+   "source": "isthmus",
+   "venue": "Cardinal Bar"
+  },
+  {
+   "id": "isthmus:john-till:29908800",
+   "kind": "event",
+   "name": "John Till",
+   "what": "Live music at The Green Room Public House",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0918,
+   "lng": -89.355,
+   "story": "Free/donations.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794528000000,
+    "end": 1794535200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/john-till-green-room/?occ_dtstart=2026-11-12T18:00",
+   "source": "isthmus",
+   "venue": "The Green Room Public House"
+  },
+  {
+   "id": "isthmus:madison-folk-dance-unlimited:29908800",
+   "kind": "event",
+   "name": "Madison Folk Dance Unlimited",
+   "what": "Show at Gates of Heaven",
+   "category": "show",
+   "hood": "Downtown",
+   "lat": 43.0797,
+   "lng": -89.3849,
+   "story": "Lesson 6 pm, open dance 7-9:45 pm Thursdays, Gates of Heaven. Free/donations.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    225
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794528000000,
+    "end": 1794541500000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/madison-folk-dance-unlimited-thursdays-winter/?occ_dtstart=2026-11-12T18:00",
+   "source": "isthmus",
+   "venue": "Gates of Heaven"
+  },
+  {
    "id": "mcm:astronomy:29908800",
    "kind": "event",
    "name": "Astronomy",
@@ -725,6 +1301,70 @@
    "source": "mcm",
    "venue": "Madison Children's Museum",
    "placeId": "childrens-museum"
+  },
+  {
+   "id": "isthmus:let-s-talk-about-a-year-of-foraging:29908830",
+   "kind": "event",
+   "name": "Let's Talk about a Year of Foraging",
+   "what": "Talk at Sequoya Library",
+   "category": "talk",
+   "hood": "West Side",
+   "lat": 43.0536,
+   "lng": -89.4501,
+   "story": "Midvale Heights Community Association Green Team talk by Robin Greenfield. RSVP.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "learn": 1,
+    "think": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794529800000,
+    "end": 1794535200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/lets-talk-about-year-of-foraging/?occ_dtstart=2026-11-12T18:30",
+   "source": "isthmus",
+   "venue": "Sequoya Library"
+  },
+  {
+   "id": "isthmus:open-mic:29908830",
+   "kind": "event",
+   "name": "Open Mic",
+   "what": "Live music at Muso",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0932,
+   "lng": -89.3546,
+   "story": "6:30 pm second and fourth Thursdays (usually). Free/donations.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    150
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794529800000,
+    "end": 1794538800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/open-mic-muso-second-thursday/?occ_dtstart=2026-11-12T18:30",
+   "source": "isthmus",
+   "venue": "Muso"
   },
   {
    "id": "isthmus:dylan-carlino:29908860",
@@ -791,6 +1431,135 @@
    "venue": "The Rigby"
   },
   {
+   "id": "isthmus:military-monologues-volume-1:29908860",
+   "kind": "event",
+   "name": "Military Monologues: Volume 1",
+   "what": "Show at Madison College-Truax, Studio Theater",
+   "category": "show",
+   "hood": "North Side",
+   "lat": 43.1209,
+   "lng": -89.3268,
+   "story": "Written/performed by students and guest artists, 7 pm on 11/11-13 and 2 pm 11/14. $15 ($13 ages under 17 or 62 and up).",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794531600000,
+    "end": 1794537000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/military-monologues-volume-1/?occ_dtstart=2026-11-12T19:00",
+   "source": "isthmus",
+   "venue": "Madison College-Truax, Studio Theater"
+  },
+  {
+   "id": "isthmus:the-debut:29908860",
+   "kind": "event",
+   "name": "The Debut",
+   "what": "Show at UW Cinematheque",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0733,
+   "lng": -89.3993,
+   "story": "A community theater director's tyranny will not stand for one of the actors. R, 2026. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794531600000,
+    "end": 1794537000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/the-debut/?occ_dtstart=2026-11-12T19:00",
+   "source": "isthmus",
+   "venue": "UW Cinematheque"
+  },
+  {
+   "id": "isthmus:trusting-the-data:29908860",
+   "kind": "event",
+   "name": "Trusting the Data",
+   "what": "Talk at UW Discovery Building",
+   "category": "talk",
+   "hood": "Campus",
+   "lat": 43.0729,
+   "lng": -89.4076,
+   "story": "Illuminating Discovery Hub \"Crossroads of Ideas\" series talk by former CDC director Susan Monarez and UW statistician Claudia Solís-Lemus. Free, but RSVP.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "learn": 1,
+    "think": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794531600000,
+    "end": 1794537000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/trusting-the-data/?occ_dtstart=2026-11-12T19:00",
+   "source": "isthmus",
+   "venue": "UW Discovery Building"
+  },
+  {
+   "id": "isthmus:lily-comp:29908860",
+   "kind": "event",
+   "name": "Lily Comp",
+   "what": "Live music at Lakeside Street Coffee House",
+   "category": "music",
+   "hood": "South Side",
+   "lat": 43.0561,
+   "lng": -89.3892,
+   "story": "Signing the new book \"Scenic Natural Wonders of Wisconsin: Waterfalls, Scenic Views, Beaches, and Natural Areas.\"",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794531600000,
+    "end": 1794538800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/lily-comp-oct-17/?occ_dtstart=2026-11-12T19:00",
+   "source": "isthmus",
+   "venue": "Lakeside Street Coffee House",
+   "placeId": "lakeside-coffee"
+  },
+  {
    "id": "isthmus:playin-the-standards-jam-with-jan-hora:29908860",
    "kind": "event",
    "name": "Playin' the Standards Jam with Jan Hora",
@@ -823,15 +1592,80 @@
    "venue": "Cafe Coda"
   },
   {
-   "id": "uw:uw-cinematheque-premieres:29908860",
+   "id": "isthmus:dj-ian-adcock:29908860",
    "kind": "event",
-   "name": "UW Cinematheque - Premieres",
-   "what": "Film at Vilas Hall",
+   "name": "DJ Ian Adcock",
+   "what": "DJ night at Lola's Hi/Lo Lounge",
+   "category": "music",
+   "hood": "North Side",
+   "lat": 43.1078,
+   "lng": -89.3633,
+   "story": "Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    179
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "drink": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794531600000,
+    "end": 1794542340000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/ian-adcock-lolas/?occ_dtstart=2026-11-12T19:00",
+   "source": "isthmus",
+   "venue": "Lola's Hi/Lo Lounge"
+  },
+  {
+   "id": "isthmus:subterranean-jazz-project:29908860",
+   "kind": "event",
+   "name": "Subterranean Jazz Project",
+   "what": "Live music at Gib's Bar",
+   "category": "music",
+   "hood": "Willy Street",
+   "lat": 43.0857,
+   "lng": -89.3614,
+   "story": "Standards, 7 pm second Thursdays.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794531600000,
+    "end": 1794542400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/subterranean-jazz-project-second-thursday-gibs/?occ_dtstart=2026-11-12T19:00",
+   "source": "isthmus",
+   "venue": "Gib's Bar",
+   "placeId": "gibs"
+  },
+  {
+   "id": "isthmus:dragonsocks-queen-of-the-universe:29908890",
+   "kind": "event",
+   "name": "Dragonsocks & Queen of the Universe",
+   "what": "Show at Broom Street Theater",
    "category": "show",
-   "hood": "Campus",
-   "lat": 43.07264502572392,
-   "lng": -89.39986377177232,
-   "story": "Cast: Julianne Moore, Jesse Eisenberg, Paul Giamatti When Mona Friedman is cast in a bit part at a small community theater, she transforms from a shy, unassuming housewife into a zealous method actor willing to do…",
+   "hood": "Willy Street",
+   "lat": 43.0822,
+   "lng": -89.366,
+   "story": "New play by Brendon Smith about a cantankerous woman and a robot caretaker, 10/30-11/14, Broom Street Theater, at 7:30 pm Thursday-Saturday (except 2 pm on 11/14) and 2 pm Sunday.",
    "price": 1,
    "setting": "in",
    "minutes": [
@@ -840,20 +1674,19 @@
    ],
    "kids": 1,
    "moods": {
-    "date": 0.6,
-    "cozy": 0.6,
-    "learn": 0.6
+    "lively": 1,
+    "date": 0.6
    },
    "gem": 0.4,
    "when": {
-    "start": 1794531600000,
-    "end": 1794537000000
+    "start": 1794533400000,
+    "end": 1794538800000
    },
    "dropIn": false,
    "hoursTrust": "solid",
-   "url": "https://today.wisc.edu/events/view/223579",
-   "source": "uw",
-   "venue": "Vilas Hall"
+   "url": "https://isthmus.com/events/dragonsocks-queen-of-the-universe/?occ_dtstart=2026-11-12T19:30",
+   "source": "isthmus",
+   "venue": "Broom Street Theater"
   },
   {
    "id": "isthmus:gaslight:29908890",
@@ -886,6 +1719,38 @@
    "url": "https://isthmus.com/events/gaslight-forward/?occ_dtstart=2026-11-12T19:30",
    "source": "isthmus",
    "venue": "Overture Center-Playhouse"
+  },
+  {
+   "id": "isthmus:the-moors:29908890",
+   "kind": "event",
+   "name": "The Moors",
+   "what": "Show at Bartell Theatre",
+   "category": "show",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.384,
+   "story": "StageQ production of dark comedy by Jen Silverman, 10/30-11/14, Bartell Theatre, at 7:30 pm Thursday-Friday and 2 pm Sunday, plus 7:30 pm on 10/31 and 2 pm, 11/14. $55-$15 sliding scale.",
+   "price": 3,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794533400000,
+    "end": 1794538800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/moors-stageq/?occ_dtstart=2026-11-12T19:30",
+   "source": "isthmus",
+   "venue": "Bartell Theatre"
   },
   {
    "id": "isthmus:amythyst-kiah-buffalo-nichols:29908920",
@@ -950,6 +1815,38 @@
    "url": "https://isthmus.com/events/choir-choir-choir-landslide/?occ_dtstart=2026-11-12T20:00",
    "source": "isthmus",
    "venue": "Atwood Music Hall"
+  },
+  {
+   "id": "isthmus:djs-bandit-samogon:29908920",
+   "kind": "event",
+   "name": "DJs Bandit, Samogon",
+   "what": "Show at Crucible",
+   "category": "show",
+   "hood": "East Side",
+   "lat": 43.1074,
+   "lng": -89.3358,
+   "story": "\"Sensation,\" kinky dance party, 8 pm second Thursdays (usually). $10.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794535200000,
+    "end": 1794540600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/djs-bandit-samogon-sensation/?occ_dtstart=2026-11-12T20:00",
+   "source": "isthmus",
+   "venue": "Crucible"
   },
   {
    "id": "isthmus:lily-rose-erin-kinsey:29908920",
@@ -1048,6 +1945,102 @@
    "venue": "North Street Cabaret"
   },
   {
+   "id": "isthmus:richard-shaten:29908920",
+   "kind": "event",
+   "name": "Richard Shaten",
+   "what": "Live music at Greenbush Bar",
+   "category": "music",
+   "hood": "Regent",
+   "lat": 43.0677,
+   "lng": -89.4012,
+   "story": "Piano, 8 pm Thursdays.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794535200000,
+    "end": 1794546000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/richard-shaten-greenbush-thursdays/?occ_dtstart=2026-11-12T20:00",
+   "source": "isthmus",
+   "venue": "Greenbush Bar"
+  },
+  {
+   "id": "isthmus:rebul-dj-luis-armacanqui:29908950",
+   "kind": "event",
+   "name": "Rebulú, DJ Luis Armacanqui",
+   "what": "DJ night at Cardinal Bar",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0758,
+   "lng": -89.3772,
+   "story": "Capitol Social salsa lesson 8:30 pm, band 9:30 pm, second Thursdays (usually). $10.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    209
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "drink": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794537000000,
+    "end": 1794549540000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/rebulu-second-thursday-cardinal/?occ_dtstart=2026-11-12T20:30",
+   "source": "isthmus",
+   "venue": "Cardinal Bar"
+  },
+  {
+   "id": "isthmus:josh-dupont:29908980",
+   "kind": "event",
+   "name": "Josh Dupont",
+   "what": "Live music at Ivory Room",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0744,
+   "lng": -89.387,
+   "story": "Piano.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794538800000,
+    "end": 1794546000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/josh-dupont-ivory-room/?occ_dtstart=2026-11-12T21:00",
+   "source": "isthmus",
+   "venue": "Ivory Room"
+  },
+  {
    "id": "isthmus:cap-alan-original-time-demonstrations-def-sonic:29909040",
    "kind": "event",
    "name": "Cap Alan, Original Time Demonstrations, Def Sonic",
@@ -1079,6 +2072,38 @@
    "source": "isthmus",
    "venue": "Mickey's Tavern",
    "placeId": "mickeys"
+  },
+  {
+   "id": "isthmus:dj-frecuencia-infinita:29909040",
+   "kind": "event",
+   "name": "DJ Frecuencia Infinita",
+   "what": "DJ night at Sotto",
+   "category": "music",
+   "hood": "State Street",
+   "lat": 43.0749,
+   "lng": -89.39,
+   "story": "Latin, 10 pm Thursdays-Fridays. $5.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "drink": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794542400000,
+    "end": 1794549600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/dj-frecuencia-infinita-thursdays/?occ_dtstart=2026-11-12T22:00",
+   "source": "isthmus",
+   "venue": "Sotto"
   },
   {
    "id": "mcm:early-explorers-playgroup:29909730",
@@ -1213,6 +2238,38 @@
    "placeId": "childrens-museum"
   },
   {
+   "id": "isthmus:trevor-stephenson:29909895",
+   "kind": "event",
+   "name": "Trevor Stephenson",
+   "what": "Live music at First Unitarian Society",
+   "category": "music",
+   "hood": "Near West",
+   "lat": 43.0742,
+   "lng": -89.4338,
+   "story": "Friday Musicale. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794593700000,
+    "end": 1794600900000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/friday-musicale-nov-13/?occ_dtstart=2026-11-13T12:15",
+   "source": "isthmus",
+   "venue": "First Unitarian Society"
+  },
+  {
    "id": "mcm:clay-day:29909940",
    "kind": "event",
    "name": "Clay Day",
@@ -1344,25 +2401,25 @@
    "venue": "Cafe Coda"
   },
   {
-   "id": "mcm:girl-scouts-night-at-the-museum:29910180",
+   "id": "isthmus:dj-chuck-money:29910180",
    "kind": "event",
-   "name": "Girl Scouts Night at the Museum",
-   "what": "Kids’ program at Madison Children's Museum",
-   "category": "play",
-   "hood": "Downtown",
-   "lat": 43.0765,
-   "lng": -89.3848,
-   "story": "@ When the doors close to the public, the Girl Scouts’ fun begins!",
-   "price": 2,
+   "name": "DJ Chuck Money",
+   "what": "DJ night at Lola's Hi/Lo Lounge",
+   "category": "music",
+   "hood": "North Side",
+   "lat": 43.1078,
+   "lng": -89.3633,
+   "story": "Soul/jazz.",
+   "price": 1,
    "setting": "in",
    "minutes": [
     45,
     180
    ],
-   "kids": 2,
+   "kids": 0,
    "moods": {
-    "kids": 1,
-    "cozy": 0.6
+    "lively": 1,
+    "drink": 0.6
    },
    "gem": 0.4,
    "when": {
@@ -1371,10 +2428,73 @@
    },
    "dropIn": false,
    "hoursTrust": "solid",
-   "url": "https://madisonchildrensmuseum.org/event/girl-scouts-night-at-the-museum-3/",
-   "source": "mcm",
-   "venue": "Madison Children's Museum",
-   "placeId": "childrens-museum"
+   "url": "https://isthmus.com/events/dj-chuck-money-fridays/?occ_dtstart=2026-11-13T17:00",
+   "source": "isthmus",
+   "venue": "Lola's Hi/Lo Lounge"
+  },
+  {
+   "id": "isthmus:bill-roberts-combo:29910210",
+   "kind": "event",
+   "name": "Bill Roberts Combo",
+   "what": "Live music at Cardinal Bar",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0758,
+   "lng": -89.3772,
+   "story": "5:30 pm second Fridays. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794612600000,
+    "end": 1794619800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/bill-roberts-combo-cardinal/?occ_dtstart=2026-11-13T17:30",
+   "source": "isthmus",
+   "venue": "Cardinal Bar"
+  },
+  {
+   "id": "isthmus:johnny-chimes:29910210",
+   "kind": "event",
+   "name": "Johnny Chimes",
+   "what": "Live music at Louisianne's, Etc., Middleton",
+   "category": "music",
+   "hood": "Middleton",
+   "lat": 43.0954,
+   "lng": -89.5104,
+   "story": "New Orleans piano, 5:30 pm Fridays. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794612600000,
+    "end": 1794619800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/Johnny-Chimes-friday/?occ_dtstart=2026-11-13T17:30",
+   "source": "isthmus",
+   "venue": "Louisianne's, Etc., Middleton"
   },
   {
    "id": "uw:dcc-movie-night-being-huemann-screening:29910210",
@@ -1410,10 +2530,75 @@
    "venue": "Armory and Gymnasium (Red Gym)"
   },
   {
+   "id": "isthmus:foraging-for-freedom:29910240",
+   "kind": "event",
+   "name": "Foraging for Freedom",
+   "what": "Reading at ART House 360, Verona",
+   "category": "talk",
+   "hood": "Verona",
+   "lat": 42.9893,
+   "lng": -89.538,
+   "story": "Talk by author Robin Greenfield. $40-$10 donation.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "learn": 1,
+    "think": 0.6,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794614400000,
+    "end": 1794619800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/robin-greenfield-nov-13/?occ_dtstart=2026-11-13T18:00",
+   "source": "isthmus",
+   "venue": "ART House 360, Verona"
+  },
+  {
+   "id": "isthmus:the-currach:29910240",
+   "kind": "event",
+   "name": "The Currach",
+   "what": "Live music at ALT Brew",
+   "category": "music",
+   "hood": "North Side",
+   "lat": 43.1231,
+   "lng": -89.3303,
+   "story": "Irish, 6 pm second Fridays. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    150
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794614400000,
+    "end": 1794623400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/currach-second-fridays/?occ_dtstart=2026-11-13T18:00",
+   "source": "isthmus",
+   "venue": "ALT Brew"
+  },
+  {
    "id": "isthmus:vo5-rare-element-play-machine-blush-earthlight-b:29910240",
    "kind": "event",
    "name": "VO5, Rare Element, Play Machine, Blush, Earthlight, Bear in the Forest, Luca B, Black Star Drum Line, DJ Ka-BOOM!Box",
-   "what": "Live music at Atwood Music Hall",
+   "what": "DJ night at Atwood Music Hall",
    "category": "music",
    "hood": "Atwood",
    "lat": 43.09,
@@ -1428,7 +2613,7 @@
    "kids": 1,
    "moods": {
     "lively": 1,
-    "date": 0.6
+    "drink": 0.6
    },
    "gem": 0.4,
    "when": {
@@ -1440,6 +2625,38 @@
    "url": "https://isthmus.com/events/vo5-rare-element-play-machine-blush-earthlight-bear-in-the-f/?occ_dtstart=2026-11-13T18:00",
    "source": "isthmus",
    "venue": "Atwood Music Hall"
+  },
+  {
+   "id": "isthmus:kyle-rightley-phillip-zakas:29910270",
+   "kind": "event",
+   "name": "Kyle Rightley, Phillip Zakas",
+   "what": "Live music at Cargo Coffee-East Washington",
+   "category": "music",
+   "hood": "Capitol East",
+   "lat": 43.0808,
+   "lng": -89.3754,
+   "story": "Free/donations.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794616200000,
+    "end": 1794623400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/kyle-rightley-phillip-zakas/?occ_dtstart=2026-11-13T18:30",
+   "source": "isthmus",
+   "venue": "Cargo Coffee-East Washington"
   },
   {
    "id": "uw:wud-film-presents-la-haine-1995-:29910270",
@@ -1507,6 +2724,70 @@
    "venue": "Cafe Coda"
   },
   {
+   "id": "isthmus:atlas-improv-company:29910300",
+   "kind": "event",
+   "name": "Atlas Improv Company",
+   "what": "Show at Atlas Improv Company",
+   "category": "show",
+   "hood": "Capitol East",
+   "lat": 43.0786,
+   "lng": -89.3785,
+   "story": "7 & 9 pm Fridays & Saturdays, 609 E. Washington Ave. $11 ($7 kids).",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794623400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/atlas-improv-weekly-7-pm/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "Atlas Improv Company"
+  },
+  {
+   "id": "isthmus:bubblegum-variety-show:29910300",
+   "kind": "event",
+   "name": "Bubblegum Variety Show",
+   "what": "Show at Crucible",
+   "category": "show",
+   "hood": "East Side",
+   "lat": 43.1074,
+   "lng": -89.3358,
+   "story": "Hosted by Anita Spanx; dance party follows. $15.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794623400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/bubblegum-variety-show-nov-13/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "Crucible"
+  },
+  {
    "id": "isthmus:dylan-carlino:29910300",
    "kind": "event",
    "name": "Dylan Carlino",
@@ -1537,6 +2818,232 @@
    "url": "https://isthmus.com/events/dylan-carlino-2026/?occ_dtstart=2026-11-13T19:00",
    "source": "isthmus",
    "venue": "Comedy on State"
+  },
+  {
+   "id": "isthmus:eega:29910300",
+   "kind": "event",
+   "name": "Eega",
+   "what": "Show at UW Cinematheque",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0733,
+   "lng": -89.3993,
+   "story": "A reincarnated lover seeks revenge on his killer. NR, 2012. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794623400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/eega/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "UW Cinematheque"
+  },
+  {
+   "id": "isthmus:military-monologues-volume-1:29910300",
+   "kind": "event",
+   "name": "Military Monologues: Volume 1",
+   "what": "Show at Madison College-Truax, Studio Theater",
+   "category": "show",
+   "hood": "North Side",
+   "lat": 43.1209,
+   "lng": -89.3268,
+   "story": "Written/performed by students and guest artists, 7 pm on 11/11-13 and 2 pm 11/14. $15 ($13 ages under 17 or 62 and up).",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794623400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/military-monologues-volume-1/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "Madison College-Truax, Studio Theater"
+  },
+  {
+   "id": "isthmus:tom-kastle:29910300",
+   "kind": "event",
+   "name": "Tom Kastle",
+   "what": "Live music at Muso",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0932,
+   "lng": -89.3546,
+   "story": "from TK's newsletter: Twenty years ago, I recorded what I called my “midlife crisis” album, called <em>Across the Centerline</em>.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794625200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/tom-kastle-muso/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "Muso"
+  },
+  {
+   "id": "isthmus:uw-men-s-hockey:29910300",
+   "kind": "event",
+   "name": "UW Men's Hockey",
+   "what": "Game at Kohl Center",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0698,
+   "lng": -89.3959,
+   "story": "vs. Ohio State.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "showoff": 0.6,
+    "kids": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794623400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/uw-mens-hockey-ohio-state/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "Kohl Center"
+  },
+  {
+   "id": "isthmus:the-racing-pulses:29910300",
+   "kind": "event",
+   "name": "The Racing Pulses",
+   "what": "Live music at Friends Applaud",
+   "category": "music",
+   "hood": "South Side",
+   "lat": 43.0501,
+   "lng": -89.3921,
+   "story": "Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794625200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/racing-pulses-friends-applaud/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "Friends Applaud"
+  },
+  {
+   "id": "isthmus:trio-soleil:29910300",
+   "kind": "event",
+   "name": "Trio Soleil",
+   "what": "Live music at Lakeside Street Coffee House",
+   "category": "music",
+   "hood": "South Side",
+   "lat": 43.0561,
+   "lng": -89.3892,
+   "story": "Jazz/standards. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794625200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/trio-soleil-lakeside/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "Lakeside Street Coffee House",
+   "placeId": "lakeside-coffee"
+  },
+  {
+   "id": "isthmus:marcy-the-highlights:29910300",
+   "kind": "event",
+   "name": "Marcy & the Highlights",
+   "what": "Live music at VFW Post 7591-Cottage Grove Road",
+   "category": "music",
+   "hood": "East Side",
+   "lat": 43.0837,
+   "lng": -89.322,
+   "story": "Classic rock/pop. $5.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794628800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/marcy-highlights-vfw-7591/?occ_dtstart=2026-11-13T19:00",
+   "source": "isthmus",
+   "venue": "VFW Post 7591-Cottage Grove Road"
   },
   {
    "id": "uw:james-ivy:29910300",
@@ -1571,15 +3078,47 @@
    "venue": "Union South"
   },
   {
-   "id": "uw:uw-cinematheque-rajamouli-myth-spectacle-cinema:29910300",
+   "id": "isthmus:9-to-5:29910330",
    "kind": "event",
-   "name": "UW Cinematheque - Rajamouli: Myth, Spectacle, Cinema",
-   "what": "Film at Vilas Hall",
+   "name": "9 to 5",
+   "what": "Show at Edgewood University-The Stream",
    "category": "show",
-   "hood": "Campus",
-   "lat": 43.07264502572392,
-   "lng": -89.39986377177232,
-   "story": "Cast: Sudeep, Nani, Samantha Ruth Prabhu Nani and Bindhu’s young love is cut short when Nani is ruthlessly murdered by his romantic rival, Sandeep.",
+   "hood": "Near West",
+   "lat": 43.0583,
+   "lng": -89.4217,
+   "story": "7:30 pm on 11/13 & 20 and 2 & 7:30 pm, 11/14 & 21, Diane Ballweg Theatre. $20 ($10 students).",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794619800000,
+    "end": 1794625200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/9-to-5-edgewood/?occ_dtstart=2026-11-13T19:30",
+   "source": "isthmus",
+   "venue": "Edgewood University-The Stream"
+  },
+  {
+   "id": "isthmus:dragonsocks-queen-of-the-universe:29910330",
+   "kind": "event",
+   "name": "Dragonsocks & Queen of the Universe",
+   "what": "Show at Broom Street Theater",
+   "category": "show",
+   "hood": "Willy Street",
+   "lat": 43.0822,
+   "lng": -89.366,
+   "story": "New play by Brendon Smith about a cantankerous woman and a robot caretaker, 10/30-11/14, Broom Street Theater, at 7:30 pm Thursday-Saturday (except 2 pm on 11/14) and 2 pm Sunday.",
    "price": 1,
    "setting": "in",
    "minutes": [
@@ -1588,20 +3127,19 @@
    ],
    "kids": 1,
    "moods": {
-    "date": 0.6,
-    "cozy": 0.6,
-    "learn": 0.6
+    "lively": 1,
+    "date": 0.6
    },
    "gem": 0.4,
    "when": {
-    "start": 1794618000000,
-    "end": 1794623400000
+    "start": 1794619800000,
+    "end": 1794625200000
    },
    "dropIn": false,
    "hoursTrust": "solid",
-   "url": "https://today.wisc.edu/events/view/223602",
-   "source": "uw",
-   "venue": "Vilas Hall"
+   "url": "https://isthmus.com/events/dragonsocks-queen-of-the-universe/?occ_dtstart=2026-11-13T19:30",
+   "source": "isthmus",
+   "venue": "Broom Street Theater"
   },
   {
    "id": "isthmus:full-panic-disaster-kid-box-core-steamroller:29910330",
@@ -1668,6 +3206,166 @@
    "venue": "Overture Center-Playhouse"
   },
   {
+   "id": "isthmus:it-s-a-wonderful-life-a-new-musical:29910330",
+   "kind": "event",
+   "name": "It's a Wonderful Life: A New Musical",
+   "what": "Show at Madison College-Truax, Mitby Theater",
+   "category": "show",
+   "hood": "North Side",
+   "lat": 43.1209,
+   "lng": -89.3268,
+   "story": "Capital City Theatre world premiere, 11/13-22, Mitby Theater, at 7:30 pm Thursday-Saturday and 2 pm Sunday, plus 2 pm, 11/21. $68-$25",
+   "price": 3,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794619800000,
+    "end": 1794625200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/wonderful-life-new-musical/?occ_dtstart=2026-11-13T19:30",
+   "source": "isthmus",
+   "venue": "Madison College-Truax, Mitby Theater"
+  },
+  {
+   "id": "isthmus:new-performers-show:29910330",
+   "kind": "event",
+   "name": "New Performers' Show",
+   "what": "Show at Madison Circus Space",
+   "category": "show",
+   "hood": "Atwood",
+   "lat": 43.0937,
+   "lng": -89.3543,
+   "story": "7:30 pm, 11/13-14. $15.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794619800000,
+    "end": 1794625200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/new-performers-show-madison-circus-space/?occ_dtstart=2026-11-13T19:30",
+   "source": "isthmus",
+   "venue": "Madison Circus Space"
+  },
+  {
+   "id": "isthmus:rittz-jehry-robinson-dustin-warbear-obscure-that:29910330",
+   "kind": "event",
+   "name": "Rittz, Jehry Robinson, Dustin Warbear, Obscure, That Mid City Kid",
+   "what": "Live music at The Red Zone/The Annex",
+   "category": "music",
+   "hood": "Regent",
+   "lat": 43.0681,
+   "lng": -89.4062,
+   "story": "Live music at The Red Zone/The Annex.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794619800000,
+    "end": 1794627000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/rittz-2026/?occ_dtstart=2026-11-13T19:30",
+   "source": "isthmus",
+   "venue": "The Red Zone/The Annex"
+  },
+  {
+   "id": "isthmus:romeo-juliet:29910330",
+   "kind": "event",
+   "name": "Romeo & Juliet",
+   "what": "Show at Bartell Theatre",
+   "category": "show",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.384,
+   "story": "Madison Shakespeare Company, 11/6-21, at 7:30 p.m. Friday-Saturday (except 2 pm on 11/21) and 2 pm Sunday, plus 7:30 pm, 11/19.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794619800000,
+    "end": 1794625200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/romeo-juliet-madison-shakespeare/?occ_dtstart=2026-11-13T19:30",
+   "source": "isthmus",
+   "venue": "Bartell Theatre"
+  },
+  {
+   "id": "isthmus:austin-cebulske-quartet:29910330",
+   "kind": "event",
+   "name": "Austin Cebulske Quartet",
+   "what": "Live music at Yahara Bay Distillers, Fitchburg",
+   "category": "music",
+   "hood": "Fitchburg",
+   "lat": 43.0108,
+   "lng": -89.4786,
+   "story": "Jazz.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794619800000,
+    "end": 1794627000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/austin-cebulske-quartet-yahara-bay/?occ_dtstart=2026-11-13T19:30",
+   "source": "isthmus",
+   "venue": "Yahara Bay Distillers, Fitchburg"
+  },
+  {
    "id": "isthmus:hottt-probs-heet-death-sex-scenes:29910360",
    "kind": "event",
    "name": "Hottt Probs, Heet Death, Sex Scenes",
@@ -1698,6 +3396,38 @@
    "url": "https://isthmus.com/events/hottt-probs-heet-death-sex-scenes/?occ_dtstart=2026-11-13T20:00",
    "source": "isthmus",
    "venue": "High Noon Saloon"
+  },
+  {
+   "id": "isthmus:jack-o-the-dust:29910360",
+   "kind": "event",
+   "name": "Jack o' the Dust",
+   "what": "Live music at Bierock",
+   "category": "music",
+   "hood": "North Side",
+   "lat": 43.1285,
+   "lng": -89.3609,
+   "story": "8 pm second Fridays (usually). Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794628800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/jack-o-the-dust-bierock/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "Bierock"
   },
   {
    "id": "isthmus:pheramones-ramones-tribute-insomniacs-green-day-:29910360",
@@ -1764,6 +3494,38 @@
    "venue": "The Bur Oak"
   },
   {
+   "id": "isthmus:the-comedy-bunker:29910360",
+   "kind": "event",
+   "name": "The Comedy Bunker",
+   "what": "Show at Hotel Indigo",
+   "category": "show",
+   "hood": "Capitol East",
+   "lat": 43.0821,
+   "lng": -89.3729,
+   "story": "Cheshire Cat Comedy showcase, with Vik Pandya, Alice Pauser, host Owen Joyner. $20 ($15 adv.).",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794627000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/comedy-bunker-nov-13/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "Hotel Indigo"
+  },
+  {
    "id": "isthmus:the-widdler-esseks-fossils-unknown-prophet-tngl-:29910360",
    "kind": "event",
    "name": "The Widdler, Esseks, Fossils, Unknown Prophet, Tngl, Gravemynd, Liminal b2b Grounded Sound",
@@ -1826,6 +3588,134 @@
    "url": "https://isthmus.com/events/tim-whalen-trio-north-street-cabaret/?occ_dtstart=2026-11-13T20:00",
    "source": "isthmus",
    "venue": "North Street Cabaret"
+  },
+  {
+   "id": "isthmus:katie-scullin:29910360",
+   "kind": "event",
+   "name": "Katie Scullin",
+   "what": "Live music at Madison Concourse Hotel Bar",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0756,
+   "lng": -89.3868,
+   "story": "Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794628800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/katie-scullin-concourse/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "Madison Concourse Hotel Bar"
+  },
+  {
+   "id": "isthmus:djs-dcviii:29910360",
+   "kind": "event",
+   "name": "DJs DCVIII",
+   "what": "DJ night at The Green Room Public House",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0918,
+   "lng": -89.355,
+   "story": "Free/donations.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "drink": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794632400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/dj-dcviii-green-room/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "The Green Room Public House"
+  },
+  {
+   "id": "isthmus:road-trip:29910360",
+   "kind": "event",
+   "name": "Road Trip",
+   "what": "Live music at Bowl-A-Vard Lanes",
+   "category": "music",
+   "hood": "East Side",
+   "lat": 43.1269,
+   "lng": -89.2939,
+   "story": "Pop/rock.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    210
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794634200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/road-trip-bowl-a-vard/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "Bowl-A-Vard Lanes"
+  },
+  {
+   "id": "isthmus:gary-beal-band:29910360",
+   "kind": "event",
+   "name": "Gary Beal Band",
+   "what": "Live music at Essen Haus",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0758,
+   "lng": -89.3768,
+   "story": "Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    239
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794621600000,
+    "end": 1794635940000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/gary-beal-band-essen-haus/?occ_dtstart=2026-11-13T20:00",
+   "source": "isthmus",
+   "venue": "Essen Haus"
   },
   {
    "id": "uw:wud-film-presents-there-will-be-blood-2007-open-:29910405",
@@ -1893,6 +3783,102 @@
    "venue": "Cafe Coda"
   },
   {
+   "id": "isthmus:atlas-improv-company:29910420",
+   "kind": "event",
+   "name": "Atlas Improv Company",
+   "what": "Show at Atlas Improv Company",
+   "category": "show",
+   "hood": "Capitol East",
+   "lat": 43.0786,
+   "lng": -89.3785,
+   "story": "7 & 9 pm Fridays & Saturdays, 609 E. Washington Ave. $11 ($7 kids).",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794625200000,
+    "end": 1794630600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/atlas-improv-weekly-9-pm/?occ_dtstart=2026-11-13T21:00",
+   "source": "isthmus",
+   "venue": "Atlas Improv Company"
+  },
+  {
+   "id": "isthmus:djs-czboogie-dh:29910420",
+   "kind": "event",
+   "name": "DJs czboogie, DH",
+   "what": "DJ night at Cardinal Bar",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0758,
+   "lng": -89.3772,
+   "story": "\"Dreaming of a Disco.\" $10.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "drink": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794625200000,
+    "end": 1794632400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/czboogie-dh/?occ_dtstart=2026-11-13T21:00",
+   "source": "isthmus",
+   "venue": "Cardinal Bar"
+  },
+  {
+   "id": "isthmus:leslie-cao-adam-nelson-michael-massey:29910420",
+   "kind": "event",
+   "name": "Leslie Cao, Adam Nelson, Michael Massey",
+   "what": "Live music at Ivory Room",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0744,
+   "lng": -89.387,
+   "story": "Dueling pianos.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794625200000,
+    "end": 1794632400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/leslie-cao-adam-nelson-michael-massey/?occ_dtstart=2026-11-13T21:00",
+   "source": "isthmus",
+   "venue": "Ivory Room"
+  },
+  {
    "id": "isthmus:left-on-high-street:29910420",
    "kind": "event",
    "name": "Left on High Street",
@@ -1924,6 +3910,38 @@
    "source": "isthmus",
    "venue": "Harmony Bar and Grill",
    "placeId": "harmony-bar"
+  },
+  {
+   "id": "isthmus:dj-mars-starstuff:29910420",
+   "kind": "event",
+   "name": "DJ Mars Starstuff",
+   "what": "DJ night at Lola's Hi/Lo Lounge",
+   "category": "music",
+   "hood": "North Side",
+   "lat": 43.1078,
+   "lng": -89.3633,
+   "story": "Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    179
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "drink": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794625200000,
+    "end": 1794635940000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/mars-starstuff-lolas/?occ_dtstart=2026-11-13T21:00",
+   "source": "isthmus",
+   "venue": "Lola's Hi/Lo Lounge"
   },
   {
    "id": "isthmus:dylan-carlino:29910450",
@@ -1958,15 +3976,111 @@
    "venue": "Comedy on State"
   },
   {
+   "id": "isthmus:dj-choko-loco:29910480",
+   "kind": "event",
+   "name": "DJ Choko Loco",
+   "what": "DJ night at Come Back In",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0758,
+   "lng": -89.3768,
+   "story": "10 pm Fridays.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "drink": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794628800000,
+    "end": 1794636000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/choko-loco-fridays/?occ_dtstart=2026-11-13T22:00",
+   "source": "isthmus",
+   "venue": "Come Back In"
+  },
+  {
+   "id": "isthmus:dj-frecuencia-infinita:29910480",
+   "kind": "event",
+   "name": "DJ Frecuencia Infinita",
+   "what": "DJ night at Sotto",
+   "category": "music",
+   "hood": "State Street",
+   "lat": 43.0749,
+   "lng": -89.39,
+   "story": "Latin, 10 pm Thursdays-Fridays. $5.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "drink": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794628800000,
+    "end": 1794636000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/dj-frecuencia-infinita-thursdays/?occ_dtstart=2026-11-13T22:00",
+   "source": "isthmus",
+   "venue": "Sotto"
+  },
+  {
+   "id": "isthmus:dj-lalo:29910540",
+   "kind": "event",
+   "name": "DJ Lalo",
+   "what": "DJ night at Tavernakaya",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0744,
+   "lng": -89.3824,
+   "story": "Latin/house/hip-hop, 11 pm second Fridays. $10.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "drink": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794632400000,
+    "end": 1794639600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/lalo-second-saturdays/?occ_dtstart=2026-11-13T23:00",
+   "source": "isthmus",
+   "venue": "Tavernakaya"
+  },
+  {
    "id": "isthmus:dj-wayne:29910540",
    "kind": "event",
    "name": "DJ Wayne",
-   "what": "Live music at Cafe Coda",
+   "what": "DJ night at Cafe Coda",
    "category": "music",
    "hood": "Willy Street",
    "lat": 43.0812,
    "lng": -89.3655,
-   "story": "Live music at Cafe Coda.",
+   "story": "DJ night at Cafe Coda.",
    "price": 1,
    "setting": "in",
    "minutes": [
@@ -1976,7 +4090,7 @@
    "kids": 1,
    "moods": {
     "lively": 1,
-    "date": 0.6
+    "drink": 0.6
    },
    "gem": 0.4,
    "when": {
@@ -1988,6 +4102,39 @@
    "url": "https://isthmus.com/events/wayne-wonder-coda/?occ_dtstart=2026-11-13T23:00",
    "source": "isthmus",
    "venue": "Cafe Coda"
+  },
+  {
+   "id": "isthmus:dane-county-farmers-market:29910975",
+   "kind": "event",
+   "name": "Dane County Farmers' Market",
+   "what": "Market at Capitol Square",
+   "category": "market",
+   "hood": "Downtown",
+   "lat": 43.075,
+   "lng": -89.3841,
+   "story": "6:15 am-1:45 pm Saturdays, 4/11-11/14, Capitol Square; 8:30 am-1:15 pm Wednesdays, 4/22-11/4, 200 block of Martin Luther King Jr. Boulevard.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    450
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "showoff": 0.6,
+    "eat": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794658500000,
+    "end": 1794685500000
+   },
+   "dropIn": true,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/Dane-County-Farmers-Market-saturdays/?occ_dtstart=2026-11-14T06:15",
+   "source": "isthmus",
+   "venue": "Capitol Square"
   },
   {
    "id": "isthmus:kids-in-the-rotunda:29911170",
@@ -2020,6 +4167,38 @@
    "url": "https://isthmus.com/events/kids-in-the-rotunda-laura-doherty/?occ_dtstart=2026-11-14T09:30",
    "source": "isthmus",
    "venue": "Overture Center-Rotunda Stage"
+  },
+  {
+   "id": "isthmus:story-hour-improv:29911200",
+   "kind": "event",
+   "name": "Story Hour Improv",
+   "what": "Show at ART House 360, Verona",
+   "category": "show",
+   "hood": "Verona",
+   "lat": 42.9893,
+   "lng": -89.538,
+   "story": "Performance for kids/families. $9-$6.50 (free ages 2 and under).",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794672000000,
+    "end": 1794677400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/story-hour-improv-art-house/?occ_dtstart=2026-11-14T10:00",
+   "source": "isthmus",
+   "venue": "ART House 360, Verona"
   },
   {
    "id": "isthmus:native-art-market:29911200",
@@ -2088,6 +4267,38 @@
    "placeId": "childrens-museum"
   },
   {
+   "id": "isthmus:canta-con-jorge-y-chimi-bilingual-folk-songs-for:29911230",
+   "kind": "event",
+   "name": "Canta con Jorge y Chimi: Bilingual Folk Songs for Kids",
+   "what": "Live music at Imagination Center",
+   "category": "music",
+   "hood": "East Side",
+   "lat": 43.1231,
+   "lng": -89.3158,
+   "story": "Bilingual (Spanish/English) event. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794673800000,
+    "end": 1794681000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/canta-con-jorge-y-chimi-bilingual-folk-songs-for-kids/?occ_dtstart=2026-11-14T10:30",
+   "source": "isthmus",
+   "venue": "Imagination Center"
+  },
+  {
    "id": "mcm:fairy-miniatures:29911230",
    "kind": "event",
    "name": "Fairy Miniatures",
@@ -2096,7 +4307,7 @@
    "hood": "Downtown",
    "lat": 43.0765,
    "lng": -89.3848,
-   "story": "Calling all fairy architects! Join the effort to solve fairyland’s chronic housing shortage by designing and building a miniature home from natural materials.",
+   "story": "@ Calling all fairy architects! Join the effort to solve fairyland’s chronic housing shortage by designing and building a miniature home from natural materials.",
    "price": 2,
    "setting": "in",
    "minutes": [
@@ -2116,6 +4327,104 @@
    "dropIn": false,
    "hoursTrust": "solid",
    "url": "https://madisonchildrensmuseum.org/event/fairy-miniatures/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "isthmus:ensemble-aubergine:29911320",
+   "kind": "event",
+   "name": "Ensemble Aubergine",
+   "what": "Live music at Grace Episcopal Church",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0738,
+   "lng": -89.3855,
+   "story": "Grace Presents concert. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794679200000,
+    "end": 1794686400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/ensemble-aubergine-grace/?occ_dtstart=2026-11-14T12:00",
+   "source": "isthmus",
+   "venue": "Grace Episcopal Church"
+  },
+  {
+   "id": "isthmus:wisconsin-fellowship-of-poets-calendar-reading:29911380",
+   "kind": "event",
+   "name": "Wisconsin Fellowship of Poets Calendar Reading",
+   "what": "Reading at Sequoya Library",
+   "category": "talk",
+   "hood": "West Side",
+   "lat": 43.0536,
+   "lng": -89.4501,
+   "story": "Selections from the 2027 edition.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "learn": 1,
+    "think": 0.6,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794682800000,
+    "end": 1794690000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/wisconsin-fellowship-poets-calendar-reading/?occ_dtstart=2026-11-14T13:00",
+   "source": "isthmus",
+   "venue": "Sequoya Library"
+  },
+  {
+   "id": "mcm:fairy-miniatures:29911380",
+   "kind": "event",
+   "name": "Fairy Miniatures",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "@ Calling all fairy architects! Join the effort to solve fairyland’s chronic housing shortage by designing and building a miniature home from natural materials.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794682800000,
+    "end": 1794690000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/fairy-miniatures-2/",
    "source": "mcm",
    "venue": "Madison Children's Museum",
    "placeId": "childrens-museum"
@@ -2155,6 +4464,102 @@
    "placeId": "mmoca"
   },
   {
+   "id": "isthmus:9-to-5:29911440",
+   "kind": "event",
+   "name": "9 to 5",
+   "what": "Show at Edgewood University-The Stream",
+   "category": "show",
+   "hood": "Near West",
+   "lat": 43.0583,
+   "lng": -89.4217,
+   "story": "7:30 pm on 11/13 & 20 and 2 & 7:30 pm, 11/14 & 21, Diane Ballweg Theatre. $20 ($10 students).",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794686400000,
+    "end": 1794691800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/9-to-5-edgewood/?occ_dtstart=2026-11-14T14:00",
+   "source": "isthmus",
+   "venue": "Edgewood University-The Stream"
+  },
+  {
+   "id": "isthmus:curator-conversation:29911440",
+   "kind": "event",
+   "name": "Curator Conversation",
+   "what": "Talk at Tandem Press",
+   "category": "talk",
+   "hood": "North Side",
+   "lat": 43.1059,
+   "lng": -89.3616,
+   "story": "Talk by John Corbett & Paul Baker Prindle (in conjunction with \"Number One at Tandem Press: Sam Gilliam & William Weege\" exhibition).",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "learn": 1,
+    "think": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794686400000,
+    "end": 1794691800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/curator-conversation-corbett-prindle/?occ_dtstart=2026-11-14T14:00",
+   "source": "isthmus",
+   "venue": "Tandem Press"
+  },
+  {
+   "id": "isthmus:dragonsocks-queen-of-the-universe:29911440",
+   "kind": "event",
+   "name": "Dragonsocks & Queen of the Universe",
+   "what": "Show at Broom Street Theater",
+   "category": "show",
+   "hood": "Willy Street",
+   "lat": 43.0822,
+   "lng": -89.366,
+   "story": "New play by Brendon Smith about a cantankerous woman and a robot caretaker, 10/30-11/14, Broom Street Theater, at 7:30 pm Thursday-Saturday (except 2 pm on 11/14) and 2 pm Sunday.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794686400000,
+    "end": 1794691800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/dragonsocks-queen-of-the-universe/?occ_dtstart=2026-11-14T14:00",
+   "source": "isthmus",
+   "venue": "Broom Street Theater"
+  },
+  {
    "id": "isthmus:gaslight:29911440",
    "kind": "event",
    "name": "Gaslight",
@@ -2185,6 +4590,456 @@
    "url": "https://isthmus.com/events/gaslight-forward/?occ_dtstart=2026-11-14T14:00",
    "source": "isthmus",
    "venue": "Overture Center-Playhouse"
+  },
+  {
+   "id": "isthmus:military-monologues-volume-1:29911440",
+   "kind": "event",
+   "name": "Military Monologues: Volume 1",
+   "what": "Show at Madison College-Truax, Studio Theater",
+   "category": "show",
+   "hood": "North Side",
+   "lat": 43.1209,
+   "lng": -89.3268,
+   "story": "Written/performed by students and guest artists, 7 pm on 11/11-13 and 2 pm 11/14. $15 ($13 ages under 17 or 62 and up).",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794686400000,
+    "end": 1794691800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/military-monologues-volume-1/?occ_dtstart=2026-11-14T14:00",
+   "source": "isthmus",
+   "venue": "Madison College-Truax, Studio Theater"
+  },
+  {
+   "id": "isthmus:mrs-roper-romp:29911440",
+   "kind": "event",
+   "name": "Mrs. Roper Romp",
+   "what": "Live music at Starkweather Brewing Company",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0937,
+   "lng": -89.3457,
+   "story": "Dress as a character from \"Three's Company,\" gather 2 pm, 11/14, Starkweather Brewing Company, with \"Roper Romp Squad\" performance at 2:30 pm, followed by bar crawl around Atwood neighborhood. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794686400000,
+    "end": 1794693600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/mrs-roper-romp-atwood/?occ_dtstart=2026-11-14T14:00",
+   "source": "isthmus",
+   "venue": "Starkweather Brewing Company"
+  },
+  {
+   "id": "isthmus:the-moors:29911440",
+   "kind": "event",
+   "name": "The Moors",
+   "what": "Show at Bartell Theatre",
+   "category": "show",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.384,
+   "story": "StageQ production of dark comedy by Jen Silverman, 10/30-11/14, Bartell Theatre, at 7:30 pm Thursday-Friday and 2 pm Sunday, plus 7:30 pm on 10/31 and 2 pm, 11/14. $55-$15 sliding scale.",
+   "price": 3,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794686400000,
+    "end": 1794691800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/moors-stageq/?occ_dtstart=2026-11-14T14:00",
+   "source": "isthmus",
+   "venue": "Bartell Theatre"
+  },
+  {
+   "id": "isthmus:uw-women-s-hockey:29911440",
+   "kind": "event",
+   "name": "UW Women's Hockey",
+   "what": "Game at LaBahn Arena",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0684,
+   "lng": -89.3992,
+   "story": "vs. University of St. Thomas.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "showoff": 0.6,
+    "kids": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794686400000,
+    "end": 1794691800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/uw-womens-hockey-st-thomas/?occ_dtstart=2026-11-14T14:00",
+   "source": "isthmus",
+   "venue": "LaBahn Arena"
+  },
+  {
+   "id": "isthmus:bluegrass-jam-with-valentine-schneider:29911440",
+   "kind": "event",
+   "name": "Bluegrass Jam with Valentine Schneider",
+   "what": "Live music at Muso",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0932,
+   "lng": -89.3546,
+   "story": "2 pm second & fourth Saturdays.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794686400000,
+    "end": 1794693600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/bluegrass-jam-muso-second-saturday/?occ_dtstart=2026-11-14T14:00",
+   "source": "isthmus",
+   "venue": "Muso"
+  },
+  {
+   "id": "isthmus:irish-set-dance:29911440",
+   "kind": "event",
+   "name": "Irish Set Dance",
+   "what": "Show at Wil-Mar Center",
+   "category": "show",
+   "hood": "Willy Street",
+   "lat": 43.0799,
+   "lng": -89.3671,
+   "story": "Open dance & lesson, with music, 2-5 pm second Saturdays. $10 donation.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794686400000,
+    "end": 1794697200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/irish-set-dance-wil-mar/?occ_dtstart=2026-11-14T14:00",
+   "source": "isthmus",
+   "venue": "Wil-Mar Center"
+  },
+  {
+   "id": "isthmus:madison-gamer-symphony-orchestra:29911500",
+   "kind": "event",
+   "name": "Madison Gamer Symphony Orchestra",
+   "what": "Live music at Madison Youth Arts",
+   "category": "music",
+   "hood": "Capitol East",
+   "lat": 43.0852,
+   "lng": -89.3708,
+   "story": "Music from \"The Legend of Zelda\" series, 3 and 7 pm. $26.50 adv.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794690000000,
+    "end": 1794697200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/madison-gamer-symphony-orchestra-my-arts/?occ_dtstart=2026-11-14T15:00",
+   "source": "isthmus",
+   "venue": "Madison Youth Arts"
+  },
+  {
+   "id": "isthmus:john-novacek:29911560",
+   "kind": "event",
+   "name": "John Novacek",
+   "what": "Live music at Farley's House of Pianos",
+   "category": "music",
+   "hood": "West Side",
+   "lat": 43.0518,
+   "lng": -89.4943,
+   "story": "Salon Piano Series concert, 4 pm, 11/15. $50 ($45 adv.; $10 students). Free masterclass 4 pm, 11/14, observers welcome.",
+   "price": 3,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794693600000,
+    "end": 1794700800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/john-novacek-salon-piano-series/?occ_dtstart=2026-11-14T16:00",
+   "source": "isthmus",
+   "venue": "Farley's House of Pianos"
+  },
+  {
+   "id": "isthmus:dj-slimzy:29911620",
+   "kind": "event",
+   "name": "DJ Slimzy",
+   "what": "DJ night at Lola's Hi/Lo Lounge",
+   "category": "music",
+   "hood": "North Side",
+   "lat": 43.1078,
+   "lng": -89.3633,
+   "story": "Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    179
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "drink": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794697200000,
+    "end": 1794707940000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/slimzy-lolas/?occ_dtstart=2026-11-14T17:00",
+   "source": "isthmus",
+   "venue": "Lola's Hi/Lo Lounge"
+  },
+  {
+   "id": "isthmus:richard-shaten:29911620",
+   "kind": "event",
+   "name": "Richard Shaten",
+   "what": "Live music at Quivey's Grove",
+   "category": "music",
+   "hood": "Fitchburg",
+   "lat": 43.0091,
+   "lng": -89.4809,
+   "story": "Piano.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794697200000,
+    "end": 1794708000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/richard-shaten-quiveys/?occ_dtstart=2026-11-14T17:00",
+   "source": "isthmus",
+   "venue": "Quivey's Grove"
+  },
+  {
+   "id": "isthmus:monkey-business-institute:29911650",
+   "kind": "event",
+   "name": "Monkey Business Institute",
+   "what": "Show at Glass Nickel Pizza - Atwood Ave.",
+   "category": "show",
+   "hood": "Atwood",
+   "lat": 43.0939,
+   "lng": -89.3418,
+   "story": "Improv, 5:30 pm (all ages, $12) & 8 pm (grownups, $18) Saturdays, Glass Nickel-Atwood.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    150
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794699000000,
+    "end": 1794708000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/monkey-business-institute-saturdays/?occ_dtstart=2026-11-14T17:30",
+   "source": "isthmus",
+   "venue": "Glass Nickel Pizza - Atwood Ave."
+  },
+  {
+   "id": "isthmus:jim-erickson:29911650",
+   "kind": "event",
+   "name": "Jim Erickson",
+   "what": "Live music at Louisianne's, Etc., Middleton",
+   "category": "music",
+   "hood": "Middleton",
+   "lat": 43.0954,
+   "lng": -89.5104,
+   "story": "Jazz, 5:30 pm Saturdays. Free. Closed on most holidays.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794699000000,
+    "end": 1794709800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/Jim-Erickson-saturdays/?occ_dtstart=2026-11-14T17:30",
+   "source": "isthmus",
+   "venue": "Louisianne's, Etc., Middleton"
+  },
+  {
+   "id": "isthmus:uw-men-s-hockey:29911680",
+   "kind": "event",
+   "name": "UW Men's Hockey",
+   "what": "Game at Kohl Center",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0698,
+   "lng": -89.3959,
+   "story": "vs. Ohio State.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "showoff": 0.6,
+    "kids": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794700800000,
+    "end": 1794706200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/uw-mens-hockey-ohio-state/?occ_dtstart=2026-11-14T18:00",
+   "source": "isthmus",
+   "venue": "Kohl Center"
+  },
+  {
+   "id": "isthmus:open-mic:29911680",
+   "kind": "event",
+   "name": "Open Mic",
+   "what": "Live music at Communication",
+   "category": "music",
+   "hood": "North Side",
+   "lat": 43.1059,
+   "lng": -89.3616,
+   "story": "All-ages, masks required, 6 pm second Saturdays (usually). Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794700800000,
+    "end": 1794708000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/open-mic-communication-second-saturays/?occ_dtstart=2026-11-14T18:00",
+   "source": "isthmus",
+   "venue": "Communication"
   },
   {
    "id": "isthmus:madison-cocktail-festival:29911680",
@@ -2221,6 +5076,102 @@
    "placeId": "garver"
   },
   {
+   "id": "isthmus:leslie-cao:29911710",
+   "kind": "event",
+   "name": "Leslie Cao",
+   "what": "Live music at Ivory Room",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0744,
+   "lng": -89.387,
+   "story": "Piano.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794702600000,
+    "end": 1794709800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/leslie-cao-ivory-room/?occ_dtstart=2026-11-14T18:30",
+   "source": "isthmus",
+   "venue": "Ivory Room"
+  },
+  {
+   "id": "isthmus:whitney-rose-celina-joan:29911710",
+   "kind": "event",
+   "name": "Whitney Rose, Celina Joan",
+   "what": "Live music at Cargo Coffee-East Washington",
+   "category": "music",
+   "hood": "Capitol East",
+   "lat": 43.0808,
+   "lng": -89.3754,
+   "story": "Free/donations.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794702600000,
+    "end": 1794709800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/whitney-rose-celina-joan/?occ_dtstart=2026-11-14T18:30",
+   "source": "isthmus",
+   "venue": "Cargo Coffee-East Washington"
+  },
+  {
+   "id": "isthmus:aaron-krings-quartet:29911710",
+   "kind": "event",
+   "name": "Aaron Krings Quartet",
+   "what": "Live music at Mansion Hill Inn",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0787,
+   "lng": -89.3876,
+   "story": "Jazz. $24.45 adv.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794702600000,
+    "end": 1794713400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/aaron-krings-quartet-mansion-hill/?occ_dtstart=2026-11-14T18:30",
+   "source": "isthmus",
+   "venue": "Mansion Hill Inn"
+  },
+  {
    "id": "uw:wud-film-presents-12-angry-men-1957-open-caption:29911710",
    "kind": "event",
    "name": "WUD Film Presents: 12 Angry Men (1957) [Open Caption Screening]",
@@ -2252,6 +5203,38 @@
    "url": "https://today.wisc.edu/events/view/227647",
    "source": "uw",
    "venue": "Union South"
+  },
+  {
+   "id": "isthmus:atlas-improv-company:29911740",
+   "kind": "event",
+   "name": "Atlas Improv Company",
+   "what": "Show at Atlas Improv Company",
+   "category": "show",
+   "hood": "Capitol East",
+   "lat": 43.0786,
+   "lng": -89.3785,
+   "story": "7 & 9 pm Fridays & Saturdays, 609 E. Washington Ave. $11 ($7 kids).",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794709800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/atlas-improv-weekly-7-pm/?occ_dtstart=2026-11-14T19:00",
+   "source": "isthmus",
+   "venue": "Atlas Improv Company"
   },
   {
    "id": "isthmus:dylan-carlino:29911740",
@@ -2286,6 +5269,38 @@
    "venue": "Comedy on State"
   },
   {
+   "id": "isthmus:full-moon-burlesque:29911740",
+   "kind": "event",
+   "name": "Full Moon Burlesque",
+   "what": "Show at Crucible",
+   "category": "show",
+   "hood": "East Side",
+   "lat": 43.1074,
+   "lng": -89.3358,
+   "story": "With Allura Fette, emcees Lola Mischief and Plezher SSSea. $18.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794709800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/full-moon-burlesque-crucible/?occ_dtstart=2026-11-14T19:00",
+   "source": "isthmus",
+   "venue": "Crucible"
+  },
+  {
    "id": "isthmus:isabella-isherwood:29911740",
    "kind": "event",
    "name": "Isabella Isherwood",
@@ -2316,6 +5331,166 @@
    "url": "https://isthmus.com/events/isabella-isherwood-coda/?occ_dtstart=2026-11-14T19:00",
    "source": "isthmus",
    "venue": "Cafe Coda"
+  },
+  {
+   "id": "isthmus:madison-gamer-symphony-orchestra:29911740",
+   "kind": "event",
+   "name": "Madison Gamer Symphony Orchestra",
+   "what": "Live music at Madison Youth Arts",
+   "category": "music",
+   "hood": "Capitol East",
+   "lat": 43.0852,
+   "lng": -89.3708,
+   "story": "Music from \"The Legend of Zelda\" series, 3 and 7 pm. $26.50 adv.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794711600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/madison-gamer-symphony-orchestra-my-arts/?occ_dtstart=2026-11-14T19:00",
+   "source": "isthmus",
+   "venue": "Madison Youth Arts"
+  },
+  {
+   "id": "isthmus:midwinter-what-lies-below-coldstate-vapid-soul:29911740",
+   "kind": "event",
+   "name": "Midwinter, What Lies Below, Coldstate, Vapid Soul",
+   "what": "Live music at The Red Zone/The Annex",
+   "category": "music",
+   "hood": "Regent",
+   "lat": 43.0681,
+   "lng": -89.4062,
+   "story": "Live music at The Red Zone/The Annex.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794711600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/midwinter-what-lies-below-coldstate/?occ_dtstart=2026-11-14T19:00",
+   "source": "isthmus",
+   "venue": "The Red Zone/The Annex"
+  },
+  {
+   "id": "isthmus:rrr:29911740",
+   "kind": "event",
+   "name": "RRR",
+   "what": "Show at UW Cinematheque",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0733,
+   "lng": -89.3993,
+   "story": "An unlikely pair of friends work to oppose the ruling British in 1920s India. TV-MA, 2022. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794709800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/rrr/?occ_dtstart=2026-11-14T19:00",
+   "source": "isthmus",
+   "venue": "UW Cinematheque"
+  },
+  {
+   "id": "isthmus:catfish-stephenson:29911740",
+   "kind": "event",
+   "name": "Catfish Stephenson",
+   "what": "Live music at Friends Applaud",
+   "category": "music",
+   "hood": "South Side",
+   "lat": 43.0501,
+   "lng": -89.3921,
+   "story": "Noon & 6 pm. Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794711600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/catfish-stephenson-friends-applaud/?occ_dtstart=2026-11-14T19:00",
+   "source": "isthmus",
+   "venue": "Friends Applaud"
+  },
+  {
+   "id": "isthmus:the-big-deal:29911740",
+   "kind": "event",
+   "name": "The Big Deal",
+   "what": "Live music at Paddy Mac's Pub, Verona",
+   "category": "music",
+   "hood": "Verona",
+   "lat": 42.9887,
+   "lng": -89.5466,
+   "story": "Live music at Paddy Mac's Pub, Verona.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794715200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/big-deal-paddy-macs/?occ_dtstart=2026-11-14T19:00",
+   "source": "isthmus",
+   "venue": "Paddy Mac's Pub, Verona"
   },
   {
    "id": "isthmus:drive-to-the-ocean-album-release-blake-peters:29911740",
@@ -2382,16 +5557,16 @@
    "venue": "High Noon Saloon"
   },
   {
-   "id": "uw:uw-cinematheque-rajamouli-myth-spectacle-cinema:29911740",
+   "id": "isthmus:9-to-5:29911770",
    "kind": "event",
-   "name": "UW Cinematheque - Rajamouli: Myth, Spectacle, Cinema",
-   "what": "Film at Vilas Hall",
+   "name": "9 to 5",
+   "what": "Show at Edgewood University-The Stream",
    "category": "show",
-   "hood": "Campus",
-   "lat": 43.07264502572392,
-   "lng": -89.39986377177232,
-   "story": "Cast: N.T. Rama Rao Jr., Ram Charan, Olivia Morris After breaking box office records for Telugu cinema with his epic Baahubali saga, writer/director S.S.",
-   "price": 1,
+   "hood": "Near West",
+   "lat": 43.0583,
+   "lng": -89.4217,
+   "story": "7:30 pm on 11/13 & 20 and 2 & 7:30 pm, 11/14 & 21, Diane Ballweg Theatre. $20 ($10 students).",
+   "price": 2,
    "setting": "in",
    "minutes": [
     45,
@@ -2399,20 +5574,19 @@
    ],
    "kids": 1,
    "moods": {
-    "date": 0.6,
-    "cozy": 0.6,
-    "learn": 0.6
+    "lively": 1,
+    "date": 0.6
    },
    "gem": 0.4,
    "when": {
-    "start": 1794704400000,
-    "end": 1794709800000
+    "start": 1794706200000,
+    "end": 1794711600000
    },
    "dropIn": false,
    "hoursTrust": "solid",
-   "url": "https://today.wisc.edu/events/view/223603",
-   "source": "uw",
-   "venue": "Vilas Hall"
+   "url": "https://isthmus.com/events/9-to-5-edgewood/?occ_dtstart=2026-11-14T19:30",
+   "source": "isthmus",
+   "venue": "Edgewood University-The Stream"
   },
   {
    "id": "isthmus:gaslight:29911770",
@@ -2447,6 +5621,199 @@
    "venue": "Overture Center-Playhouse"
   },
   {
+   "id": "isthmus:it-s-a-wonderful-life-a-new-musical:29911770",
+   "kind": "event",
+   "name": "It's a Wonderful Life: A New Musical",
+   "what": "Show at Madison College-Truax, Mitby Theater",
+   "category": "show",
+   "hood": "North Side",
+   "lat": 43.1209,
+   "lng": -89.3268,
+   "story": "Capital City Theatre world premiere, 11/13-22, Mitby Theater, at 7:30 pm Thursday-Saturday and 2 pm Sunday, plus 2 pm, 11/21. $68-$25",
+   "price": 3,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794706200000,
+    "end": 1794711600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/wonderful-life-new-musical/?occ_dtstart=2026-11-14T19:30",
+   "source": "isthmus",
+   "venue": "Madison College-Truax, Mitby Theater"
+  },
+  {
+   "id": "isthmus:new-performers-show:29911770",
+   "kind": "event",
+   "name": "New Performers' Show",
+   "what": "Show at Madison Circus Space",
+   "category": "show",
+   "hood": "Atwood",
+   "lat": 43.0937,
+   "lng": -89.3543,
+   "story": "7:30 pm, 11/13-14. $15.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794706200000,
+    "end": 1794711600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/new-performers-show-madison-circus-space/?occ_dtstart=2026-11-14T19:30",
+   "source": "isthmus",
+   "venue": "Madison Circus Space"
+  },
+  {
+   "id": "isthmus:recuerdos-flamencos:29911770",
+   "kind": "event",
+   "name": "Recuerdos Flamencos",
+   "what": "Show at Lakeside Street Coffee House",
+   "category": "show",
+   "hood": "South Side",
+   "lat": 43.0561,
+   "lng": -89.3892,
+   "story": "Tania Tandias Flamenco & Spanish Dance scholarship benefit, with dance by Tania Tandias and scholarship recipients, guitar by Peter Baime. $20/$15 donation.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794706200000,
+    "end": 1794711600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/recuerdos-flamencos/?occ_dtstart=2026-11-14T19:30",
+   "source": "isthmus",
+   "venue": "Lakeside Street Coffee House",
+   "placeId": "lakeside-coffee"
+  },
+  {
+   "id": "isthmus:romeo-juliet:29911770",
+   "kind": "event",
+   "name": "Romeo & Juliet",
+   "what": "Show at Bartell Theatre",
+   "category": "show",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.384,
+   "story": "Madison Shakespeare Company, 11/6-21, at 7:30 p.m. Friday-Saturday (except 2 pm on 11/21) and 2 pm Sunday, plus 7:30 pm, 11/19.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794706200000,
+    "end": 1794711600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/romeo-juliet-madison-shakespeare/?occ_dtstart=2026-11-14T19:30",
+   "source": "isthmus",
+   "venue": "Bartell Theatre"
+  },
+  {
+   "id": "isthmus:many-names-band:29911770",
+   "kind": "event",
+   "name": "Many Names Band",
+   "what": "Live music at Bierock",
+   "category": "music",
+   "hood": "North Side",
+   "lat": 43.1285,
+   "lng": -89.3609,
+   "story": "Live music at Bierock.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794706200000,
+    "end": 1794713400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/many-names-band-bierock/?occ_dtstart=2026-11-14T19:30",
+   "source": "isthmus",
+   "venue": "Bierock"
+  },
+  {
+   "id": "isthmus:angels-outlaws:29911800",
+   "kind": "event",
+   "name": "Angels & Outlaws",
+   "what": "Live music at Bowl-A-Vard Lanes",
+   "category": "music",
+   "hood": "East Side",
+   "lat": 43.1269,
+   "lng": -89.2939,
+   "story": "Country.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794708000000,
+    "end": 1794715200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/angels-and-outlaws-bowl-a-vard/?occ_dtstart=2026-11-14T20:00",
+   "source": "isthmus",
+   "venue": "Bowl-A-Vard Lanes"
+  },
+  {
    "id": "isthmus:ethan-regan-lily-kershaw:29911800",
    "kind": "event",
    "name": "Ethan Regan, Lily Kershaw",
@@ -2477,6 +5844,199 @@
    "url": "https://isthmus.com/events/ethan-regan-lily-kershaw/?occ_dtstart=2026-11-14T20:00",
    "source": "isthmus",
    "venue": "Majestic Theatre"
+  },
+  {
+   "id": "isthmus:katya-lezin:29911800",
+   "kind": "event",
+   "name": "Katya Lezin",
+   "what": "Reading at Concourse Hotel",
+   "category": "talk",
+   "hood": "Downtown",
+   "lat": 43.0756,
+   "lng": -89.3868,
+   "story": "Reading from and discussing the new book \"But First, Food: A Recipe-Filled Memoir About The Meals, Morsels and Moments That Make My Life Delicious,\" with Noah Lieberman.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 0,
+   "moods": {
+    "learn": 1,
+    "think": 0.6,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794708000000,
+    "end": 1794713400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/katya-lezin/?occ_dtstart=2026-11-14T20:00",
+   "source": "isthmus",
+   "venue": "Concourse Hotel"
+  },
+  {
+   "id": "isthmus:tell-me-lies:29911800",
+   "kind": "event",
+   "name": "Tell Me Lies",
+   "what": "Live music at Atwood Music Hall",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.09,
+   "lng": -89.356,
+   "story": "Fleetwood Mac tribute.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794708000000,
+    "end": 1794715200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/tell-me-lies-2026/?occ_dtstart=2026-11-14T20:00",
+   "source": "isthmus",
+   "venue": "Atwood Music Hall"
+  },
+  {
+   "id": "isthmus:uncensored:29911800",
+   "kind": "event",
+   "name": "Uncensored",
+   "what": "Show at Yahara Bay Distillers, Fitchburg",
+   "category": "show",
+   "hood": "Fitchburg",
+   "lat": 43.0108,
+   "lng": -89.4786,
+   "story": "Cheshire Cat Comedy showcase, with Hunter Hirsh. $25 ($20 adv.).",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794708000000,
+    "end": 1794713400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/uncensored-nov-14/?occ_dtstart=2026-11-14T20:00",
+   "source": "isthmus",
+   "venue": "Yahara Bay Distillers, Fitchburg"
+  },
+  {
+   "id": "isthmus:vaultboy-gus:29911800",
+   "kind": "event",
+   "name": "Vaultboy, Gus",
+   "what": "Live music at The Bur Oak",
+   "category": "music",
+   "hood": "Atwood",
+   "lat": 43.0935,
+   "lng": -89.35,
+   "story": "$25 ($20 adv.).",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794708000000,
+    "end": 1794715200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/vaultboy-2026/?occ_dtstart=2026-11-14T20:00",
+   "source": "isthmus",
+   "venue": "The Bur Oak"
+  },
+  {
+   "id": "isthmus:harmonious-wail:29911800",
+   "kind": "event",
+   "name": "Harmonious Wail",
+   "what": "Live music at North Street Cabaret",
+   "category": "music",
+   "hood": "East Side",
+   "lat": 43.101,
+   "lng": -89.352,
+   "story": "Gypsy swing.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794708000000,
+    "end": 1794718800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/harmonious-wail-NSC/?occ_dtstart=2026-11-14T20:00",
+   "source": "isthmus",
+   "venue": "North Street Cabaret"
+  },
+  {
+   "id": "isthmus:gary-beal-band:29911800",
+   "kind": "event",
+   "name": "Gary Beal Band",
+   "what": "Live music at Essen Haus",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0758,
+   "lng": -89.3768,
+   "story": "Free.",
+   "price": 0,
+   "setting": "in",
+   "minutes": [
+    45,
+    239
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794708000000,
+    "end": 1794722340000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/gary-beal-band-essen-haus/?occ_dtstart=2026-11-14T20:00",
+   "source": "isthmus",
+   "venue": "Essen Haus"
   },
   {
    "id": "uw:wud-film-presents-hadestown-the-musical-2026-ope:29911860",
@@ -2806,6 +6366,72 @@
    "url": "https://today.wisc.edu/events/view/227373",
    "source": "uw",
    "venue": "Hamel Music Center"
+  },
+  {
+   "id": "mcm:let-s-move-with-abby:29918400",
+   "kind": "event",
+   "name": "Let’s Move! with Abby",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Join us for movement games and activities! From obstacle courses to dances, group games and balance activities, we’ll enjoy different opportunities to move our bodies every day.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1795104000000,
+    "end": 1795109400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/lets-move-with-abby-220/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:reading-on-the-rooftop:29918460",
+   "kind": "event",
+   "name": "Reading on the Rooftop",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Take storytime to new heights! Join Paula Panczenko on the museum rooftop for a cozy read-aloud surrounded by fresh air, gardens, and views of our Capitol and the lake.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    30,
+    30
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1795107600000,
+    "end": 1795109400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/reading-on-the-rooftop-16/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
   }
  ]
 }

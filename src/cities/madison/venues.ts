@@ -1,5 +1,12 @@
 // Venues we know well enough to send someone to for an event. A listing at a
 // venue that isn't here is dropped: we can't say how far it is or what it's like.
+//
+// To find the next ones worth adding, run `npm run events -- --dry --venues`:
+// it lists every venue whose listings were dropped this week, busiest first,
+// with the address and coordinates from the listing page, ready to paste.
+// The first block below was placed by hand; the second came from that report.
+// Order matters: the first entry whose `match` is found in the venue name wins,
+// so specific names go before general ones.
 
 import type { Venue } from '../../core/events';
 
@@ -40,4 +47,102 @@ export const VENUES: Venue[] = [
   { match: 'breese stevens', lat: 43.0832, lng: -89.3718, hood: 'Tenney-Lapham', usual: 'music' },
   { match: 'mosse humanities', lat: 43.0738, lng: -89.4, hood: 'Campus' },
   { match: 'mills hall', lat: 43.0738, lng: -89.4, hood: 'Campus', usual: 'music' },
+
+  // ---- From the Isthmus listings report (coordinates from the listing pages) ----
+
+  // Music rooms and bars with a stage.
+  { match: 'muso', exact: true, lat: 43.0932, lng: -89.3546, hood: 'Atwood', usual: 'music' },
+  { match: 'cardinal bar', lat: 43.0758, lng: -89.3772, hood: 'Downtown', usual: 'music', bar: true },
+  { match: "lola's", lat: 43.1078, lng: -89.3633, hood: 'North Side', usual: 'music', bar: true },
+  { match: 'ivory room', lat: 43.0744, lng: -89.387, hood: 'Downtown', usual: 'music', bar: true },
+  { match: 'green room public house', lat: 43.0918, lng: -89.355, hood: 'Atwood', usual: 'music', bar: true },
+  { match: 'red zone', lat: 43.0681, lng: -89.4062, hood: 'Regent', usual: 'music', bar: true },
+  { match: 'friends applaud', lat: 43.0501, lng: -89.3921, hood: 'South Side', usual: 'music' },
+  { match: 'lakeside street coffee', lat: 43.0561, lng: -89.3892, hood: 'South Side', usual: 'music', placeId: 'lakeside-coffee' },
+  { match: 'cargo coffee-east', lat: 43.0808, lng: -89.3754, hood: 'Capitol East', usual: 'music' },
+  { match: 'crucible', lat: 43.1074, lng: -89.3358, hood: 'East Side', usual: 'show', bar: true },
+  { match: 'communication', exact: true, lat: 43.1059, lng: -89.3616, hood: 'North Side', usual: 'music' },
+  { match: 'sotto', exact: true, lat: 43.0749, lng: -89.39, hood: 'State Street', usual: 'music', bar: true },
+  { match: 'lucille', exact: true, lat: 43.0745, lng: -89.3814, hood: 'Downtown', usual: 'music', bar: true },
+  { match: 'essen haus', lat: 43.0758, lng: -89.3768, hood: 'Downtown', usual: 'music', bar: true },
+  { match: 'come back in', lat: 43.0758, lng: -89.3768, hood: 'Downtown', usual: 'music', bar: true },
+  { match: 'bierock', lat: 43.1285, lng: -89.3609, hood: 'North Side', usual: 'music', bar: true },
+  { match: 'bowl-a-vard', lat: 43.1269, lng: -89.2939, hood: 'East Side', usual: 'music', bar: true },
+  { match: 'vfw post 7591', lat: 43.0837, lng: -89.322, hood: 'East Side', usual: 'music', bar: true },
+  { match: 'palette bar', lat: 43.0821, lng: -89.3729, hood: 'Capitol East', usual: 'music', bar: true },
+  { match: 'hotel indigo', lat: 43.0821, lng: -89.3729, hood: 'Capitol East', usual: 'show', bar: true },
+  { match: 'zuzu cafe', lat: 43.0621, lng: -89.4083, hood: 'Vilas', usual: 'music' },
+  { match: "gib's", lat: 43.0857, lng: -89.3614, hood: 'Willy Street', usual: 'music', bar: true, placeId: 'gibs' },
+  { match: 'greenbush bar', lat: 43.0677, lng: -89.4012, hood: 'Regent', usual: 'music', bar: true },
+  { match: 'concourse', lat: 43.0756, lng: -89.3868, hood: 'Downtown', usual: 'music', bar: true },
+  { match: 'mansion hill inn', lat: 43.0787, lng: -89.3876, hood: 'Downtown', usual: 'music', bar: true },
+  { match: 'tavernakaya', lat: 43.0744, lng: -89.3824, hood: 'Downtown', usual: 'music', bar: true },
+  { match: 'bear and bottle', lat: 43.1071, lng: -89.3633, hood: 'North Side', bar: true },
+  { match: 'glouglou', lat: 43.0683, lng: -89.4236, hood: 'Monroe Street', usual: 'music', bar: true },
+  { match: 'settle down tavern', lat: 43.0743, lng: -89.3812, hood: 'Downtown', bar: true },
+  { match: "farley's house of pianos", lat: 43.0518, lng: -89.4943, hood: 'West Side', usual: 'music' },
+  { match: 'first unitarian', lat: 43.0742, lng: -89.4338, hood: 'Near West', usual: 'music' },
+  { match: 'grace episcopal', lat: 43.0738, lng: -89.3855, hood: 'Downtown', usual: 'music' },
+  { match: 'gates of heaven', lat: 43.0797, lng: -89.3849, hood: 'Downtown' },
+
+  // Breweries and taprooms that put on shows.
+  { match: 'starkweather brewing', lat: 43.0937, lng: -89.3457, hood: 'Atwood', usual: 'music', bar: true },
+  { match: 'herbiery', lat: 43.0925, lng: -89.3545, hood: 'Atwood', bar: true },
+  { match: 'alt brew', lat: 43.1231, lng: -89.3303, hood: 'North Side', usual: 'music', bar: true },
+  { match: 'karben4', lat: 43.1258, lng: -89.3252, hood: 'North Side', bar: true },
+
+  // Theater, improv, film, circus.
+  { match: 'bartell', lat: 43.0765, lng: -89.384, hood: 'Downtown', usual: 'show' },
+  { match: 'broom street theater', lat: 43.0822, lng: -89.366, hood: 'Willy Street', usual: 'show' },
+  { match: 'atlas improv', lat: 43.0786, lng: -89.3785, hood: 'Capitol East', usual: 'show' },
+  { match: 'tnw ensemble', lat: 43.0917, lng: -89.3554, hood: 'Atwood', usual: 'show' },
+  { match: 'madison circus space', lat: 43.0937, lng: -89.3543, hood: 'Atwood', usual: 'show' },
+  { match: 'glass nickel pizza - atwood', lat: 43.0939, lng: -89.3418, hood: 'Atwood', usual: 'show' },
+  { match: 'uw cinematheque', lat: 43.0733, lng: -89.3993, hood: 'Campus', usual: 'show' },
+  { match: 'mitby theater', lat: 43.1209, lng: -89.3268, hood: 'North Side', usual: 'show' },
+  { match: 'madison college-truax, studio theater', lat: 43.1209, lng: -89.3268, hood: 'North Side', usual: 'show' },
+  { match: 'madison college-truax', lat: 43.1209, lng: -89.3268, hood: 'North Side' },
+  { match: 'edgewood', lat: 43.0583, lng: -89.4217, hood: 'Near West', usual: 'show' },
+  { match: 'madison youth arts', lat: 43.0852, lng: -89.3708, hood: 'Capitol East' },
+
+  // Arenas.
+  { match: 'kohl center', lat: 43.0698, lng: -89.3959, hood: 'Campus', usual: 'show' },
+  { match: 'labahn arena', lat: 43.0684, lng: -89.3992, hood: 'Campus', usual: 'show' },
+
+  // Galleries, libraries, community rooms, campus buildings.
+  { match: 'tandem press', lat: 43.1059, lng: -89.3616, hood: 'North Side' },
+  { match: 'photomidwest', lat: 43.0491, lng: -89.4917, hood: 'West Side' },
+  { match: 'wisconsin historical', lat: 43.0751, lng: -89.4002, hood: 'Campus' },
+  { match: 'center for black excellence', lat: 43.038, lng: -89.3915, hood: 'South Side' },
+  { match: 'wil-mar', lat: 43.0799, lng: -89.3671, hood: 'Willy Street' },
+  { match: 'neighborhood house', lat: 43.067, lng: -89.404, hood: 'Greenbush' },
+  { match: 'madison labor temple', lat: 43.0501, lng: -89.3943, hood: 'South Side' },
+  { match: 'imagination center', lat: 43.1231, lng: -89.3158, hood: 'East Side' },
+  { match: 'sequoya library', lat: 43.0536, lng: -89.4501, hood: 'West Side' },
+  { match: 'pinney library', lat: 43.0842, lng: -89.3182, hood: 'East Side' },
+  { match: 'alicia ashman library', lat: 43.0757, lng: -89.5187, hood: 'Far West' },
+  { match: 'warner park', lat: 43.1325, lng: -89.368, hood: 'North Side' },
+  { match: 'uw stock pavilion', lat: 43.075, lng: -89.4154, hood: 'Campus' },
+  { match: 'uw discovery building', lat: 43.0729, lng: -89.4076, hood: 'Campus' },
+  { match: 'uw nancy nicholas hall', lat: 43.0751, lng: -89.4096, hood: 'Campus' },
+  { match: 'uw social sciences', lat: 43.0759, lng: -89.4035, hood: 'Campus' },
+  { match: 'capitol square', lat: 43.075, lng: -89.3841, hood: 'Downtown' },
+
+  // Places already on the curated list that also turn up in listings.
+  { match: 'monona terrace', lat: 43.0717, lng: -89.3802, hood: 'Downtown', placeId: 'monona-terrace' },
+  { match: 'henry vilas zoo', lat: 43.0608, lng: -89.4091, hood: 'Vilas', placeId: 'vilas-zoo' },
+  { match: 'brittingham boats', lat: 43.0637, lng: -89.3911, hood: 'Bassett', placeId: 'brittingham-boats' },
+  { match: 'owen conservation park', lat: 43.0752, lng: -89.482, hood: 'West Side', placeId: 'owen-park' },
+  { match: 'cherokee marsh', lat: 43.1668, lng: -89.3643, hood: 'North Side', placeId: 'cherokee-marsh' },
+
+  // Just outside the city, still within reach.
+  { match: 'louisianne', lat: 43.0954, lng: -89.5104, hood: 'Middleton', usual: 'music', bar: true },
+  { match: 'hidden cave cidery', lat: 43.1037, lng: -89.537, hood: 'Middleton', bar: true },
+  { match: 'the kickback', lat: 43.0972, lng: -89.5043, hood: 'Middleton' },
+  { match: 'zafferano', lat: 43.0171, lng: -89.4242, hood: 'Fitchburg', usual: 'music' },
+  { match: 'yahara bay distillers', lat: 43.0108, lng: -89.4786, hood: 'Fitchburg', usual: 'show', bar: true },
+  { match: 'ten pin alley', lat: 43.008, lng: -89.4814, hood: 'Fitchburg', usual: 'music', bar: true },
+  { match: "quivey's grove", lat: 43.0091, lng: -89.4809, hood: 'Fitchburg', usual: 'music' },
+  { match: "paddy mac's", lat: 42.9887, lng: -89.5466, hood: 'Verona', usual: 'music', bar: true },
+  { match: 'art house 360', lat: 42.9893, lng: -89.538, hood: 'Verona', usual: 'show' },
 ];

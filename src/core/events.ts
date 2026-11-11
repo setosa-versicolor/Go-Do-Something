@@ -39,6 +39,8 @@ const MAX_MILES = 12;
 export interface Venue {
   /** Lowercase fragment matched against the venue name. */
   match: string;
+  /** The whole name must equal `match`. For short names that are also ordinary words. */
+  exact?: boolean;
   lat: number;
   lng: number;
   hood: string;
@@ -51,7 +53,7 @@ export interface Venue {
 }
 
 const FILLER =
-  /\b(class(es)?|workshop|meeting|support group|webinar|virtual|zoom|online|info(rmation)? session|training|registration|fundrais\w+|yoga|meditation|advising|seminar|colloquium|grand rounds|drop-in|office hours|careers?|club|rehearsal|auditions?|blood drive|volunteer\w*|story ?time|worship|bingo|trivia|karaoke|happy hour|open house|tour)\b/i;
+  /\b(class(es)?|workshop|meeting|support group|webinar|virtual|zoom|online|info(rmation)? session|training|registration|fundrais\w+|yoga|meditation|advising|seminar|colloquium|grand rounds|drop-in|office hours|careers?|club|rehearsal|auditions?|blood drive|volunteer\w*|story ?time|worship|bingo|trivia|karaoke|happy hour|open house|tour|chess|game night|puzzle|stitch\S*|knitting|bring your own|clean-?up|adoptions?|one-on-one|run club|practice)\b/i;
 
 const CANT_GO = /\b(sold out|cancel(l)?ed|postponed)\b/i;
 
@@ -59,8 +61,10 @@ const KINDS: { category: Category; label: string; re: RegExp; moods: Partial<Rec
   { category: 'market', label: 'Market', re: /\b(market|fair|festival|bazaar)\b/i, moods: { lively: 1, showoff: 0.6, eat: 0.6 }, dropIn: true },
   { category: 'talk', label: 'Reading', re: /\b(reading|author|poet(ry)?|book launch|in conversation|storytelling)\b/i, moods: { learn: 1, think: 0.6, date: 0.6 } },
   { category: 'talk', label: 'Talk', re: /\b(lecture|talk|panel)\b/i, moods: { learn: 1, think: 0.6 } },
+  { category: 'show', label: 'Game', re: /\b(hockey|basketball|football|volleyball|soccer|baseball|roller derby|wrestling)\b/i, moods: { lively: 1, showoff: 0.6, kids: 0.6 } },
   { category: 'show', label: 'Film', re: /\b(film|screening|cinema|movie)\b/i, moods: { date: 0.6, cozy: 0.6, learn: 0.6 } },
   { category: 'show', label: 'Show', re: /\b(comedy|stand-?up|improv|theat(er|re)|dance|ballet|opera|burlesque|drag)\b/i, moods: { lively: 1, date: 0.6 } },
+  { category: 'music', label: 'DJ night', re: /\bdjs?\b/i, moods: { lively: 1, drink: 0.6 } },
   { category: 'music', label: 'Live music', re: /\b(concert|band|jazz|blues|quartet|trio|symphony|orchestra|songwriter|open mic|recital|choir|bluegrass|folk)\b/i, moods: { lively: 1, date: 0.6 } },
 ];
 
@@ -90,8 +94,8 @@ function priceOf(text: string): Option['price'] {
 }
 
 export function findVenue(name: string, venues: Venue[]): Venue | undefined {
-  const n = name.toLowerCase();
-  return venues.find((v) => n.includes(v.match));
+  const n = name.toLowerCase().trim();
+  return venues.find((v) => (v.exact ? n === v.match : n.includes(v.match)));
 }
 
 export type Verdict = { option: Option } | { dropped: string };

@@ -1,5 +1,6 @@
 // The events process. Run every morning by the deploy workflow, and by hand
-// with `npm run events` (add --dry to see what would be kept without writing).
+// with `npm run events` (add --dry to see what would be kept without writing,
+// and --venues to list the venues whose listings were dropped as unknown).
 //
 //   fetch each calendar → parse (src/core/sources.ts) → judge each listing
 //   (src/core/events.ts) → drop duplicates → write public/events.json
@@ -18,6 +19,9 @@ import type { Option } from '../src/core/types';
 const now = Date.now();
 const HORIZON = 8 * DAY;
 const dry = process.argv.includes('--dry');
+/** --venues: list the venues we dropped listings for, busiest first, so the next ones to add are obvious. */
+const listVenues = process.argv.includes('--venues');
+const strangers = new Map<string, { n: number; sample: string; url: string }>();
 
 async function get(url: string): Promise<string> {
   const res = await fetch(url, { headers: { 'user-agent': 'go-do-something events fetcher' }, signal: AbortSignal.timeout(20_000) });
@@ -69,7 +73,13 @@ for (const [name, fetchSource] of Object.entries(sources)) {
     for (const r of raw) {
       const verdict = judge(r, venues, city.center);
       if ('option' in verdict) kept.push(verdict.option);
-      else dropped.set(verdict.dropped, (dropped.get(verdict.dropped) ?? 0) + 1);
+      else {
+        dropped.set(verdict.dropped, (dropped.get(verdict.dropped) ?? 0) + 1);
+        if (verdict.dropped === 'unknown venue') {
+          const v = r.venue.trim() || '(no venue given)';
+          strangers.set(v, { n: (strangers.get(v)?.n ?? 0) + 1, sample: r.title, url: r.url });
+        }
+      }
     }
     counts[name] = kept.length - before;
     const why = [...dropped].sort((a, b) => b[1] - a[1]).map(([reason, n]) => `${n} ${reason}`).join(', ');
@@ -83,6 +93,31 @@ for (const [name, fetchSource] of Object.entries(sources)) {
 if (failures === Object.keys(sources).length) {
   console.error('Every source failed; leaving the existing events.json untouched.');
   process.exit(1);
+}
+
+if (listVenues) {
+  // Isthmus event pages carry the venue's address and coordinates, so each
+  // line below is ready to paste into the city's venues.ts once you've decided
+  // the venue belongs there.
+  console.log('\nVenues not in the list, by listings this week:');
+  for (const [v, { n, sample, url }] of [...strangers].sort((a, b) => b[1].n - a[1].n)) {
+    let where = '';
+    if (url.includes('isthmus.com')) {
+      try {
+        const page = await get(url);
+        const lat = /latitude" content="([-\d.]+)"/.exec(page)?.[1];
+        const lng = /longitude" content="([-\d.]+)"/.exec(page)?.[1];
+        const street = /"streetAddress">([^<]*)</.exec(page)?.[1] ?? '';
+        const town = /"addressLocality">([^<]*)</.exec(page)?.[1] ?? '';
+        if (lat && lng) where = `lat: ${Number(lat).toFixed(4)}, lng: ${Number(lng).toFixed(4)}  (${street}, ${town})`;
+        await new Promise((r) => setTimeout(r, 250));
+      } catch {
+        where = '(page not readable)';
+      }
+    }
+    console.log(`${String(n).padStart(4)}  ${v}  |  ${where}  |  e.g. ${sample.slice(0, 50)}`);
+  }
+  console.log('');
 }
 
 const events = dedupe(kept).sort((a, b) => a.when!.start - b.when!.start);

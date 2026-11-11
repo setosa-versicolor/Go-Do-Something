@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clean, dedupe, judge, loadEvents, parseIsthmusTitle, STALE_AFTER, toOption, type RawEvent } from '../src/core/events';
+import { clean, dedupe, findVenue, judge, loadEvents, parseIsthmusTitle, STALE_AFTER, toOption, type RawEvent } from '../src/core/events';
 import { parseIsthmus, parseTribe, parseUw } from '../src/core/sources';
 import { fmtTime, HOUR } from '../src/core/time';
 import { city, venues } from '../src/cities/madison';
@@ -118,5 +118,21 @@ describe('calendar parsers', () => {
     // A museum 'event' that lasts all day is a notice, not a program.
     const notice = { ...mcm[0]!, end: mcm[0]!.start + 7 * HOUR };
     expect(judge(notice, venues, city.center)).toEqual({ dropped: 'all-day listing' });
+  });
+});
+
+describe('finding a venue', () => {
+  const list = [
+    { match: 'communication', exact: true, lat: 1, lng: 1, hood: 'A' },
+    { match: 'union south', lat: 2, lng: 2, hood: 'B' },
+  ];
+
+  it('matches a fragment anywhere in the name', () => {
+    expect(findVenue('UW Union South-The Marquee', list)?.hood).toBe('B');
+  });
+
+  it('needs the whole name when the entry says so', () => {
+    expect(findVenue('Communication', list)?.hood).toBe('A');
+    expect(findVenue('UW Vilas Communication Hall', list)).toBeUndefined();
   });
 });
