@@ -207,3 +207,38 @@ footer p { margin: 0.8rem 0 0; }
   @keyframes deal { from { opacity: 0; transform: translateY(40px) rotate(2deg) scale(0.96); } }
   @keyframes blink { 50% { opacity: 1; transform: scale(1.25); } }
 }
+
+/* ------------------------------------------------------------ the model */
+.scene { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s; }
+.scene.on { opacity: 1; }
+.scene canvas { width: 100%; height: 100%; display: block; touch-action: pan-y; cursor: grab; outline-offset: -4px; }
+.scene canvas:active { cursor: grabbing; }
+.scene.on ~ .orb { display: none; }
+.sky:has(.scene.on)::before { display: none; }
+.sky:has(.scene.on).grey { filter: none; }
+.sky:has(.scene.on) { color: #fff; }
+.sky:has(.scene.on) h1 { text-shadow: 0 2px 22px rgb(0 0 0 / 0.55), 0 1px 2px rgb(0 0 0 / 0.35); }
+.sky:has(.scene.on) .brand { text-shadow: 0 1px 8px rgb(0 0 0 / 0.6); }
+.sky:has(.scene.on)::after { content: ''; position: absolute; inset: 0 0 45% 0; background: linear-gradient(rgb(0 0 0 / 0.32), transparent); pointer-events: none; }
+.sky-inner { pointer-events: none; z-index: 1; }
+.sky-inner button { pointer-events: auto; }
+.shore { z-index: 1; pointer-events: none; }
+.scene-hint { position: absolute; right: 0.9rem; bottom: 3rem; z-index: 2; font-size: 0.72rem; letter-spacing: 0.04em; color: #fff; background: rgb(0 0 0 / 0.4); padding: 0.3rem 0.7rem; border-radius: 999px; pointer-events: none; backdrop-filter: blur(6px); }
+.stage-mood .sky-inner { min-height: clamp(17rem, 42dvh, 30rem); }
+.stage-time .sky-inner { min-height: clamp(17rem, 46dvh, 30rem); }
+.stage-thinking .sky-inner { min-height: clamp(20rem, 64dvh, 40rem); }
+.stage-results .sky-inner, .sky.small .sky-inner { min-height: clamp(16rem, 38dvh, 26rem); }
+.sky-inner { transition: min-height 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.sky h1 { margin-top: 1.1rem; }
+.stage-mood .tile { min-height: 3.5rem; padding: 0.5rem 0.85rem 0.55rem; }
+.deck li.lit .card { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
+@media (prefers-reduced-motion: no-preference) {
+  .scene-hint { animation: fade 0.8s 1.5s both; }
+}
+.sky:has(.scene.on) h1 { font-size: clamp(1.7rem, 6.4vw, 2.9rem); margin-top: 0.8rem; }
+.sky:has(.scene.on) h1 em { font-size: clamp(0.95rem, 3.6vw, 1.25rem); margin-top: 0.3rem; }
+.scene-hint { right: auto; left: 50%; transform: translateX(-50%); bottom: 3.1rem; white-space: nowrap; }
+.stage-mood .sky-inner { min-height: clamp(18rem, 46dvh, 32rem); }
+.sky:has(.scene.on) .brand { margin-bottom: 0; }
+.sky:has(.scene.on) .sky-inner { justify-content: flex-start; }
+.scene-hint { bottom: 2.9rem; }

@@ -10,6 +10,7 @@ import { sunFor } from '../core/sun';
 import { DAY, HOUR, MIN, fmtDay, fmtTime, parseLocalInput, toLocal, toLocalInput } from '../core/time';
 import { GROUP, type Option } from '../core/types';
 import { conditionsFor, fetchWeather, type Weather } from '../core/weather';
+import type { Diorama, Pin, Pose, SkyInput } from './scene';
 import { partOfDay, skyAt } from './sky';
 import { forgetEverything, loadLog, loadMode, loadTheme, saveLog, saveMode, saveTheme, type Theme } from './store';
 
@@ -34,6 +35,7 @@ const STARTS: [string, string][] = [['now', 'now'], ['tonight', 'tonight'], ['to
 const MODES: [Mode, string][] = [['walk', 'on foot'], ['bike', 'by bike'], ['drive', 'by car']];
 const THINKING = ["Checking what's open…", 'Looking at the sky…', 'Leaving out the obvious…'];
 const COUNT = ['Nothing', 'One', 'Two', 'Three'];
+const PIN_COLOR: Record<string, string> = { outdoors: '#2fa58a', consume: '#e08a3c', mind: '#8a6fd0', lively: '#e0567a' };
 
 type Stage = 'mood' | 'time' | 'thinking' | 'results';
 
@@ -61,6 +63,7 @@ export function App() {
   const [line, setLine] = useState(0);
   const [sheet, setSheet] = useState(false);
   const [toast, setToast] = useState('');
+  const [active, setActive] = useState<number | null>(null); // the card the model is looking at
   const [theme, setTheme] = useState<Theme>(loadTheme);
   const [, setWeatherTick] = useState(0);
   const [shared, setShared] = useState<string | null>(() => /^#\/p\/(.+)$/.exec(location.hash)?.[1] ?? null);
@@ -111,6 +114,7 @@ export function App() {
     const result = match(req, w);
     const tile = MOODS.find((m) => m[2] === q.mood)?.[0];
     const hours = durationMin % 60 === 0 ? `${durationMin / 60} hour${durationMin === 60 ? '' : 's'}` : `${durationMin} minutes`;
+    setActive(null);
     setView({ req, result, options, label: [q.text ? `“${q.text}”` : [tile ?? 'Anything', along && along[1] ? along[0].toLowerCase() : null].filter(Boolean).join(', '), hours].join(' · ') });
     setExcluded([]);
     for (const p of result.picks) {
@@ -178,6 +182,32 @@ export function App() {
     else say("That was the last good one. I won't pad the list.");
   };
 
+  const onBalloon = () => {
+    if (stage !== 'mood' && stage !== 'time') return;
+    say('Up we go. A surprise it is.');
+    chooseMood('surprise me');
+  };
+
+  /** A beacon was tapped: bring its card forward. */
+  const onPin = (i: number) => {
+    setActive(i);
+    const li = deck.current?.children[i] as HTMLElement | undefined;
+    li?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  };
+
+  /** The deck was swiped: point the model at the card now in front. */
+  const onDeckScroll = () => {
+    const el = deck.current;
+    if (!el || el.scrollWidth <= el.clientWidth + 4) return;
+    const mid = el.scrollLeft + el.clientWidth / 2;
+    let best = 0;
+    [...el.children].forEach((c, i) => {
+      const li = c as HTMLElement;
+      if (Math.abs(li.offsetLeft + li.offsetWidth / 2 - mid) < Math.abs((el.children[best] as HTMLElement).offsetLeft + (el.children[best] as HTMLElement).offsetWidth / 2 - mid)) best = i;
+    });
+    if (el.scrollLeft > 8 || active !== null) setActive(best);
+  };
+
   const memory = useMemo(() => summarize(log, view?.options ?? places, Date.now()), [log, view]);
   const byId = (id: string) => (view?.options ?? places).find((o) => o.id === id);
 
@@ -222,6 +252,20 @@ export function App() {
   // The header describes the sky at that moment, not the worst of the whole window.
   const conditions = conditionsFor(weather.current, skyTime, skyTime + HOUR);
   const part = partOfDay(toLocal(skyTime, tz).h);
+  const local = toLocal(skyTime, tz);
+  const skyInput: SkyInput = {
+    time: skyTime, sunrise: sun.sunrise, sunset: sun.sunset,
+    wet: !conditions.known ? 0 : { dry: 0, damp: 0.45, wet: 0.85, storm: 1 }[conditions.sky],
+    snowing: /snow|flurr/.test(conditions.summary), snowIn: conditions.known ? conditions.snowIn : 0,
+    frozen: conditions.known && conditions.tempF < 30 && (local.mo === 12 || local.mo <= 2), month: local.mo,
+  };
+  const pins: Pin[] = results
+    ? view.result.picks.map((p) => ({
+        east: (p.option.lng - city.center.lng) * 69.17 * Math.cos((city.center.lat * Math.PI) / 180),
+        north: (p.option.lat - city.center.lat) * 69.05,
+        color: PIN_COLOR[GROUP[p.option.category]]!,
+      }))
+    : [];
   const now = Date.now();
   const checkIn = pendingCheckIn(log, now);
   const checkInPlace = checkIn ? byId(checkIn) ?? places.find((p) => p.id === checkIn) : undefined;
@@ -235,6 +279,7 @@ export function App() {
   return (
     <div class={`page stage-${stage}`}>
       <header class={`sky ${sky.phase}${conditions.known && conditions.sky !== 'dry' ? ' grey' : ''}${results ? ' small' : ''}`}>
+        <Scene pose={stage} sky={skyInput} pins={pins} active={active} onPin={onPin} onBalloon={onBalloon} />
         <div class="orb" aria-hidden="true" style={{ left: `${10 + 80 * sky.progress}%`, top: `${62 - Math.sin(Math.PI * sky.progress) * 44}%` }} />
         <div class="sky-inner">
           <p class="brand">
@@ -337,9 +382,9 @@ export function App() {
           {!r.conditions.known && r.picks.some((p) => p.option.setting === 'out') && (
             <p class="note quiet">I couldn't get the weather just now, so take the outdoor ideas with a look out the window.</p>
           )}
-          <ol class={`deck n${r.picks.length}`} ref={deck}>
+          <ol class={`deck n${r.picks.length}`} ref={deck} onScroll={onDeckScroll}>
             {r.picks.map((p, i) => (
-              <li key={p.option.id} style={{ '--i': i }}>
+              <li key={p.option.id} style={{ '--i': i }} class={active === i ? 'lit' : ''} onPointerEnter={(e) => { if (e.pointerType === 'mouse') setActive(i); }}>
                 <Card pick={p} index={i} total={r.picks.length} now={view.req.now} mode={view.req.mode} origin={origin}
                   saved={memory.saved.includes(p.option.id)} venueNudge={p.option.placeId ? byId(p.option.placeId)?.nudge : undefined}
                   onSave={() => toggleSave(p.option.id)} onShare={() => share(p.option)} onSkip={() => swap(p.option.id)} onGo={() => record(p.option.id, 'go')} />
@@ -397,6 +442,55 @@ export function App() {
 }
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/**
+ * The 3D model behind the header. Loaded on demand; if it can't start (no
+ * WebGL, an old phone), nothing is rendered and the painted sky stays.
+ */
+function Scene(props: { pose: Pose; sky: SkyInput; pins: Pin[]; active: number | null; onPin: (i: number) => void; onBalloon: () => void }) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const model = useRef<Diorama | null>(null);
+  const latest = useRef(props);
+  latest.current = props;
+  const [on, setOn] = useState(false);
+  const [hint, setHint] = useState(true);
+
+  useEffect(() => {
+    let gone = false;
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    import('./scene')
+      .then((m) => {
+        if (gone || !canvas.current) return;
+        model.current = m.createDiorama(canvas.current, {
+          onPin: (i) => latest.current.onPin(i),
+          onBalloon: () => latest.current.onBalloon(),
+          onTouch: () => setHint(false),
+        }, calm);
+        setOn(true);
+      })
+      .catch(() => undefined); // no WebGL: the painted sky is the fallback
+    const t = setTimeout(() => setHint(false), 12_000);
+    return () => {
+      gone = true;
+      clearTimeout(t);
+      model.current?.dispose();
+      model.current = null;
+    };
+  }, []);
+
+  const s = props.sky;
+  useEffect(() => model.current?.setSky(s), [on, Math.round(s.time / 60_000), s.wet, s.snowing, s.frozen, Math.round(s.snowIn)]);
+  useEffect(() => model.current?.setPose(props.pose), [on, props.pose]);
+  useEffect(() => model.current?.setPins(props.pins), [on, props.pins.map((p) => `${p.east.toFixed(3)},${p.north.toFixed(3)}`).join('|')]);
+  useEffect(() => model.current?.focus(props.active), [on, props.active]);
+
+  return (
+    <div class={`scene${on ? ' on' : ''}`}>
+      <canvas ref={canvas} aria-label="A small model of Madison under the current sky. Decorative; everything it does is also available below." />
+      {on && hint && <span class="scene-hint">Drag to look around. Tap things.</span>}
+    </div>
+  );
+}
 
 function Card(props: {
   pick: Pick; index: number; total: number; now: number; mode: Mode; origin: LatLng | null; saved: boolean; venueNudge?: string;

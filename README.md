@@ -31,6 +31,17 @@ A static site. No server, no database, no accounts, no API keys.
 
 To turn on deploys: repo Settings → Pages → Source: GitHub Actions.
 
+## The model
+
+The top of the page is a small 3D model of Madison (`src/ui/scene.ts`, three.js, loaded on demand): the Capitol on the isthmus between the lakes, under the real sky for the time and weather, with rain, snow and winter ice when the forecast says so. One unit is one mile, so a place's coordinates drop straight onto it.
+
+- Drag to look around.
+- Tap the Capitol, a sailboat or the water for a small reaction. Tap the sun or moon to run the day forward.
+- Tap the balloon to ask for a surprise.
+- When three picks are dealt, each stands as a numbered beacon where it really is. Tap a beacon to bring up its card; swipe the cards and the camera follows.
+
+It's decoration over a working page: everything it does is also a button below. Without WebGL the page keeps its painted sky, and with reduced motion the model holds still.
+
 ## How matching works
 
 `match(request, world)` in `src/core/match.ts`, in four stages:

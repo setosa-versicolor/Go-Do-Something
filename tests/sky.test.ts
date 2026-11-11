@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { sunFor } from '../src/core/sun';
+import { elevation } from '../src/ui/scene';
 import { partOfDay, skyAt } from '../src/ui/sky';
 import { at, TZ } from './helpers';
 
@@ -24,5 +25,17 @@ describe('the sky backdrop', () => {
 
   it('names the part of the day', () => {
     expect([2, 8, 13, 18, 22].map(partOfDay)).toEqual(['night', 'morning', 'afternoon', 'evening', 'night']);
+  });
+
+  it('gives the 3D scene a continuous sun height, on any day it is asked about', () => {
+    const e = (h: number, mi = 0, day = 11) => elevation(at(2026, 11, day, h, mi), sun.sunrise, sun.sunset).e;
+    expect(e(11, 41)).toBeCloseTo(1, 1); // solar noon
+    expect(e(16, 38)).toBeCloseTo(0, 1); // sunset
+    expect(e(17, 30)).toBeLessThan(-0.4);
+    expect(e(23)).toBe(-1);
+    expect(e(6)).toBeGreaterThan(-0.6); // the sky lightens before sunrise
+    // A time-lapse runs past midnight using today's sun; tomorrow noon still reads as noon.
+    expect(e(11, 41, 12)).toBeCloseTo(1, 1);
+    expect(elevation(at(2026, 11, 11, 9), sun.sunrise, sun.sunset).p).toBeGreaterThan(0.15);
   });
 });
