@@ -986,6 +986,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   interface Beacon { g: THREE.Group; beam: THREE.Mesh; ring: THREE.Mesh; label: THREE.Sprite; pos: THREE.Vector3; born: number }
   let beacons: Beacon[] = [];
   let focused: number | null = null;
+  /** Seconds left looking at the whole spread before closing in on the chosen pick. */
+  let hop = 0;
+  let fresh = false;
   const label = (n: number, color: string) => {
     const c = document.createElement('canvas');
     c.width = c.height = 128;
@@ -1030,9 +1033,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     const all = Math.min(28, Math.max(8, 6 + spread * 3.4));
     const one = focused === null ? undefined : beacons[focused];
     if (!one) return { tx: cx, ty: all * 0.1, tz: cz, theta: 0.5, phi: 1.0, r: all };
-    // Lean toward the chosen pick without losing sight of the other two.
-    const r = Math.max(6.5, all * 0.78);
-    return { tx: cx + (one.pos.x - cx) * 0.6, ty: r * 0.24, tz: cz + (one.pos.z - cz) * 0.6, theta: 0.5, phi: 1.02, r };
+    // Changing picks: pull back until all three are in view, then come down on the new one.
+    if (hop > 0) return { tx: cx, ty: all * 0.1, tz: cz, theta: 0.5, phi: 1.0, r: all };
+    return { tx: one.pos.x, ty: 1.05, tz: one.pos.z, theta: 0.5, phi: 1.05, r: 4.4 };
   };
 
   // ------------------------------------------------------------ pointer
@@ -1277,6 +1280,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       }
     }
 
+    hop = Math.max(0, hop - dt);
+
     // Beacons rise, breathe, and the chosen one stands taller.
     beacons.forEach((b, i) => {
       const grown = Math.min(1, (clock - b.born) * 1.6);
@@ -1354,6 +1359,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       }
       focused = null;
       pinHits.length = 0;
+      fresh = true;
       beacons = pins.map((p, i) => {
         const g = new THREE.Group();
         const pos = new THREE.Vector3(p.east, 0, -p.north);
@@ -1374,6 +1380,11 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       });
     },
     focus(index) {
+      if (index !== null && index !== focused && !calm) {
+        // A new deal gets a longer look at the whole map; a swipe gets a quick one.
+        hop = fresh ? 2.6 : 1.0;
+        fresh = false;
+      }
       focused = index;
     },
     dispose() {
