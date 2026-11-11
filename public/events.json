@@ -1,73 +1,109 @@
 {
- "generatedAt": 1794370851894,
+ "generatedAt": 1794407854448,
  "sources": {
-  "isthmus": 55,
-  "uw": 0
+  "isthmus": 56,
+  "uw": 14,
+  "mcm": 27
  },
  "events": [
   {
-   "id": "isthmus:tango-tuesday:29905980",
+   "id": "mcm:stories-across-generations:29906880",
    "kind": "event",
-   "name": "Tango Tuesday",
-   "what": "Show at Cafe Coda",
-   "category": "show",
-   "hood": "Willy Street",
-   "lat": 43.0812,
-   "lng": -89.3655,
-   "story": "Lessons/practice 7 pm, open dance 8:30-10:30 pm Tuesdays, Cafe Coda. $10.",
-   "price": 1,
+   "name": "Stories Across Generations",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Settle in for a special storytime that brings generations together. Eleanor Dougherty shares beloved picture books with young listeners in a warm, welcoming setting.",
+   "price": 2,
    "setting": "in",
    "minutes": [
-    45,
-    210
+    30,
+    30
    ],
-   "kids": 1,
+   "kids": 2,
    "moods": {
-    "lively": 1,
-    "date": 0.6
+    "kids": 1,
+    "cozy": 0.6
    },
    "gem": 0.4,
    "when": {
-    "start": 1794358800000,
-    "end": 1794371400000
+    "start": 1794412800000,
+    "end": 1794414600000
    },
    "dropIn": false,
    "hoursTrust": "solid",
-   "url": "https://isthmus.com/events/Madison-Tango-Society-practica-tuesdays/?occ_dtstart=2026-11-10T19:00",
-   "source": "isthmus",
-   "venue": "Cafe Coda"
+   "url": "https://madisonchildrensmuseum.org/event/stories-across-generations-27/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
   },
   {
-   "id": "isthmus:salsa-dance:29906010",
+   "id": "mcm:nice-age-tales:29906910",
    "kind": "event",
-   "name": "Salsa Dance",
-   "what": "Show at Cafe Coda",
-   "category": "show",
-   "hood": "Willy Street",
-   "lat": 43.0812,
-   "lng": -89.3655,
-   "story": "Lesson 7:30 pm, open dance 8:30 pm. $10.",
-   "price": 1,
+   "name": "Nice Age Tales",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Join us for a puppet show, songs and story time for early learners.",
+   "price": 2,
    "setting": "in",
    "minutes": [
-    45,
-    180
+    30,
+    30
    ],
-   "kids": 1,
+   "kids": 2,
    "moods": {
-    "lively": 1,
-    "date": 0.6
+    "kids": 1,
+    "cozy": 0.6
    },
    "gem": 0.4,
    "when": {
-    "start": 1794360600000,
-    "end": 1794371400000
+    "start": 1794414600000,
+    "end": 1794416400000
    },
    "dropIn": false,
    "hoursTrust": "solid",
-   "url": "https://isthmus.com/events/salsa-dance-coda/?occ_dtstart=2026-11-10T19:30",
-   "source": "isthmus",
-   "venue": "Cafe Coda"
+   "url": "https://madisonchildrensmuseum.org/event/nice-age-tales-59/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:music-time-with-tim:29906940",
+   "kind": "event",
+   "name": "Music Time with Tim",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Explore the world of music and rhythm! Each week, Tim leads children in singing and other musical activities that inspire creativity and connection. It’s an engaging experience for kids and families—free with admission.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    30,
+    30
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794416400000,
+    "end": 1794418200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/music-time-with-tim-105/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
   },
   {
    "id": "isthmus:bluegrass-jam:29907060",
@@ -101,6 +137,39 @@
    "source": "isthmus",
    "venue": "Harmony Bar and Grill",
    "placeId": "harmony-bar"
+  },
+  {
+   "id": "mcm:li-l-music-with-junko:29907090",
+   "kind": "event",
+   "name": "Li’l Music with Junko",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Do you have a dancing baby? Discover Junko’s weekly music session where babies and toddlers can explore their natural love of rhythm.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    60
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794425400000,
+    "end": 1794429000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/lil-music-with-junko-11/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
   },
   {
    "id": "isthmus:madison-public-farmers-market:29907240",
@@ -209,7 +278,7 @@
    "hood": "Willy Street",
    "lat": 43.0843,
    "lng": -89.3615,
-   "story": "Second &amp; fourth Wednesdays (usually). Free.",
+   "story": "Second & fourth Wednesdays (usually). Free.",
    "price": 0,
    "setting": "in",
    "minutes": [
@@ -308,7 +377,7 @@
    "hood": "State Street",
    "lat": 43.0745,
    "lng": -89.3883,
-   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 & 21. $71.32-$56.47.",
    "price": 3,
    "setting": "in",
    "minutes": [
@@ -330,39 +399,6 @@
    "url": "https://isthmus.com/events/gaslight-forward/?occ_dtstart=2026-11-11T19:30",
    "source": "isthmus",
    "venue": "Overture Center-Playhouse"
-  },
-  {
-   "id": "isthmus:sold-out-neil-degrasse-tyson:29907450",
-   "kind": "event",
-   "name": "SOLD OUT: Neil DeGrasse Tyson",
-   "what": "Film at Orpheum Theater",
-   "category": "show",
-   "hood": "State Street",
-   "lat": 43.075,
-   "lng": -89.3885,
-   "story": "Film at Orpheum Theater.",
-   "price": 1,
-   "setting": "in",
-   "minutes": [
-    45,
-    90
-   ],
-   "kids": 1,
-   "moods": {
-    "date": 0.6,
-    "cozy": 0.6,
-    "learn": 0.6
-   },
-   "gem": 0.4,
-   "when": {
-    "start": 1794447000000,
-    "end": 1794452400000
-   },
-   "dropIn": false,
-   "hoursTrust": "solid",
-   "url": "https://isthmus.com/events/neil-degrasse-tyson/?occ_dtstart=2026-11-11T19:30",
-   "source": "isthmus",
-   "venue": "Orpheum Theater"
   },
   {
    "id": "isthmus:jumptown-swing-dance:29907450",
@@ -432,7 +468,7 @@
    "id": "isthmus:the-mic-on-state:29907480",
    "kind": "event",
    "name": "The Mic on State",
-   "what": "Film at Comedy on State",
+   "what": "Show at Comedy on State",
    "category": "show",
    "hood": "State Street",
    "lat": 43.075,
@@ -446,9 +482,8 @@
    ],
    "kids": 0,
    "moods": {
-    "date": 0.6,
-    "cozy": 0.6,
-    "learn": 0.6
+    "lively": 1,
+    "date": 0.6
    },
    "gem": 0.4,
    "when": {
@@ -462,6 +497,105 @@
    "venue": "Comedy on State"
   },
   {
+   "id": "mcm:tales-with-teresa:29908290",
+   "kind": "event",
+   "name": "Tales with Teresa",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "@ Join us for story time and hear Teresa read some of her favorite books using her DynaVox.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    30,
+    30
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794497400000,
+    "end": 1794499200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/tales-with-teresa-99/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:let-s-move-with-abby:29908320",
+   "kind": "event",
+   "name": "Let’s Move! with Abby",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Join us for movement games and activities! From obstacle courses to dances, group games and balance activities, we’ll enjoy different opportunities to move our bodies every day.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794499200000,
+    "end": 1794504600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/lets-move-with-abby-218/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:reading-on-the-rooftop:29908380",
+   "kind": "event",
+   "name": "Reading on the Rooftop",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Take storytime to new heights! Join Paula Panczenko on the museum rooftop for a cozy read-aloud surrounded by fresh air, gardens, and views of our Capitol and the lake.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    30,
+    30
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794502800000,
+    "end": 1794504600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/reading-on-the-rooftop-15/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
    "id": "isthmus:gaslight:29908560",
    "kind": "event",
    "name": "Gaslight",
@@ -470,7 +604,7 @@
    "hood": "State Street",
    "lat": 43.0745,
    "lng": -89.3883,
-   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 & 21. $71.32-$56.47.",
    "price": 3,
    "setting": "in",
    "minutes": [
@@ -527,10 +661,76 @@
    "placeId": "chazen"
   },
   {
+   "id": "mcm:braaains-with-uw-neuroscience-outreach:29908740",
+   "kind": "event",
+   "name": "Braaains! with UW Neuroscience Outreach",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "@ Join our friends from the UW Neuroscience Training Program outreach team for brain-building activities and interact with REAL neurological specimens. Come learn how we think!",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794524400000,
+    "end": 1794531600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/braaains-with-uw-neuroscience-outreach-8/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:astronomy:29908800",
+   "kind": "event",
+   "name": "Astronomy",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Look up! There’s a whole universe waiting to be explored. Join UW Astronomy for an evening of stargazing and discovery as you learn about the stars, planets, and wonders of space.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794528000000,
+    "end": 1794533400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/astronomy/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
    "id": "isthmus:dylan-carlino:29908860",
    "kind": "event",
    "name": "Dylan Carlino",
-   "what": "Film at Comedy on State",
+   "what": "Show at Comedy on State",
    "category": "show",
    "hood": "State Street",
    "lat": 43.075,
@@ -544,9 +744,8 @@
    ],
    "kids": 0,
    "moods": {
-    "date": 0.6,
-    "cozy": 0.6,
-    "learn": 0.6
+    "lively": 1,
+    "date": 0.6
    },
    "gem": 0.4,
    "when": {
@@ -558,6 +757,38 @@
    "url": "https://isthmus.com/events/dylan-carlino-2026/?occ_dtstart=2026-11-12T19:00",
    "source": "isthmus",
    "venue": "Comedy on State"
+  },
+  {
+   "id": "isthmus:furrowmusic-bluejacket-devin-griffn:29908860",
+   "kind": "event",
+   "name": "furrowmusic, Bluejacket, Devin Griffn",
+   "what": "Live music at The Rigby",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0742,
+   "lng": -89.3813,
+   "story": "$15.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794531600000,
+    "end": 1794538800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/furrowmusic-bluejacket-devin-griffin/?occ_dtstart=2026-11-12T19:00",
+   "source": "isthmus",
+   "venue": "The Rigby"
   },
   {
    "id": "isthmus:playin-the-standards-jam-with-jan-hora:29908860",
@@ -592,6 +823,39 @@
    "venue": "Cafe Coda"
   },
   {
+   "id": "uw:uw-cinematheque-premieres:29908860",
+   "kind": "event",
+   "name": "UW Cinematheque - Premieres",
+   "what": "Film at Vilas Hall",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.07264502572392,
+   "lng": -89.39986377177232,
+   "story": "Cast: Julianne Moore, Jesse Eisenberg, Paul Giamatti When Mona Friedman is cast in a bit part at a small community theater, she transforms from a shy, unassuming housewife into a zealous method actor willing to do…",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794531600000,
+    "end": 1794537000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/223579",
+   "source": "uw",
+   "venue": "Vilas Hall"
+  },
+  {
    "id": "isthmus:gaslight:29908890",
    "kind": "event",
    "name": "Gaslight",
@@ -600,7 +864,7 @@
    "hood": "State Street",
    "lat": 43.0745,
    "lng": -89.3883,
-   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 & 21. $71.32-$56.47.",
    "price": 3,
    "setting": "in",
    "minutes": [
@@ -752,38 +1016,6 @@
    "venue": "High Noon Saloon"
   },
   {
-   "id": "isthmus:sts9:29908920",
-   "kind": "event",
-   "name": "STS9",
-   "what": "Live music at The Sylvee",
-   "category": "music",
-   "hood": "Capitol East",
-   "lat": 43.08,
-   "lng": -89.374,
-   "story": "Live music at The Sylvee.",
-   "price": 1,
-   "setting": "in",
-   "minutes": [
-    45,
-    120
-   ],
-   "kids": 1,
-   "moods": {
-    "lively": 1,
-    "date": 0.6
-   },
-   "gem": 0.4,
-   "when": {
-    "start": 1794535200000,
-    "end": 1794542400000
-   },
-   "dropIn": false,
-   "hoursTrust": "solid",
-   "url": "https://isthmus.com/events/sts9-2026/?occ_dtstart=2026-11-12T20:00",
-   "source": "isthmus",
-   "venue": "The Sylvee"
-  },
-  {
    "id": "isthmus:tim-whalen-trio:29908920",
    "kind": "event",
    "name": "Tim Whalen Trio",
@@ -847,6 +1079,204 @@
    "source": "isthmus",
    "venue": "Mickey's Tavern",
    "placeId": "mickeys"
+  },
+  {
+   "id": "mcm:early-explorers-playgroup:29909730",
+   "kind": "event",
+   "name": "Early Explorers Playgroup",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "This playgroup is expertly designed for our earliest visitors.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    60
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794583800000,
+    "end": 1794587400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/early-explorers-playgroup-108/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:imagination-station:29909760",
+   "kind": "event",
+   "name": "Imagination Station",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Join Abby in the Art Studio classroom on Wednesdays to stretch your creativity with common materials used in unexpected ways. Each week will feature a different activity.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    60
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794585600000,
+    "end": 1794589200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/imagination-station-11/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:music-with-junebug:29909790",
+   "kind": "event",
+   "name": "Music with Junebug",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "@ Join us for Music with Junebug led by Junko Yamauchi. This program gives toddlers and preschoolers the opportunity to sing, dance, explore instruments, and play!",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    30,
+    30
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794587400000,
+    "end": 1794589200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/music-with-junebug-96/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:steam-time-elf-and-fairy-botanical-soap-making:29909820",
+   "kind": "event",
+   "name": "STEAM Time: Elf and Fairy Botanical Soap Making",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "@ Get ready for some squeaky-clean science! Discover how soap goes from a liquid mixture to a solid bar as you explore the fascinating properties of matter.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    60
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794589200000,
+    "end": 1794592800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/steam-time-soap-making/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:clay-day:29909940",
+   "kind": "event",
+   "name": "Clay Day",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Squish it, shape it, roll it, and build with it! Each week, Laurie and museum staff lead a new hands-on project featuring air-dry, polymer, or ceramic clay.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794596400000,
+    "end": 1794603600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/clay-day-57/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:storytime-with-diamond-spratling-sage-sails-the-:29910000",
+   "kind": "event",
+   "name": "Storytime with Diamond Spratling: Sage Sails the World",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "@ Diamond Spratling, Climate DistrupHER, is a force in the climate justice field, and has written a children’s book.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    30,
+    30
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794600000000,
+    "end": 1794601800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/storytime-with-diamond-spratling-sage-sails-the-world/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
   },
   {
    "id": "isthmus:ben-knox-band:29910120",
@@ -914,6 +1344,72 @@
    "venue": "Cafe Coda"
   },
   {
+   "id": "mcm:girl-scouts-night-at-the-museum:29910180",
+   "kind": "event",
+   "name": "Girl Scouts Night at the Museum",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "@ When the doors close to the public, the Girl Scouts’ fun begins!",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794610800000,
+    "end": 1794621600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/girl-scouts-night-at-the-museum-3/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "uw:dcc-movie-night-being-huemann-screening:29910210",
+   "kind": "event",
+   "name": "DCC Movie Night: Being Huemann Screening",
+   "what": "Film at Armory and Gymnasium (Red Gym)",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.07631796199038,
+   "lng": -89.39845049122404,
+   "story": "Join us in the Disability Cultural Center for a screening of Being Heumann, the film adaptation of Judy Heumann’s book, Being Heumann: An Unrepentant Memoir of a Disability Rights Activist.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    150
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794612600000,
+    "end": 1794621600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/227357",
+   "source": "uw",
+   "venue": "Armory and Gymnasium (Red Gym)"
+  },
+  {
    "id": "isthmus:vo5-rare-element-play-machine-blush-earthlight-b:29910240",
    "kind": "event",
    "name": "VO5, Rare Element, Play Machine, Blush, Earthlight, Bear in the Forest, Luca B, Black Star Drum Line, DJ Ka-BOOM!Box",
@@ -946,6 +1442,39 @@
    "venue": "Atwood Music Hall"
   },
   {
+   "id": "uw:wud-film-presents-la-haine-1995-:29910270",
+   "kind": "event",
+   "name": "WUD Film Presents: La Haine (1995)",
+   "what": "Film at Union South",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0717,
+   "lng": -89.4078,
+   "story": "France | 98 min | NR | Dir. Mathieu Kassovitz \"24 hours in the lives of three young men in the French suburbs the day after a violent riot.\" - IMDB La Haine is an unmissable response to an unending emergency\" - Peter…",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    105
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794616200000,
+    "end": 1794622500000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/227140",
+   "source": "uw",
+   "venue": "Union South"
+  },
+  {
    "id": "isthmus:aru-l-thr-gabriel-wade-quintet:29910300",
    "kind": "event",
    "name": "Aruṇ Lūthrā & Gabriel Wade Quintet",
@@ -954,7 +1483,7 @@
    "hood": "Willy Street",
    "lat": 43.0812,
    "lng": -89.3655,
-   "story": "7 &amp; 9 pm. $20.",
+   "story": "7 & 9 pm. $20.",
    "price": 2,
    "setting": "in",
    "minutes": [
@@ -981,7 +1510,7 @@
    "id": "isthmus:dylan-carlino:29910300",
    "kind": "event",
    "name": "Dylan Carlino",
-   "what": "Film at Comedy on State",
+   "what": "Show at Comedy on State",
    "category": "show",
    "hood": "State Street",
    "lat": 43.075,
@@ -995,9 +1524,8 @@
    ],
    "kids": 0,
    "moods": {
-    "date": 0.6,
-    "cozy": 0.6,
-    "learn": 0.6
+    "lively": 1,
+    "date": 0.6
    },
    "gem": 0.4,
    "when": {
@@ -1011,15 +1539,47 @@
    "venue": "Comedy on State"
   },
   {
-   "id": "isthmus:our-land:29910300",
+   "id": "uw:james-ivy:29910300",
    "kind": "event",
-   "name": "Our Land",
-   "what": "Film at Madison Museum of Contemporary Art",
+   "name": "James Ivy",
+   "what": "Live music at Union South",
+   "category": "music",
+   "hood": "Campus",
+   "lat": 43.0717,
+   "lng": -89.4078,
+   "story": "James Ivy is the project of the New Jersey-born, New York-based singer-songwriter and producer James Butler.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    180
+   ],
+   "kids": 1,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794618000000,
+    "end": 1794628800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/224590",
+   "source": "uw",
+   "venue": "Union South"
+  },
+  {
+   "id": "uw:uw-cinematheque-rajamouli-myth-spectacle-cinema:29910300",
+   "kind": "event",
+   "name": "UW Cinematheque - Rajamouli: Myth, Spectacle, Cinema",
+   "what": "Film at Vilas Hall",
    "category": "show",
-   "hood": "State Street",
-   "lat": 43.0747,
-   "lng": -89.3885,
-   "story": "MMoCA Cinema screening. NR, 2026.",
+   "hood": "Campus",
+   "lat": 43.07264502572392,
+   "lng": -89.39986377177232,
+   "story": "Cast: Sudeep, Nani, Samantha Ruth Prabhu Nani and Bindhu’s young love is cut short when Nani is ruthlessly murdered by his romantic rival, Sandeep.",
    "price": 1,
    "setting": "in",
    "minutes": [
@@ -1039,10 +1599,41 @@
    },
    "dropIn": false,
    "hoursTrust": "solid",
-   "url": "https://isthmus.com/events/our-land/?occ_dtstart=2026-11-13T19:00",
+   "url": "https://today.wisc.edu/events/view/223602",
+   "source": "uw",
+   "venue": "Vilas Hall"
+  },
+  {
+   "id": "isthmus:full-panic-disaster-kid-box-core-steamroller:29910330",
+   "kind": "event",
+   "name": "Full Panic, Disaster Kid, Box Core, Steamroller",
+   "what": "Live music at The Rigby",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0742,
+   "lng": -89.3813,
+   "story": "$10.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 0,
+   "moods": {
+    "lively": 1,
+    "date": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794619800000,
+    "end": 1794627000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://isthmus.com/events/full-panic-disaster-kid-box-core-steamroller/?occ_dtstart=2026-11-13T19:30",
    "source": "isthmus",
-   "venue": "Madison Museum of Contemporary Art",
-   "placeId": "mmoca"
+   "venue": "The Rigby"
   },
   {
    "id": "isthmus:gaslight:29910330",
@@ -1053,7 +1644,7 @@
    "hood": "State Street",
    "lat": 43.0745,
    "lng": -89.3883,
-   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 & 21. $71.32-$56.47.",
    "price": 3,
    "setting": "in",
    "minutes": [
@@ -1075,38 +1666,6 @@
    "url": "https://isthmus.com/events/gaslight-forward/?occ_dtstart=2026-11-13T19:30",
    "source": "isthmus",
    "venue": "Overture Center-Playhouse"
-  },
-  {
-   "id": "isthmus:wisconsin-chamber-orchestra:29910330",
-   "kind": "event",
-   "name": "Wisconsin Chamber Orchestra",
-   "what": "Live music at Overture Center-Capitol Theater",
-   "category": "music",
-   "hood": "State Street",
-   "lat": 43.0745,
-   "lng": -89.3883,
-   "story": "\"Ravel Revelry,\" with guest pianist John Novacek.",
-   "price": 1,
-   "setting": "in",
-   "minutes": [
-    45,
-    120
-   ],
-   "kids": 1,
-   "moods": {
-    "lively": 1,
-    "date": 0.6
-   },
-   "gem": 0.4,
-   "when": {
-    "start": 1794619800000,
-    "end": 1794627000000
-   },
-   "dropIn": false,
-   "hoursTrust": "solid",
-   "url": "https://isthmus.com/events/wisconsin-chamber-orchestra-ravel-revelry/?occ_dtstart=2026-11-13T19:30",
-   "source": "isthmus",
-   "venue": "Overture Center-Capitol Theater"
   },
   {
    "id": "isthmus:hottt-probs-heet-death-sex-scenes:29910360",
@@ -1139,38 +1698,6 @@
    "url": "https://isthmus.com/events/hottt-probs-heet-death-sex-scenes/?occ_dtstart=2026-11-13T20:00",
    "source": "isthmus",
    "venue": "High Noon Saloon"
-  },
-  {
-   "id": "isthmus:kitchen-dwellers-dogs-in-a-pile:29910360",
-   "kind": "event",
-   "name": "Kitchen Dwellers, Dogs in a Pile",
-   "what": "Live music at The Sylvee",
-   "category": "music",
-   "hood": "Capitol East",
-   "lat": 43.08,
-   "lng": -89.374,
-   "story": "Kitchen Dwellers fly in a higher orbit than most of their peers on the jamgrass/spacegrass circuit. And by that we mean several galaxies higher.",
-   "price": 1,
-   "setting": "in",
-   "minutes": [
-    45,
-    120
-   ],
-   "kids": 1,
-   "moods": {
-    "lively": 1,
-    "date": 0.6
-   },
-   "gem": 0.4,
-   "when": {
-    "start": 1794621600000,
-    "end": 1794628800000
-   },
-   "dropIn": false,
-   "hoursTrust": "solid",
-   "url": "https://isthmus.com/events/kitchen-dwellers-dogs-in-a-pile/?occ_dtstart=2026-11-13T20:00",
-   "source": "isthmus",
-   "venue": "The Sylvee"
   },
   {
    "id": "isthmus:pheramones-ramones-tribute-insomniacs-green-day-:29910360",
@@ -1301,6 +1828,39 @@
    "venue": "North Street Cabaret"
   },
   {
+   "id": "uw:wud-film-presents-there-will-be-blood-2007-open-:29910405",
+   "kind": "event",
+   "name": "WUD Film Presents: There Will Be Blood (2007) [Open Caption Screening]",
+   "what": "Film at Union South",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0717,
+   "lng": -89.4078,
+   "story": "US | 158 min | R | Dir. Paul Thomas Anderson \"Silver miner Daniel Plainview (Daniel Day-Lewis) leads a hardscrabble life with his son, H.W. (Dillon Freasier).",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    168
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794624300000,
+    "end": 1794634380000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/227141",
+   "source": "uw",
+   "venue": "Union South"
+  },
+  {
    "id": "isthmus:aru-l-thr-gabriel-wade-quintet:29910420",
    "kind": "event",
    "name": "Aruṇ Lūthrā & Gabriel Wade Quintet",
@@ -1309,7 +1869,7 @@
    "hood": "Willy Street",
    "lat": 43.0812,
    "lng": -89.3655,
-   "story": "7 &amp; 9 pm. $20.",
+   "story": "7 & 9 pm. $20.",
    "price": 2,
    "setting": "in",
    "minutes": [
@@ -1369,7 +1929,7 @@
    "id": "isthmus:dylan-carlino:29910450",
    "kind": "event",
    "name": "Dylan Carlino",
-   "what": "Film at Comedy on State",
+   "what": "Show at Comedy on State",
    "category": "show",
    "hood": "State Street",
    "lat": 43.075,
@@ -1383,9 +1943,8 @@
    ],
    "kids": 0,
    "moods": {
-    "date": 0.6,
-    "cozy": 0.6,
-    "learn": 0.6
+    "lively": 1,
+    "date": 0.6
    },
    "gem": 0.4,
    "when": {
@@ -1434,12 +1993,12 @@
    "id": "isthmus:kids-in-the-rotunda:29911170",
    "kind": "event",
    "name": "Kids in the Rotunda",
-   "what": "Film at Overture Center-Rotunda Stage",
+   "what": "Show at Overture Center-Rotunda Stage",
    "category": "show",
    "hood": "State Street",
    "lat": 43.0745,
    "lng": -89.3883,
-   "story": "Laura Doherty &amp; the Heartbeats, 9:30 am, 11 am &amp; 1 pm. Free.",
+   "story": "Laura Doherty & the Heartbeats, 9:30 am, 11 am & 1 pm. Free.",
    "price": 0,
    "setting": "in",
    "minutes": [
@@ -1448,9 +2007,8 @@
    ],
    "kids": 1,
    "moods": {
-    "date": 0.6,
-    "cozy": 0.6,
-    "learn": 0.6
+    "lively": 1,
+    "date": 0.6
    },
    "gem": 0.4,
    "when": {
@@ -1497,6 +2055,72 @@
    "venue": "Arts + Literature Laboratory"
   },
   {
+   "id": "mcm:let-s-move-with-abby:29911200",
+   "kind": "event",
+   "name": "Let’s Move! with Abby",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Join us for movement games and activities! From obstacle courses to dances, group games and balance activities, we’ll enjoy different opportunities to move our bodies every day.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    60
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794672000000,
+    "end": 1794675600000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/lets-move-with-abby-222/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:fairy-miniatures:29911230",
+   "kind": "event",
+   "name": "Fairy Miniatures",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Calling all fairy architects! Join the effort to solve fairyland’s chronic housing shortage by designing and building a miniature home from natural materials.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794673800000,
+    "end": 1794679200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/fairy-miniatures/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
    "id": "isthmus:our-land:29911410",
    "kind": "event",
    "name": "Our Land",
@@ -1539,7 +2163,7 @@
    "hood": "State Street",
    "lat": 43.0745,
    "lng": -89.3883,
-   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 & 21. $71.32-$56.47.",
    "price": 3,
    "setting": "in",
    "minutes": [
@@ -1597,10 +2221,43 @@
    "placeId": "garver"
   },
   {
+   "id": "uw:wud-film-presents-12-angry-men-1957-open-caption:29911710",
+   "kind": "event",
+   "name": "WUD Film Presents: 12 Angry Men (1957) [Open Caption Screening]",
+   "what": "Film at Union South",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0717,
+   "lng": -89.4078,
+   "story": "USA | 96 min | NR | Dir. Sidney Lumet \"The jury in a New York City murder trial is frustrated by a single member whose skeptical caution forces them to more carefully consider the evidence before jumping to a hasty…",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    105
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794702600000,
+    "end": 1794708900000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/227647",
+   "source": "uw",
+   "venue": "Union South"
+  },
+  {
    "id": "isthmus:dylan-carlino:29911740",
    "kind": "event",
    "name": "Dylan Carlino",
-   "what": "Film at Comedy on State",
+   "what": "Show at Comedy on State",
    "category": "show",
    "hood": "State Street",
    "lat": 43.075,
@@ -1614,9 +2271,8 @@
    ],
    "kids": 0,
    "moods": {
-    "date": 0.6,
-    "cozy": 0.6,
-    "learn": 0.6
+    "lively": 1,
+    "date": 0.6
    },
    "gem": 0.4,
    "when": {
@@ -1638,7 +2294,7 @@
    "hood": "Willy Street",
    "lat": 43.0812,
    "lng": -89.3655,
-   "story": "7 &amp; 9 pm. $25.",
+   "story": "7 & 9 pm. $25.",
    "price": 2,
    "setting": "in",
    "minutes": [
@@ -1662,37 +2318,36 @@
    "venue": "Cafe Coda"
   },
   {
-   "id": "isthmus:the-madhatters:29911740",
+   "id": "isthmus:drive-to-the-ocean-album-release-blake-peters:29911740",
    "kind": "event",
-   "name": "The MadHatters",
-   "what": "Film at Overture Center-Capitol Theater",
-   "category": "show",
-   "hood": "State Street",
-   "lat": 43.0745,
-   "lng": -89.3883,
-   "story": "A cappella. $22.69-$17.87.",
-   "price": 2,
+   "name": "Drive to the Ocean (album release), Blake Peters",
+   "what": "Live music at The Rigby",
+   "category": "music",
+   "hood": "Downtown",
+   "lat": 43.0742,
+   "lng": -89.3813,
+   "story": "Rock.",
+   "price": 1,
    "setting": "in",
    "minutes": [
     45,
-    90
+    180
    ],
-   "kids": 1,
+   "kids": 0,
    "moods": {
-    "date": 0.6,
-    "cozy": 0.6,
-    "learn": 0.6
+    "lively": 1,
+    "date": 0.6
    },
    "gem": 0.4,
    "when": {
     "start": 1794704400000,
-    "end": 1794709800000
+    "end": 1794715200000
    },
    "dropIn": false,
    "hoursTrust": "solid",
-   "url": "https://isthmus.com/events/the-madhatters-overture/?occ_dtstart=2026-11-14T19:00",
+   "url": "https://isthmus.com/events/drive-to-the-ocean-album-release-blake-peters/?occ_dtstart=2026-11-14T19:00",
    "source": "isthmus",
-   "venue": "Overture Center-Capitol Theater"
+   "venue": "The Rigby"
   },
   {
    "id": "isthmus:hips-don-t-lie:29911740",
@@ -1727,6 +2382,39 @@
    "venue": "High Noon Saloon"
   },
   {
+   "id": "uw:uw-cinematheque-rajamouli-myth-spectacle-cinema:29911740",
+   "kind": "event",
+   "name": "UW Cinematheque - Rajamouli: Myth, Spectacle, Cinema",
+   "what": "Film at Vilas Hall",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.07264502572392,
+   "lng": -89.39986377177232,
+   "story": "Cast: N.T. Rama Rao Jr., Ram Charan, Olivia Morris After breaking box office records for Telugu cinema with his epic Baahubali saga, writer/director S.S.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794704400000,
+    "end": 1794709800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/223603",
+   "source": "uw",
+   "venue": "Vilas Hall"
+  },
+  {
    "id": "isthmus:gaslight:29911770",
    "kind": "event",
    "name": "Gaslight",
@@ -1735,7 +2423,7 @@
    "hood": "State Street",
    "lat": 43.0745,
    "lng": -89.3883,
-   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 &amp; 21. $71.32-$56.47.",
+   "story": "Forward Theater: World premiere of new adaptation by Steven Dietz, 10/29-11/22, Playhouse, at 7:30 pm Wednesday-Saturday and 2 pm Sunday, plus 2 pm, 11/7, 12, 14 & 21. $71.32-$56.47.",
    "price": 3,
    "setting": "in",
    "minutes": [
@@ -1789,6 +2477,335 @@
    "url": "https://isthmus.com/events/ethan-regan-lily-kershaw/?occ_dtstart=2026-11-14T20:00",
    "source": "isthmus",
    "venue": "Majestic Theatre"
+  },
+  {
+   "id": "uw:wud-film-presents-hadestown-the-musical-2026-ope:29911860",
+   "kind": "event",
+   "name": "WUD Film Presents: Hadestown: The Musical (2026) [Open Caption Screening]",
+   "what": "Film at Union South",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0717,
+   "lng": -89.4078,
+   "story": "USA | 142 min | NR | Dir. Brett Sullivan \"A musical juxtaposition of the Orpheus/Eurydice and Hades/Persephone myths that examines the way real life can impact our quest for a perfect world.\" - IMDB \"A splendid…",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    152
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794711600000,
+    "end": 1794720720000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/227648",
+   "source": "uw",
+   "venue": "Union South"
+  },
+  {
+   "id": "mcm:sparkly-slime:29912670",
+   "kind": "event",
+   "name": "Sparkly Slime",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "What happens when a little fairy sparkle meets a whole lot of goo? It’s slime-making magic! Mix, squish, stretch, and experiment as you create a shimmering batch of sparkly slime.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    60
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794760200000,
+    "end": 1794763800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/sparkly-slime/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "uw:uw-cinematheque-rajamouli-myth-spectacle-cinema:29912880",
+   "kind": "event",
+   "name": "UW Cinematheque - Rajamouli: Myth, Spectacle, Cinema",
+   "what": "Film at Vilas Hall",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.07264502572392,
+   "lng": -89.39986377177232,
+   "story": "Cast: Prabhas, Rana Daggubati, Anushka Shetty A larger-than-life saga etched with the force of an ancient myth, Rajamouli’s mammoth sword-and-sandals epic changed the trajectory of Indian cinema.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794772800000,
+    "end": 1794778200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/223604",
+   "source": "uw",
+   "venue": "Vilas Hall"
+  },
+  {
+   "id": "uw:uw-cinematheque-rajamouli-myth-spectacle-cinema:29913060",
+   "kind": "event",
+   "name": "UW Cinematheque - Rajamouli: Myth, Spectacle, Cinema",
+   "what": "Film at Vilas Hall",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.07264502572392,
+   "lng": -89.39986377177232,
+   "story": "Cast: Prabhas, Rana Daggubati, Anushka Shetty Boasting jaw-dropping battle sequences, searing melodrama, and spectacular filmmaking, the Baahubali films shattered Indian box-office records.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794783600000,
+    "end": 1794789000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/223605",
+   "source": "uw",
+   "venue": "Vilas Hall"
+  },
+  {
+   "id": "uw:exclusive-film-screening-the-new-gold-standard-:29916000",
+   "kind": "event",
+   "name": "Exclusive film screening: \"The New Gold Standard\"",
+   "what": "Film at Union South",
+   "category": "show",
+   "hood": "Campus",
+   "lat": 43.0717,
+   "lng": -89.4078,
+   "story": "Interested in biomedical science? Cutting edge research techniques? Animal welfare? Join us for an exclusive screening of \"The New Gold Standard\", a feature documentary by Steven Latham Productions.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    120
+   ],
+   "kids": 1,
+   "moods": {
+    "date": 0.6,
+    "cozy": 0.6,
+    "learn": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1794960000000,
+    "end": 1794967200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/227603",
+   "source": "uw",
+   "venue": "Union South"
+  },
+  {
+   "id": "mcm:stories-across-generations:29916960",
+   "kind": "event",
+   "name": "Stories Across Generations",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Settle in for a special storytime that brings generations together. Eleanor Dougherty shares beloved picture books with young listeners in a warm, welcoming setting.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    30,
+    30
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1795017600000,
+    "end": 1795019400000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/stories-across-generations-28/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:nice-age-tales:29916990",
+   "kind": "event",
+   "name": "Nice Age Tales",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Join us for a puppet show, songs and story time for early learners.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    30,
+    30
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1795019400000,
+    "end": 1795021200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/nice-age-tales-60/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:music-time-with-tim:29917020",
+   "kind": "event",
+   "name": "Music Time with Tim",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Explore the world of music and rhythm! Each week, Tim leads children in singing and other musical activities that inspire creativity and connection. It’s an engaging experience for kids and families—free with admission.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    30,
+    30
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1795021200000,
+    "end": 1795023000000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/music-time-with-tim-106/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "mcm:li-l-music-with-junko:29917170",
+   "kind": "event",
+   "name": "Li’l Music with Junko",
+   "what": "Kids’ program at Madison Children's Museum",
+   "category": "play",
+   "hood": "Downtown",
+   "lat": 43.0765,
+   "lng": -89.3848,
+   "story": "Do you have a dancing baby? Discover Junko’s weekly music session where babies and toddlers can explore their natural love of rhythm.",
+   "price": 2,
+   "setting": "in",
+   "minutes": [
+    45,
+    60
+   ],
+   "kids": 2,
+   "moods": {
+    "kids": 1,
+    "cozy": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1795030200000,
+    "end": 1795033800000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://madisonchildrensmuseum.org/event/lil-music-with-junko-12/",
+   "source": "mcm",
+   "venue": "Madison Children's Museum",
+   "placeId": "childrens-museum"
+  },
+  {
+   "id": "uw:from-near-obscurity-to-iconic-works-bach-s-cello:29917530",
+   "kind": "event",
+   "name": "From Near Obscurity to Iconic Works: Bach’s Cello Suites",
+   "what": "Talk at Hamel Music Center",
+   "category": "talk",
+   "hood": "Campus",
+   "lat": 43.0735,
+   "lng": -89.398,
+   "story": "The six suites for unaccompanied cello by Johann Sebastian Bach—once dismissed as mere curiosities—are now revered as iconic works.",
+   "price": 1,
+   "setting": "in",
+   "minutes": [
+    45,
+    90
+   ],
+   "kids": 1,
+   "moods": {
+    "learn": 1,
+    "think": 0.6
+   },
+   "gem": 0.4,
+   "when": {
+    "start": 1795051800000,
+    "end": 1795057200000
+   },
+   "dropIn": false,
+   "hoursTrust": "solid",
+   "url": "https://today.wisc.edu/events/view/227373",
+   "source": "uw",
+   "venue": "Hamel Music Center"
   }
  ]
 }

@@ -6,6 +6,8 @@
 // --at is Madison wall time. Without --weather, weather is unknown (as offline).
 
 import { city, places } from '../src/cities/madison';
+import { readFileSync } from 'node:fs';
+import { loadEvents } from '../src/core/events';
 import { summarize } from '../src/core/history';
 import { parseIntent, resolveStart } from '../src/core/intent';
 import { match, statusLine } from '../src/core/match';
@@ -28,10 +30,18 @@ const say = args.join(' ');
 const now = atArg ? parseLocalInput(atArg, city.tz) ?? Date.now() : Date.now();
 const intent = parseIntent(say);
 const start = resolveStart(intent.start, now, city.tz);
+// The same events file the app reads, judged the same way.
+let events: ReturnType<typeof loadEvents> = [];
+try {
+  events = loadEvents(JSON.parse(readFileSync(new URL('../public/events.json', import.meta.url), 'utf8')), now);
+} catch {
+  /* no events file yet */
+}
+const options = [...places, ...events];
 const weather = useWeather ? await fetchWeather(city.center, Date.now()) : null;
 const result = match(
   { now, start, durationMin: hours ? Number(hours) * 60 : intent.durationMin ?? 120, origin: city.center, mode, intent, seed },
-  { city, options: places, weather, memory: summarize([], places, now) },
+  { city, options, weather, memory: summarize([], options, now) },
 );
 
 console.log(`\n"${say}" — ${fmtDay(start, now, city.tz)} at ${fmtTime(start, city.tz)}, ${mode}, heard: [${intent.heard.join(', ')}]`);

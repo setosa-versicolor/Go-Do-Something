@@ -35,6 +35,9 @@ export const VENUES: Venue[] = [
   { match: 'veterans museum', lat: 43.0756, lng: -89.3853, hood: 'Downtown', placeId: 'veterans-museum' },
   { match: 'working draft', lat: 43.0805, lng: -89.365, hood: 'Willy Street', bar: true, placeId: 'working-draft' },
   { match: 'olbrich', lat: 43.0926, lng: -89.3353, hood: 'East Side', placeId: 'olbrich-gardens' },
+  { match: "children's museum", lat: 43.0765, lng: -89.3848, hood: 'Downtown', placeId: 'childrens-museum' },
+  { match: 'the rigby', lat: 43.0742, lng: -89.3813, hood: 'Downtown', usual: 'music', bar: true },
+  { match: 'breese stevens', lat: 43.0832, lng: -89.3718, hood: 'Tenney-Lapham', usual: 'music' },
   { match: 'mosse humanities', lat: 43.0738, lng: -89.4, hood: 'Campus' },
   { match: 'mills hall', lat: 43.0738, lng: -89.4, hood: 'Campus', usual: 'music' },
 ];

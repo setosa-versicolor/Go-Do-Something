@@ -1,7 +1,7 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { city, places } from '../cities/madison';
-import { loadEvents } from '../core/events';
+import { loadEvents, SOURCES } from '../core/events';
 import { directionsUrl, miles, travelLabel, type LatLng, type Mode } from '../core/geo';
 import { append, MAX_SAVED, pendingCheckIn, summarize, type Entry, type Verb } from '../core/history';
 import { parseIntent, resolveStart } from '../core/intent';
@@ -430,7 +430,7 @@ function Card(props: {
         <p class="story">{o.story}</p>
         {o.nudge && <p class="nudge"><span>Do this</span>{o.nudge}</p>}
         {!o.nudge && props.venueNudge && <p class="nudge"><span>While you're there</span>{props.venueNudge}</p>}
-        {o.url && <p class="source"><a href={o.url} target="_blank" rel="noopener">Details and tickets ({o.source === 'uw' ? 'UW–Madison' : 'Isthmus'})</a></p>}
+        {o.url && <p class="source"><a href={o.url} target="_blank" rel="noopener">Details and tickets ({SOURCES[o.source ?? ''] ?? 'source'})</a></p>}
       </div>
       <div class="actions">
         <a class="primary" href={directionsUrl(o.venue ?? o.name, city.label, props.mode, props.origin ?? undefined)} target="_blank" rel="noopener" onClick={props.onGo}>Take me there</a>

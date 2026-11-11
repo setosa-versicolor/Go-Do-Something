@@ -228,7 +228,7 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   if (opt.when) {
     const today = toLocal(req.now, tz);
     const same = today.y === local.y && today.mo === local.mo && today.d === local.d;
-    moments.push({ score: 0.25, line: same ? `Only happening ${hour >= 17 ? 'tonight' : 'today'}.` : "It's a one-time thing. It won't be there next week." });
+    moments.push({ score: 0.25, line: same ? `It's on ${hour >= 17 ? 'tonight' : 'today'}, and you'd make the start.` : "It's on then, and you'd make the start." });
   }
   moments.sort((a, b) => b.score - a.score);
   if (moments.length) parts.moment = W.moment * Math.min(0.6, moments[0]!.score + 0.3 * moments.slice(1).reduce((s, m) => s + m.score, 0));
@@ -273,6 +273,8 @@ function overlap(a: Option, b: Option): number {
   else if (GROUP[a.category] === GROUP[b.category]) p += TUNING.sameGroup;
   if (a.setting === b.setting) p += TUNING.sameSetting;
   if (a.hood === b.hood) p += TUNING.sameHood;
+  // Two things at one address are one outing, not two.
+  if (Math.abs(a.lat - b.lat) < 0.0008 && Math.abs(a.lng - b.lng) < 0.0008) p += TUNING.sameCategory;
   return p;
 }
 

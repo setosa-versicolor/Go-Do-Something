@@ -3,6 +3,7 @@
 // venue, can tell what kind of thing it is, and it isn't calendar filler.
 // Used by the fetch script (build time) and by the app (to validate the file).
 
+import { miles, type LatLng } from './geo';
 import { fromLocal, DAY, MIN } from './time';
 import type { Category, Mood, Option } from './types';
 
@@ -14,10 +15,26 @@ export interface RawEvent {
   end?: number;
   venue: string;
   url: string;
+  /** Coordinates from the feed itself, for venues we don't have on file. */
   lat?: number;
   lng?: number;
   tags?: string[];
+  /**
+   * Set by a source whose every listing is a known kind of thing at a known
+   * place (a museum's own program calendar). Skips the guesswork, not the checks.
+   */
+  preset?: Pick<Option, 'category' | 'moods' | 'kids' | 'price'> & { label: string };
 }
+
+/** Human names for the calendars we read, shown on the link back to them. */
+export const SOURCES: Record<string, string> = {
+  isthmus: 'Isthmus',
+  uw: 'UW–Madison',
+  mcm: "Madison Children's Museum",
+};
+
+/** How far from the city centre an event with only raw coordinates may be. */
+const MAX_MILES = 12;
 
 export interface Venue {
   /** Lowercase fragment matched against the venue name. */
@@ -54,6 +71,7 @@ export function clean(html: string): string {
     .replace(/&#0?39;|&apos;|&rsquo;|&lsquo;/g, "'").replace(/&quot;|&ldquo;|&rdquo;/g, '"')
     .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
     .replace(/\s+/g, ' ')
+    .replace(/^@ /, '')
     .trim();
 }
 
@@ -76,30 +94,63 @@ export function findVenue(name: string, venues: Venue[]): Venue | undefined {
   return venues.find((v) => n.includes(v.match));
 }
 
-/** A recommendable option, or null — with no apology — if it doesn't make the cut. */
-export function toOption(raw: RawEvent, venues: Venue[]): Option | null {
+export type Verdict = { option: Option } | { dropped: string };
+
+/**
+ * Judge one listing. It becomes a recommendable option only if we know where
+ * it is, can tell what kind of thing it is, and it isn't calendar filler.
+ * Otherwise it's dropped, with the reason, so the fetch log can be read.
+ */
+export function judge(raw: RawEvent, venues: Venue[], center: LatLng): Verdict {
   const title = clean(raw.title);
   const description = clean(raw.description);
+  if (!title || !Number.isFinite(raw.start)) return { dropped: 'malformed' };
   const venue = findVenue(raw.venue, venues);
-  if (!title || !venue || !Number.isFinite(raw.start)) return null;
+  const here = venue ?? (raw.lat !== undefined && raw.lng !== undefined ? { lat: raw.lat, lng: raw.lng, hood: 'Campus' } : null);
+  if (!here) return { dropped: 'unknown venue' };
+  if (miles(here, center) > MAX_MILES) return { dropped: 'out of town' };
   const text = `${title} ${description} ${(raw.tags ?? []).join(' ')}`;
-  if (FILLER.test(text) || CANT_GO.test(text)) return null;
+  if (CANT_GO.test(text)) return { dropped: 'sold out or cancelled' };
+  if (!raw.preset && FILLER.test(text)) return { dropped: 'filler' };
   // Fall back on what the venue is known for, using the plainest label for it.
-  const kind = KINDS.find((k) => k.re.test(text)) ?? [...KINDS].reverse().find((k) => k.category === venue.usual);
-  if (!kind) return null;
+  const kind = raw.preset ?? KINDS.find((k) => k.re.test(text)) ?? [...KINDS].reverse().find((k) => k.category === venue?.usual);
+  if (!kind) return { dropped: "can't tell what it is" };
   const end = raw.end && raw.end > raw.start ? raw.end : raw.start + (kind.category === 'music' ? 120 : 90) * MIN;
   const length = Math.round((end - raw.start) / MIN);
-  if (length > 8 * 60) return null; // an all-day listing, not an outing
+  // A venue's own program that runs for hours is a notice ("open late today"), not a thing to turn up for.
+  if (length > 8 * 60 || (raw.preset && length > 180)) return { dropped: 'all-day listing' };
   const venueName = clean(raw.venue);
   return {
-    id: `${raw.source}:${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 48)}:${raw.start / MIN}`,
-    kind: 'event', name: title, what: `${kind.label} at ${venueName}`, category: kind.category, hood: venue.hood,
-    lat: venue.lat, lng: venue.lng,
-    story: description ? blurb(description) : `${kind.label} at ${venueName}.`,
-    price: priceOf(description), setting: 'in', minutes: [Math.min(45, length), length], kids: venue.bar ? 0 : 1,
-    moods: kind.moods, gem: 0.4, when: { start: raw.start, end }, dropIn: kind.dropIn ?? false,
-    hoursTrust: 'solid', url: raw.url, source: raw.source, venue: venueName, placeId: venue.placeId,
+    option: {
+      id: `${raw.source}:${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 48)}:${raw.start / MIN}`,
+      kind: 'event', name: title, what: `${kind.label} at ${venueName}`, category: kind.category, hood: here.hood,
+      lat: here.lat, lng: here.lng,
+      story: description ? blurb(description) : `${kind.label} at ${venueName}.`,
+      price: raw.preset?.price ?? priceOf(description), setting: 'in', minutes: [Math.min(45, length), length],
+      kids: raw.preset?.kids ?? (venue?.bar ? 0 : 1),
+      moods: kind.moods, gem: 0.4, when: { start: raw.start, end }, dropIn: 'dropIn' in kind ? kind.dropIn ?? false : false,
+      hoursTrust: 'solid', url: raw.url, source: raw.source, venue: venueName, placeId: venue?.placeId,
+    },
   };
+}
+
+/** `judge`, for callers that only want the option. */
+export function toOption(raw: RawEvent, venues: Venue[], center: LatLng): Option | null {
+  const v = judge(raw, venues, center);
+  return 'option' in v ? v.option : null;
+}
+
+/**
+ * The same show from two calendars is one show: same start, same spot.
+ * Earlier sources win, so list the best-written calendar first.
+ */
+export function dedupe(options: Option[]): Option[] {
+  const kept: Option[] = [];
+  for (const o of options) {
+    const twin = kept.some((k) => k.when!.start === o.when!.start && (miles(k, o) < 0.06 || k.name.toLowerCase() === o.name.toLowerCase()));
+    if (!twin) kept.push(o);
+  }
+  return kept;
 }
 
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];

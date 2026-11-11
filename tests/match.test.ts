@@ -254,7 +254,7 @@ describe('dated events', () => {
     const r = run(show(19));
     expect(ids(r)).toEqual(['show']);
     expect(statusLine(r.picks[0]!, start, TZ)).toBe('Starts at 7 pm');
-    expect(r.picks[0]!.reason).toMatch(/Only happening tonight/);
+    expect(r.picks[0]!.reason).toMatch(/It's on tonight/);
   });
 
   it('drops events that already started, start too late, or run too long', () => {

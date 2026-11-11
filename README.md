@@ -23,7 +23,7 @@ A static site. No server, no database, no accounts, no API keys.
 | Piece | Where | Notes |
 | --- | --- | --- |
 | Places | `src/cities/madison/places.ts` | Hand-written. The content is the product. |
-| Events | `public/events.json` | Built by `scripts/fetch-events.ts` from the Isthmus calendar and the UW–Madison calendar, strictly filtered. |
+| Events | `public/events.json` | Rebuilt every morning from public calendars. See "The events process". |
 | Weather | Open-Meteo, from the browser | Free, no key. Sunrise and sunset are computed locally. |
 | Matching | `src/core/match.ts` | One pure function. The only copy of the logic. |
 | Memory | `localStorage` | Stays on the device. Location is used in memory only and never stored. |
@@ -62,6 +62,22 @@ Past versions were wrong quietly. The rules now:
 - Travel times are straight-line estimates with a detour factor, not routing.
 - The target is 200+ places. Add them slowly.
 - Not built yet: itineraries, group decisions, live conditions (beach closures, ice).
+
+## The events process
+
+`npm run events` (run by the deploy workflow every morning; add `-- --dry` to look without writing):
+
+1. **Fetch** each calendar. Today: the Isthmus calendar (RSS), UW–Madison events by tag (JSON, which also carries the Wisconsin Union's films and concerts), and the Madison Children's Museum's own programs (JSON).
+2. **Parse** with one small pure function per calendar in `src/core/sources.ts`.
+3. **Judge** every listing in `src/core/events.ts`. It's kept only if we know where it is (a venue in `src/cities/madison/venues.ts`, or coordinates from the feed within 12 miles), can tell what kind of thing it is, and it isn't filler, sold out, cancelled or an all-day notice. The run prints how many were dropped and why.
+4. **Dedupe**: same start time at the same spot is one event; the earlier calendar wins.
+5. **Write** `public/events.json`. The app re-validates it and ignores it entirely if it's more than four days old.
+
+A calendar that fails is skipped and reported; the others still publish. The quickest way to get more events through is to add venues to `venues.ts`: most Isthmus listings are dropped only because the venue isn't on file.
+
+To add a calendar: write a parser in `sources.ts`, test it against a real sample, name it in `SOURCES`, and list it in `scripts/fetch-events.ts`.
+
+Looked at and not used: Visit Madison's feed has dates but no times, so we can't honestly say when to turn up; the Wisconsin Union's own feed has titles only; Madtown Life mostly repeats Isthmus.
 
 ## Scheduled review (for a reviewing agent)
 
