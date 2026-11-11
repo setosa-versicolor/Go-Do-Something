@@ -12,7 +12,7 @@ import { GROUP, type Option } from '../core/types';
 import { conditionsFor, fetchWeather, type Weather } from '../core/weather';
 import type { Diorama, Pin, Pose, SkyInput } from './scene';
 import { partOfDay, skyAt } from './sky';
-import { forgetEverything, loadLog, loadMode, loadTheme, saveLog, saveMode, saveTheme, type Theme } from './store';
+import { forgetEverything, loadLog, loadMode, loadStart, loadTheme, saveLog, saveMode, saveStart, saveTheme, type Theme } from './store';
 
 const tz = city.tz;
 
@@ -55,7 +55,11 @@ export function App() {
   const [startKey, setStartKey] = useState('now');
   const [custom, setCustom] = useState<number | null>(null);
   const [mode, setMode] = useState<Mode>(loadMode);
-  const [origin, setOrigin] = useState<LatLng | null>(null);
+  // Where travel is measured from: '' is the city center, 'me' is the device, anything else is a named area.
+  const [startFrom, setStartFrom] = useState<string>(() => (city.starts.some((s) => s.name === loadStart()) ? loadStart() : ''));
+  const [here, setHere] = useState<LatLng | null>(null);
+  const [finding, setFinding] = useState(false);
+  const origin: LatLng | null = startFrom === 'me' ? here : city.starts.find((s) => s.name === startFrom) ?? null;
   const [log, setLog] = useState<Entry[]>(loadLog);
   const [view, setView] = useState<View | null>(null);
   const [excluded, setExcluded] = useState<string[]>([]);
@@ -230,18 +234,38 @@ export function App() {
     }
   };
 
-  const locate = () => {
-    if (origin) return setOrigin(null);
-    if (!navigator.geolocation) return say(`This browser won't share a location, so I'm measuring from ${city.centerName}.`);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const here = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        if (miles(here, city.center) > 30) say(`You're not in ${city.name} right now, so I'm measuring from ${city.centerName}.`);
-        else setOrigin(here);
-      },
-      () => say(`No location, no problem. Measuring from ${city.centerName}.`),
-      { maximumAge: 5 * 60_000, timeout: 8000 },
-    );
+  /** Pick where travel is measured from. Only "where I am" needs the device; if that fails, say exactly why. */
+  const chooseStart = (name: string) => {
+    if (name !== 'me') {
+      setStartFrom(name);
+      saveStart(name);
+      return;
+    }
+    const fallBack = (why: string) => {
+      setFinding(false);
+      say(`${why} Pick the nearest area from the list instead.`);
+    };
+    if (!navigator.geolocation) return fallBack("This browser can't share a location.");
+    setFinding(true);
+    const found = (pos: GeolocationPosition) => {
+      setFinding(false);
+      const at = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      const away = miles(at, city.center);
+      if (away > 30) return say(`You're about ${Math.round(away)} miles from ${city.name}, so I'll keep measuring from ${startFrom || city.centerName}.`);
+      setHere(at);
+      setStartFrom('me');
+      say('Got it. Measuring from where you are.');
+    };
+    const failed = (err: GeolocationPositionError) => {
+      // A precise fix can time out indoors; a rough one is plenty for travel estimates.
+      if (err.code !== err.PERMISSION_DENIED && !retried) {
+        retried = true;
+        return navigator.geolocation.getCurrentPosition(found, failed, { enableHighAccuracy: false, maximumAge: 30 * 60_000, timeout: 20_000 });
+      }
+      fallBack(err.code === err.PERMISSION_DENIED ? 'Location is blocked for this site (check the site or browser settings).' : "Your device couldn't work out where it is.");
+    };
+    let retried = false;
+    navigator.geolocation.getCurrentPosition(found, failed, { enableHighAccuracy: false, maximumAge: 5 * 60_000, timeout: 10_000 });
   };
 
   // The backdrop is the sky over the city at the moment in question.
@@ -360,7 +384,12 @@ export function App() {
               {MODES.map(([v, l]) => <option value={v}>{l}</option>)}
             </select>
             , from{' '}
-            <button type="button" class="link" onClick={locate} aria-pressed={Boolean(origin)}>{origin ? 'where I am' : city.centerName}</button>.
+            <select aria-label="Where you're starting from" value={finding ? 'finding' : startFrom} disabled={finding} onChange={(e) => { const v = e.currentTarget.value; if (v === 'me') e.currentTarget.value = startFrom; chooseStart(v); }}>
+              {finding && <option value="finding">finding you…</option>}
+              <option value="">{city.centerName}</option>
+              <option value="me">where I am now</option>
+              {city.starts.map((s) => <option value={s.name}>{s.name}</option>)}
+            </select>.
           </p>
           {startKey === 'pick' && (
             <label class="pick">

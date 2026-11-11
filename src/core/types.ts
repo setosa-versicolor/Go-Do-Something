@@ -102,6 +102,8 @@ export interface City {
   tz: string;
   center: LatLng;
   centerName: string;
+  /** Other places to measure travel from, for people who'd rather not share a location. */
+  starts: { name: string; lat: number; lng: number }[];
 }
 
 /** A landmark the model knows how to build. Positions are miles east and north of the center. */

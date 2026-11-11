@@ -5,6 +5,7 @@ import type { Mode } from '../core/geo';
 
 const LOG = 'gds:log';
 const MODE = 'gds:mode';
+const START = 'gds:start';
 const THEME = 'gds:theme';
 
 function read<T>(key: string, fallback: T): T {
@@ -35,6 +36,10 @@ export function loadMode(): Mode {
   return m === 'bike' || m === 'walk' ? m : 'drive';
 }
 export const saveMode = (m: Mode) => write(MODE, m);
+
+/** The named area travel is measured from. A device location is never stored. */
+export const loadStart = (): string => read<string>(START, '');
+export const saveStart = (name: string) => write(START, name);
 
 export type Theme = 'auto' | 'light' | 'dark';
 export function loadTheme(): Theme {
