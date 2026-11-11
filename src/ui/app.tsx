@@ -15,17 +15,20 @@ import { forgetEverything, loadLog, loadMode, loadTheme, saveLog, saveMode, save
 
 const tz = city.tz;
 
-// Each tile is just canned words: it goes through the same parser as typing does.
+// Tiles and pills are just canned words: they go through the same parser as typing does.
+// Labels stay broad on purpose. A tile names a kind of outing, never a taste.
 const MOODS: [label: string, line: string, say: string][] = [
-  ['Quiet', 'somewhere to think', 'think'],
-  ['A date', 'room to talk', 'date'],
-  ['Kids along', 'they need to move', 'kids'],
-  ['A visitor', 'show off the city', 'visiting'],
-  ['Food', 'hungry now', 'hungry'],
-  ['A drink', 'nothing fancy', 'drink'],
-  ['Fresh air', 'legs and lungs', 'outside move'],
+  ['Food', 'a snack to a real dinner', 'food'],
+  ['Drinks', 'dives to cocktail bars', 'drinks'],
+  ['Coffee', 'and somewhere to sit', 'coffee'],
+  ['Outside', 'a walk, a view, water', 'outside'],
+  ['Art & ideas', 'museums, books, talks', 'art museum books'],
+  ['Music & shows', "whatever's on a stage", 'music show'],
+  ['Play', 'games and climbing', 'play games'],
+  ['Peace & quiet', 'room to think', 'quiet'],
   ['Something odd', 'off the usual list', 'odd'],
 ];
+const COMPANY: [label: string, say: string][] = [['Just me', ''], ['A date', 'date'], ['Friends', 'friends'], ['Kids', 'kids'], ['A visitor', 'visiting']];
 const DURATIONS: [number, string, string][] = [[60, 'An hour', 'in and out'], [120, 'Two hours', 'room to linger'], [180, 'Three hours', 'a proper outing'], [300, 'Half the day', 'no rush at all']];
 const STARTS: [string, string][] = [['now', 'now'], ['tonight', 'tonight'], ['tomorrow morning', 'tomorrow morning'], ['saturday morning', 'Saturday morning'], ['pick', 'at a time I pick…']];
 const MODES: [Mode, string][] = [['walk', 'on foot'], ['bike', 'by bike'], ['drive', 'by car']];
@@ -44,6 +47,7 @@ interface View {
 export function App() {
   const [stage, setStage] = useState<Stage>('mood');
   const [mood, setMood] = useState<string>(''); // the canned words of the chosen tile
+  const [company, setCompany] = useState<string | null>(null); // label of the chosen pill
   const [text, setText] = useState('');
   const [duration, setDuration] = useState(120);
   const [startKey, setStartKey] = useState('now');
@@ -95,7 +99,8 @@ export function App() {
   /** Ask the matcher. Everything the person chose is passed in, so nothing here reads stale state. */
   const ask = (q: { mood: string; text: string; duration: number; shuffles: number }) => {
     const now = Date.now();
-    const intent = parseIntent(`${q.mood} ${q.text}`);
+    const along = COMPANY.find((c) => c[0] === company);
+    const intent = parseIntent(q.text || `${q.mood} ${along?.[1] ?? ''}`);
     const picked = startKey === 'pick' ? custom : null;
     // Words win over the controls: "tomorrow morning" typed beats "now" selected.
     const start = Math.max(now, picked ?? resolveStart(intent.start ?? parseIntent(startKey).start, now, tz));
@@ -106,7 +111,7 @@ export function App() {
     const result = match(req, w);
     const tile = MOODS.find((m) => m[2] === q.mood)?.[0];
     const hours = durationMin % 60 === 0 ? `${durationMin / 60} hour${durationMin === 60 ? '' : 's'}` : `${durationMin} minutes`;
-    setView({ req, result, options, label: [q.text ? `“${q.text}”` : tile ?? 'Anything', hours].join(' · ') });
+    setView({ req, result, options, label: [q.text ? `“${q.text}”` : [tile ?? 'Anything', along && along[1] ? along[0].toLowerCase() : null].filter(Boolean).join(', '), hours].join(' · ') });
     setExcluded([]);
     for (const p of result.picks) {
       const last = w.memory.lastShown.get(p.option.id);
@@ -264,7 +269,13 @@ export function App() {
             </section>
           )}
           {shared && <Shared id={shared} options={[...places, ...events.current]} weather={weather.current} mode={mode} onClose={() => { history.replaceState(null, '', location.pathname + location.search); setShared(null); }} />}
-          <h2 class="q">What sounds right?</h2>
+          <h2 class="q">Who's coming? <span>optional</span></h2>
+          <div class="pills" role="group" aria-label="Who's coming">
+            {COMPANY.map(([label]) => (
+              <button class="pill" aria-pressed={company === label} onClick={() => setCompany(company === label ? null : label)}>{label}</button>
+            ))}
+          </div>
+          <h2 class="q">What sounds good?</h2>
           <div class="tiles">
             {MOODS.map(([label, sub, words], i) => (
               <button class="tile" style={{ '--i': i }} onClick={() => chooseMood(words)}>
@@ -272,7 +283,7 @@ export function App() {
                 <span>{sub}</span>
               </button>
             ))}
-            <button class="tile wide" style={{ '--i': MOODS.length }} onClick={() => chooseMood('surprise me')}>
+            <button class="tile accent" style={{ '--i': MOODS.length }} onClick={() => chooseMood('surprise me')}>
               <strong>Surprise me</strong>
               <span>whatever's best right now</span>
             </button>

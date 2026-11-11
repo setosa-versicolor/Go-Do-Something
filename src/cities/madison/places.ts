@@ -437,6 +437,27 @@ export const PLACES: Option[] = [
     nudge: "Look for the unmarked door on King Street. Get dumplings and a pizza to share. Bring cash to be safe, and patience; it's small.",
   }),
   place({
+    id: 'gibs', name: "Gib's Bar", what: 'Careful cocktails in an old Willy Street house',
+    category: 'bar', hood: 'Willy Street', lat: 43.0828, lng: -89.3622, price: 2, setting: 'in', minutes: [45, 90], kids: 0,
+    moods: 'date! drink! cozy', hours: 'tu-sa 17:00-24:00', best: ['night'], gem: 0.8,
+    story: "A two-story house turned cocktail bar, with a short, serious menu downstairs and a living room of couches upstairs. The drinks are precise without anyone making a speech about them.",
+    nudge: "Go upstairs and take a couch if one's free. Tell the bartender a spirit and a mood and let them choose. Have one more than you planned, slowly.",
+  }),
+  place({
+    id: 'robin-room', name: 'Robin Room', what: 'A small, low-lit cocktail bar on East Johnson',
+    category: 'bar', hood: 'Tenney-Lapham', lat: 43.0826, lng: -89.3752, price: 2, setting: 'in', minutes: [40, 80], kids: 0,
+    moods: 'date! drink! cozy', hours: 'daily 16:00-24:00', best: ['night'],
+    story: "A narrow neighborhood room with a long bar, candlelight, and a menu split between classics done properly and a few house inventions. Grown-up without being stiff.",
+    nudge: "Sit at the bar, not a table. Start with a classic so you know what they can do, then order the strangest thing on the house list.",
+  }),
+  place({
+    id: 'merchant', name: 'Merchant', what: 'Craft cocktails and a late kitchen off the Square',
+    category: 'bar', hood: 'Downtown', lat: 43.0733, lng: -89.3822, price: 2, setting: 'in', minutes: [45, 100], kids: 0,
+    moods: 'date drink! eat lively showoff', hours: 'daily 16:00-24:00', best: ['night'],
+    story: "A big, handsome room a block from the Capitol with a wall of bottles and a long cocktail list that changes with the season. It's where downtown goes when it wants to dress up a little.",
+    nudge: "Ask what's new on the seasonal list and order from that. Share a couple of plates rather than committing to dinner. Walk the Square afterward while the dome is lit.",
+  }),
+  place({
     id: 'plaza', name: 'The Plaza Tavern', what: 'Home of the Plazaburger',
     category: 'bar', hood: 'State Street', lat: 43.0755, lng: -89.39, price: 1, setting: 'in', minutes: [30, 60], kids: 0,
     moods: 'eat drink! lively odd', hours: 'mo-sa 11:00-02:00', best: ['night'],

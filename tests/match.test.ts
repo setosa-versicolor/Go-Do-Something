@@ -159,6 +159,26 @@ describe('constraints', () => {
   });
 });
 
+describe('broad asks stay broad', () => {
+  it('offers cocktail bars as well as dives for "drinks"', () => {
+    const seen = new Set<string>();
+    for (let seed = 1; seed <= 12; seed++) {
+      for (const p of match(request(at(2026, 11, 13, 20), 'drinks', { seed, durationMin: 180 }), world()).picks) seen.add(p.option.id);
+    }
+    const doable = match(request(at(2026, 11, 13, 20), 'drinks', { durationMin: 180 }), world()).debug.ranked.map((p) => p.option.id);
+    for (const id of ['gibs', 'robin-room', 'merchant', 'mickeys', 'le-tigre']) expect(doable).toContain(id);
+    expect(['gibs', 'robin-room', 'merchant', 'natt-spil'].some((id) => seen.has(id))).toBe(true);
+  });
+
+  it('puts the named kind of place first, and still varies the rest', () => {
+    const r = match(request(at(2026, 11, 14, 10), 'coffee'), world());
+    expect(r.picks[0]!.option.category).toBe('cafe');
+    expect(r.picks[0]!.parts.kind).toBeGreaterThan(0);
+    const play = match(request(at(2026, 11, 14, 14), 'play games'), world());
+    expect(play.picks.some((p) => p.option.category === 'play')).toBe(true);
+  });
+});
+
 describe('three different things', () => {
   it('does not offer three versions of the same thing', () => {
     for (const [mo, d, h] of [[11, 14, 11], [7, 11, 14], [11, 11, 19], [5, 15, 9]] as const) {

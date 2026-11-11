@@ -2,7 +2,7 @@
 // canned words — into a structured Intent. One parser, one path. Deterministic
 // and inspectable: `heard` lists exactly which phrases were understood.
 
-import type { Mood } from './types';
+import type { Category, Mood } from './types';
 import { fromLocal, localDatePlus, toLocal } from './time';
 
 export interface StartHint {
@@ -15,6 +15,8 @@ export interface StartHint {
 
 export interface Intent {
   moods: Partial<Record<Mood, number>>;
+  /** Kinds of place asked for by name ("coffee", "a bar", "a museum"). A boost, never a wall. */
+  kinds: Category[];
   withKids: boolean;
   cheap: boolean;
   inside: boolean;
@@ -30,6 +32,7 @@ export interface Intent {
 interface Entry {
   re: RegExp;
   moods?: Partial<Record<Mood, number>>;
+  kinds?: Category[];
   flag?: 'withKids' | 'cheap' | 'inside' | 'surprise';
 }
 
@@ -40,15 +43,17 @@ const LEXICON: Entry[] = [
   { re: /\b(kids?|child(ren)?|toddlers?|family|son|daughter|nephew|niece|little ones?)\b/, moods: { kids: 1 }, flag: 'withKids' },
   { re: /\b(visit(ing|or|ors)?|in town|out[- ]of[- ]town(ers?)?|guests?|parents|show (them|him|her) (around|madison)|tourist|first time)\b/, moods: { showoff: 1 } },
   { re: /\b(burn (off )?energy|walk|hike|run|bike|ride|paddle|kayak|swim|exercise|active|move|stretch my legs|sled(ding)?|ski)\b/, moods: { move: 1 } },
-  { re: /\b(hungry|eat|food|lunch|dinner|breakfast|brunch|bite|snack|starving)\b/, moods: { eat: 1 } },
-  { re: /\b(drinks?|beer|cocktails?|bar|wine|pint|nightcap|brewery)\b/, moods: { drink: 1 } },
-  { re: /\b(coffee|cafe|café|tea|espresso|caffeine)\b/, moods: { cozy: 0.7, think: 0.5, drink: 0.3 } },
-  { re: /\b(ice cream|dessert|sweet|treat|donuts?|pastry)\b/, moods: { eat: 0.8 } },
-  { re: /\b(learn|museum|art|history|science|culture|books?|bookstore|library|lecture|curious|nerd(y)?)\b/, moods: { learn: 1 } },
+  { re: /\b(hungry|eat|food|lunch|dinner|breakfast|brunch|bite|snack|starving)\b/, moods: { eat: 1 }, kinds: ['food', 'market'] },
+  { re: /\b(drinks?|beer|cocktails?|bar|wine|pint|nightcap|brewery|nightcap)\b/, moods: { drink: 1 }, kinds: ['bar'] },
+  { re: /\b(coffee|cafe|café|tea|espresso|caffeine)\b/, moods: { cozy: 0.7, think: 0.5 }, kinds: ['cafe'] },
+  { re: /\b(ice cream|dessert|sweet|treat|donuts?|pastry)\b/, moods: { eat: 0.8 }, kinds: ['treat'] },
+  { re: /\b(learn|museum|art|history|science|culture|books?|bookstore|library|lecture|curious|nerd(y)?|ideas|gallery|exhibit\w*|talk|reading)\b/, moods: { learn: 1 }, kinds: ['museum', 'bookstore', 'library', 'talk'] },
   { re: /\b(outside|outdoors?|nature|fresh air|trees|woods|lake|water|park|sun(ny|shine)?|sunset|sunrise|birds?|stars)\b/, moods: { nature: 1 } },
   { re: /\b(rain(y|ing)?|cold|freezing|snow(y|ing)?|cozy|warm up|hide|shelter|gloomy|grey|gray)\b/, moods: { cozy: 1 } },
   { re: /\b(inside|indoors?|rain(y|ing)?|storm(y|ing)?)\b/, flag: 'inside' },
   { re: /\b(friends?|group|people|music|live|show|concert|dance|loud|fun|party|social|celebrat\w+|birthday|crowd)\b/, moods: { lively: 1 } },
+  { re: /\b(music|concert|band|jazz|show|comedy|theat(er|re)|film|movie|stage)\b/, moods: { lively: 1 }, kinds: ['music', 'show'] },
+  { re: /\b(play|games?|arcade|pinball|bowling|mini ?golf|climb(ing)?)\b/, moods: { lively: 0.6, move: 0.5 }, kinds: ['play'] },
   { re: /\b(weird|odd|strange|different|unusual|hidden|secret|never been|new to me|bored)\b/, moods: { odd: 1 } },
   // "a free evening" is about time, not money.
   { re: /\b(cheap|free(?! (hour|time|evening|afternoon|morning|day|night|weekend|minute|sat|sun|mon|tue|wed|thu|fri)\w*)|broke|no money|budget|inexpensive)\b/, flag: 'cheap' },
@@ -102,12 +107,13 @@ function parseStart(text: string, heard: string[]): StartHint | undefined {
 
 export function parseIntent(raw: string): Intent {
   const text = raw.toLowerCase().replace(/[’]/g, "'").trim();
-  const intent: Intent = { moods: {}, withKids: false, cheap: false, inside: false, surprise: false, heard: [], lost: false };
+  const intent: Intent = { moods: {}, kinds: [], withKids: false, cheap: false, inside: false, surprise: false, heard: [], lost: false };
   for (const e of LEXICON) {
     const m = e.re.exec(text);
     if (!m) continue;
     intent.heard.push(m[0]);
     if (e.flag) intent[e.flag] = true;
+    for (const k of e.kinds ?? []) if (!intent.kinds.includes(k)) intent.kinds.push(k);
     for (const [mood, w] of Object.entries(e.moods ?? {}) as [Mood, number][]) {
       intent.moods[mood] = Math.max(intent.moods[mood] ?? 0, w);
     }
@@ -115,7 +121,10 @@ export function parseIntent(raw: string): Intent {
   intent.durationMin = parseDuration(text, intent.heard);
   intent.start = parseStart(text, intent.heard);
   // "Surprise me" wins over any accidental mood words.
-  if (intent.surprise) intent.moods = {};
+  if (intent.surprise) {
+    intent.moods = {};
+    intent.kinds = [];
+  }
   intent.heard = [...new Set(intent.heard)];
   intent.lost = text.length > 0 && intent.heard.length === 0;
   return intent;

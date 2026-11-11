@@ -38,6 +38,14 @@ describe('intent', () => {
     expect(parseIntent('coffee').durationMin).toBeUndefined();
   });
 
+  it('hears kinds of place without narrowing the taste', () => {
+    expect(parseIntent('drinks')).toMatchObject({ moods: { drink: 1 }, kinds: ['bar'] });
+    expect(parseIntent('coffee').kinds).toEqual(['cafe']);
+    expect(parseIntent('music show').kinds).toEqual(['music', 'show']);
+    expect(parseIntent('art museum books').kinds).toContain('bookstore');
+    expect(parseIntent('surprise me with a bar').kinds).toEqual([]);
+  });
+
   it('is empty, not lost, when nothing is said', () => {
     expect(parseIntent('')).toMatchObject({ moods: {}, lost: false, heard: [] });
   });

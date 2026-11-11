@@ -82,7 +82,7 @@ export const TUNING = {
   lateGraceMin: 10, // may arrive this late to a timed event
   overrunMin: 30, // a timed event may run this far past the window
   twilightMin: 20,
-  weight: { mood: 1, moment: 1, time: 0.25, near: 0.2, gem: 0.25, kids: 0.35, cheap: 0.3, taste: 0.25, jitter: 0.06 },
+  weight: { mood: 1, kind: 0.4, moment: 1, time: 0.25, near: 0.2, gem: 0.25, kids: 0.35, cheap: 0.3, taste: 0.25, jitter: 0.06 },
   shownPenalty: 0.3,
   shownQuietHours: 3, // don't reshuffle on every reload
   wentPenalty: 0.5,
@@ -124,10 +124,11 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
 
   const wanted = Object.entries(intent.moods) as [Mood, number][];
   let moodFit = 0;
+  const kindFit = intent.kinds.includes(opt.category);
   if (wanted.length) {
     const total = wanted.reduce((s, [, w]) => s + w, 0);
     moodFit = wanted.reduce((s, [m, w]) => s + w * (opt.moods[m] ?? 0), 0) / total;
-    if (moodFit === 0) return reject(id, 'mood', "doesn't match what you asked for");
+    if (moodFit === 0 && !kindFit) return reject(id, 'mood', "doesn't match what you asked for");
   }
 
   const travelMin = travelMinutes(req.origin, opt, req.mode);
@@ -233,6 +234,8 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   if (moments.length) parts.moment = W.moment * Math.min(0.6, moments[0]!.score + 0.3 * moments.slice(1).reduce((s, m) => s + m.score, 0));
 
   if (wanted.length) parts.mood = W.mood * moodFit;
+  // They named this kind of place outright ("coffee", "a bar").
+  if (kindFit) parts.kind = W.kind;
   parts.time = W.time * Math.min(1, stayMin / idealStay);
   // A fifteen-minute curiosity is thin for a whole afternoon.
   if (idealStay < (req.durationMin - 2 * travelMin) * 0.25) parts.slight = -0.1;
