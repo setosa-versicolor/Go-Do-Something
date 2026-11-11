@@ -285,7 +285,7 @@ export function App() {
             <button class="plain" onClick={() => setStage('mood')} aria-label={`Go Do Something, ${city.name}: start over`}>Go Do Something · {city.name}</button>
             <span>{moment}</span>
           </p>
-          {stage === 'mood' && <h1>You have a free {part}.<em>Here's how to not waste it.</em></h1>}
+          {stage === 'mood' && <h1>You have a free {part}.<em>Make the most of it.</em></h1>}
           {stage === 'time' && <h1>How long have you got?</h1>}
           {stage === 'thinking' && <h1 class="pulse" aria-live="polite">{THINKING[line]}</h1>}
           {results && r && (

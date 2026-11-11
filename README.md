@@ -1,6 +1,6 @@
 # Go Do Something · Madison
 
-> You have a free evening. Here's how to not waste it.
+> You have a free evening. Make the most of it.
 
 Say what sounds right and how long you've got: two taps. Then three things worth doing in Madison, WI, are dealt for you: open, reachable, different from each other, each with a reason it fits and exactly what to do when you get there. Three, never more. No feed. The backdrop is the actual sky over the city at that moment.
 
