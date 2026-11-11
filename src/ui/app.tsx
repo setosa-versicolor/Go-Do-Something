@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { city, places } from '../cities/madison';
 import { loadEvents } from '../core/events';
@@ -5,53 +6,66 @@ import { directionsUrl, miles, travelLabel, type LatLng, type Mode } from '../co
 import { append, MAX_SAVED, pendingCheckIn, summarize, type Entry, type Verb } from '../core/history';
 import { parseIntent, resolveStart } from '../core/intent';
 import { match, statusLine, type Pick, type Request, type Result } from '../core/match';
-import type { ComponentChildren } from 'preact';
-import { DAY, HOUR, MIN, fmtDay, fmtTime, parseLocalInput, toLocalInput } from '../core/time';
-import type { Option } from '../core/types';
-import { fetchWeather, type Weather } from '../core/weather';
+import { sunFor } from '../core/sun';
+import { DAY, HOUR, MIN, fmtDay, fmtTime, parseLocalInput, toLocal, toLocalInput } from '../core/time';
+import { GROUP, type Option } from '../core/types';
+import { conditionsFor, fetchWeather, type Weather } from '../core/weather';
+import { partOfDay, skyAt } from './sky';
 import { forgetEverything, loadLog, loadMode, loadTheme, saveLog, saveMode, saveTheme, type Theme } from './store';
 
 const tz = city.tz;
 
-// Chips are just canned words: they go through the same parser as typing does.
-const CHIPS: [label: string, say: string][] = [
-  ['Need to think', 'think'], ['Date', 'date'], ['Kids along', 'kids'], ['Friend visiting', 'visiting'],
-  ['Hungry', 'hungry'], ['A drink', 'drink'], ['Move', 'move'], ['Somewhere cozy', 'cozy'],
-  ['Something odd', 'odd'], ['Cheap', 'cheap'], ['Surprise me', 'surprise me'],
+// Each tile is just canned words: it goes through the same parser as typing does.
+const MOODS: [label: string, line: string, say: string][] = [
+  ['Quiet', 'somewhere to think', 'think'],
+  ['A date', 'room to talk', 'date'],
+  ['Kids along', 'they need to move', 'kids'],
+  ['A visitor', 'show off the city', 'visiting'],
+  ['Food', 'hungry now', 'hungry'],
+  ['A drink', 'nothing fancy', 'drink'],
+  ['Fresh air', 'legs and lungs', 'outside move'],
+  ['Something odd', 'off the usual list', 'odd'],
 ];
-const DURATIONS: [number, string][] = [[60, 'an hour'], [120, 'two hours'], [180, 'three hours'], [300, 'half the day']];
+const DURATIONS: [number, string, string][] = [[60, 'An hour', 'in and out'], [120, 'Two hours', 'room to linger'], [180, 'Three hours', 'a proper outing'], [300, 'Half the day', 'no rush at all']];
 const STARTS: [string, string][] = [['now', 'now'], ['tonight', 'tonight'], ['tomorrow morning', 'tomorrow morning'], ['saturday morning', 'Saturday morning'], ['pick', 'at a time I pick…']];
 const MODES: [Mode, string][] = [['walk', 'on foot'], ['bike', 'by bike'], ['drive', 'by car']];
+const THINKING = ["Checking what's open…", 'Looking at the sky…', 'Leaving out the obvious…'];
+const COUNT = ['Nothing', 'One', 'Two', 'Three'];
+
+type Stage = 'mood' | 'time' | 'thinking' | 'results';
 
 interface View {
   req: Request;
   result: Result;
   options: Option[];
+  label: string;
 }
 
 export function App() {
-  const [chips, setChips] = useState<string[]>([]);
+  const [stage, setStage] = useState<Stage>('mood');
+  const [mood, setMood] = useState<string>(''); // the canned words of the chosen tile
   const [text, setText] = useState('');
-  const [draft, setDraft] = useState('');
   const [duration, setDuration] = useState(120);
   const [startKey, setStartKey] = useState('now');
   const [custom, setCustom] = useState<number | null>(null);
   const [mode, setMode] = useState<Mode>(loadMode);
   const [origin, setOrigin] = useState<LatLng | null>(null);
   const [log, setLog] = useState<Entry[]>(loadLog);
-  const [ready, setReady] = useState(false);
   const [view, setView] = useState<View | null>(null);
-  const [open, setOpen] = useState<string | null>(null);
   const [excluded, setExcluded] = useState<string[]>([]);
   const [shuffles, setShuffles] = useState(0);
+  const [line, setLine] = useState(0);
   const [sheet, setSheet] = useState(false);
   const [toast, setToast] = useState('');
   const [theme, setTheme] = useState<Theme>(loadTheme);
+  const [, setWeatherTick] = useState(0);
   const [shared, setShared] = useState<string | null>(() => /^#\/p\/(.+)$/.exec(location.hash)?.[1] ?? null);
 
   const weather = useRef<Weather | null>(null);
   const events = useRef<Option[]>([]);
+  const loaded = useRef<Promise<unknown>>(Promise.resolve());
   const logRef = useRef(log);
+  const deck = useRef<HTMLOListElement>(null);
   const debug = useMemo(() => new URLSearchParams(location.search).has('debug'), []);
 
   const record = (id: string, verb: Verb) => {
@@ -66,54 +80,80 @@ export function App() {
     setTimeout(() => setToast(''), 4500);
   };
 
-  // Look outside and at the calendar first, briefly. If either is slow or
-  // down we go ahead without it rather than keep anyone waiting.
+  // Look outside and at the calendar while the person is choosing.
   useEffect(() => {
-    const w = fetchWeather(city.center, Date.now()).then((x) => void (weather.current = x));
+    const w = fetchWeather(city.center, Date.now()).then((x) => { weather.current = x; setWeatherTick((n) => n + 1); });
     const e = fetch('./events.json')
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => void (events.current = loadEvents(json, Date.now())))
       .catch(() => undefined);
-    const patience = new Promise((r) => setTimeout(r, 1800));
-    Promise.race([Promise.all([w, e]), patience]).then(() => setReady(true));
+    loaded.current = Promise.all([w, e]);
   }, []);
 
   const world = (options: Option[], now: number) => ({ city, options, weather: weather.current, memory: summarize(logRef.current, options, now) });
 
-  const fresh = () => {
+  /** Ask the matcher. Everything the person chose is passed in, so nothing here reads stale state. */
+  const ask = (q: { mood: string; text: string; duration: number; shuffles: number }) => {
     const now = Date.now();
-    const intent = parseIntent([...chips, text].join(' '));
+    const intent = parseIntent(`${q.mood} ${q.text}`);
     const picked = startKey === 'pick' ? custom : null;
     // Words win over the controls: "tomorrow morning" typed beats "now" selected.
     const start = Math.max(now, picked ?? resolveStart(intent.start ?? parseIntent(startKey).start, now, tz));
     const options = [...places, ...events.current.filter((e) => e.when!.end > now)];
-    const req: Request = {
-      now, start, durationMin: intent.durationMin ?? duration, origin: origin ?? city.center, mode, intent,
-      seed: Math.floor(now / DAY) * 31 + shuffles,
-    };
+    const durationMin = intent.durationMin ?? q.duration;
+    const req: Request = { now, start, durationMin, origin: origin ?? city.center, mode, intent, seed: Math.floor(now / DAY) * 31 + q.shuffles };
     const w = world(options, now);
     const result = match(req, w);
-    setView({ req, result, options });
+    const tile = MOODS.find((m) => m[2] === q.mood)?.[0];
+    const hours = durationMin % 60 === 0 ? `${durationMin / 60} hour${durationMin === 60 ? '' : 's'}` : `${durationMin} minutes`;
+    setView({ req, result, options, label: [q.text ? `“${q.text}”` : tile ?? 'Anything', hours].join(' · ') });
     setExcluded([]);
-    setOpen(result.picks[0]?.option.id ?? null);
     for (const p of result.picks) {
       const last = w.memory.lastShown.get(p.option.id);
       if (!last || now - last > 10 * MIN) record(p.option.id, 'shown');
     }
   };
 
-  useEffect(() => {
-    if (ready) fresh();
-  }, [ready, chips, text, duration, startKey, custom, mode, origin, shuffles]);
+  /** The beat between asking and the reveal: real work, kept short. */
+  const reveal = async (q: { mood: string; text: string; duration: number; shuffles: number }) => {
+    setStage('thinking');
+    setLine(0);
+    const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ticker = setInterval(() => setLine((n) => (n + 1) % THINKING.length), 600);
+    const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    await Promise.all([pause(calm ? 200 : 1700), Promise.race([loaded.current, pause(2500)])]);
+    clearInterval(ticker);
+    ask(q);
+    setStage('results');
+    window.scrollTo(0, 0);
+  };
 
-  // Coming back to the tab after a while: the moment has changed, so ask again.
-  useEffect(() => {
-    const onVisible = () => {
-      if (document.visibilityState === 'visible' && view && Date.now() - view.req.now > 10 * MIN) fresh();
-    };
-    document.addEventListener('visibilitychange', onVisible);
-    return () => document.removeEventListener('visibilitychange', onVisible);
-  });
+  const chooseMood = (words: string) => {
+    setMood(words);
+    setText('');
+    setStage('time');
+  };
+
+  const submitText = (e: Event) => {
+    e.preventDefault();
+    const typed = String(new FormData(e.currentTarget as HTMLFormElement).get('say') ?? '').trim();
+    if (!typed) return;
+    setMood('');
+    setText(typed);
+    // If they already said how long, don't ask again.
+    if (parseIntent(typed).durationMin) reveal({ mood: '', text: typed, duration, shuffles });
+    else setStage('time');
+  };
+
+  const chooseDuration = (minutes: number) => {
+    setDuration(minutes);
+    reveal({ mood, text, duration: minutes, shuffles });
+  };
+
+  const again = () => {
+    setShuffles(shuffles + 1);
+    reveal({ mood, text, duration, shuffles: shuffles + 1 });
+  };
 
   const swap = (id: string) => {
     if (!view) return;
@@ -129,10 +169,8 @@ export function App() {
     setExcluded(exclude);
     setView({ ...view, req, result: { ...next, picks } });
     record(id, 'skip');
-    if (replacement) {
-      record(replacement.option.id, 'shown');
-      setOpen(replacement.option.id);
-    }
+    if (replacement) record(replacement.option.id, 'shown');
+    else say("That was the last good one. I won't pad the list.");
   };
 
   const memory = useMemo(() => summarize(log, view?.options ?? places, Date.now()), [log, view]);
@@ -159,7 +197,7 @@ export function App() {
 
   const locate = () => {
     if (origin) return setOrigin(null);
-    if (!navigator.geolocation) return say("This browser won't share a location, so I'm measuring from " + city.centerName + '.');
+    if (!navigator.geolocation) return say(`This browser won't share a location, so I'm measuring from ${city.centerName}.`);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const here = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -171,129 +209,147 @@ export function App() {
     );
   };
 
-  const submit = (e: Event) => {
-    e.preventDefault();
-    setText(draft.trim());
-    (document.activeElement as HTMLElement | null)?.blur();
-  };
-
-  const checkIn = pendingCheckIn(log, Date.now());
+  // The backdrop is the sky over the city at the moment in question.
+  const results = stage === 'results' && view;
+  const skyTime = results ? view.req.start : Date.now();
+  const sun = sunFor(skyTime, city.center.lat, city.center.lng, tz);
+  const sky = skyAt(skyTime, sun);
+  // The header describes the sky at that moment, not the worst of the whole window.
+  const conditions = conditionsFor(weather.current, skyTime, skyTime + HOUR);
+  const part = partOfDay(toLocal(skyTime, tz).h);
+  const now = Date.now();
+  const checkIn = pendingCheckIn(log, now);
   const checkInPlace = checkIn ? byId(checkIn) ?? places.find((p) => p.id === checkIn) : undefined;
   const r = view?.result;
-  const now = view?.req.now ?? Date.now();
-  const later = view ? view.req.start - view.req.now > 5 * MIN : false;
-  const heard = view?.req.intent.heard ?? [];
+  const moment = [
+    results && view.req.start - view.req.now > 5 * MIN ? `${cap(fmtDay(view.req.start, view.req.now, tz))}, ${fmtTime(view.req.start, tz)}` : fmtTime(now, tz),
+    conditions.known ? conditions.summary : null,
+    skyTime < sun.sunset && skyTime > sun.sunrise ? `sunset ${fmtTime(sun.sunset, tz)}` : null,
+  ].filter(Boolean).join(' · ');
 
   return (
-    <div class="page">
-      <header class="top">
-        <h1>
-          Go Do Something <span>{city.name}</span>
-        </h1>
-        <p class="moment" aria-live="polite">
-          {view && r
-            ? [
-                later ? `${cap(fmtDay(view.req.start, now, tz))} at ${fmtTime(view.req.start, tz)}` : `It's ${fmtTime(now, tz)}`,
-                r.conditions.known ? r.conditions.summary : null,
-                view.req.start < r.sun.sunset ? `sunset at ${fmtTime(r.sun.sunset, tz)}` : view.req.start < r.sun.sunset + HOUR ? 'just after sunset' : null,
-              ].filter(Boolean).join(' · ')
-            : 'Looking outside…'}
-        </p>
+    <div class={`page stage-${stage}`}>
+      <header class={`sky ${sky.phase}${conditions.known && conditions.sky !== 'dry' ? ' grey' : ''}${results ? ' small' : ''}`}>
+        <div class="orb" aria-hidden="true" style={{ left: `${10 + 80 * sky.progress}%`, top: `${62 - Math.sin(Math.PI * sky.progress) * 44}%` }} />
+        <div class="sky-inner">
+          <p class="brand">
+            <button class="plain" onClick={() => setStage('mood')} aria-label={`Go Do Something, ${city.name}: start over`}>Go Do Something · {city.name}</button>
+            <span>{moment}</span>
+          </p>
+          {stage === 'mood' && <h1>You have a free {part}.<em>Here's how to not waste it.</em></h1>}
+          {stage === 'time' && <h1>How long have you got?</h1>}
+          {stage === 'thinking' && <h1 class="pulse" aria-live="polite">{THINKING[line]}</h1>}
+          {results && r && (
+            <h1>
+              {r.picks.length === 0 ? 'Nothing honest to offer.' : `${COUNT[r.picks.length]} for your ${partOfDay(toLocal(view.req.start, tz).h)}.`}
+              <em>{view.label}</em>
+            </h1>
+          )}
+        </div>
+        <svg class="shore" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 34 C 150 6, 300 58, 450 32 S 750 8, 900 34 S 1100 54, 1200 26 V60 H0 Z" />
+        </svg>
       </header>
 
-      {checkInPlace && (
-        <section class="checkin" aria-label="Check-in">
-          <p>
-            Did you make it to <strong>{checkInPlace.name}</strong>?
-          </p>
-          <div class="row">
-            <button onClick={() => record(checkInPlace.id, 'liked')}>Went. Glad I did</button>
-            <button onClick={() => record(checkInPlace.id, 'meh')}>Went. Not for me</button>
-            <button onClick={() => record(checkInPlace.id, 'nope')}>Didn't go</button>
+      {stage === 'mood' && (
+        <main class="step" key="mood">
+          {checkInPlace && (
+            <section class="checkin" aria-label="Check-in">
+              <p>Before anything else: did you make it to <strong>{checkInPlace.name}</strong>?</p>
+              <div class="row">
+                <button onClick={() => record(checkInPlace.id, 'liked')}>Went. Glad I did</button>
+                <button onClick={() => record(checkInPlace.id, 'meh')}>Went. Not for me</button>
+                <button onClick={() => record(checkInPlace.id, 'nope')}>Didn't go</button>
+              </div>
+            </section>
+          )}
+          {shared && <Shared id={shared} options={[...places, ...events.current]} weather={weather.current} mode={mode} onClose={() => { history.replaceState(null, '', location.pathname + location.search); setShared(null); }} />}
+          <h2 class="q">What sounds right?</h2>
+          <div class="tiles">
+            {MOODS.map(([label, sub, words], i) => (
+              <button class="tile" style={{ '--i': i }} onClick={() => chooseMood(words)}>
+                <strong>{label}</strong>
+                <span>{sub}</span>
+              </button>
+            ))}
+            <button class="tile wide" style={{ '--i': MOODS.length }} onClick={() => chooseMood('surprise me')}>
+              <strong>Surprise me</strong>
+              <span>whatever's best right now</span>
+            </button>
           </div>
-        </section>
+          <form class="say" onSubmit={submitText}>
+            <label class="sr" for="say">Or say it your own way</label>
+            <input id="say" name="say" type="text" placeholder="or say it: “rainy afternoon, two hours, cheap”" autocomplete="off" enterkeyhint="go" />
+            <button type="submit" class="go" aria-label="Go">→</button>
+          </form>
+        </main>
       )}
 
-      {shared && ready && <Shared id={shared} options={[...places, ...events.current]} weather={weather.current} mode={mode} onClose={() => { history.replaceState(null, '', location.pathname + location.search); setShared(null); }} />}
-
-      <form class="ask" onSubmit={submit}>
-        <p class="sentence">
-          I have{' '}
-          <select aria-label="How much time" value={duration} onChange={(e) => setDuration(Number(e.currentTarget.value))}>
-            {DURATIONS.map(([v, l]) => <option value={v}>{l}</option>)}
-          </select>
-          , starting{' '}
-          <select aria-label="Starting when" value={startKey} onChange={(e) => { setStartKey(e.currentTarget.value); if (e.currentTarget.value === 'pick' && !custom) setCustom(Date.now() + 2 * HOUR); }}>
-            {STARTS.map(([v, l]) => <option value={v}>{l}</option>)}
-          </select>
-          , getting there{' '}
-          <select aria-label="How you're getting around" value={mode} onChange={(e) => { const m = e.currentTarget.value as Mode; setMode(m); saveMode(m); }}>
-            {MODES.map(([v, l]) => <option value={v}>{l}</option>)}
-          </select>{' '}
-          from{' '}
-          <button type="button" class="link" onClick={locate} aria-pressed={Boolean(origin)}>
-            {origin ? 'where I am' : city.centerName}
-          </button>
-          .
-        </p>
-        {startKey === 'pick' && (
-          <label class="pick">
-            <span>When ({city.name} time)</span>
-            <input type="datetime-local" value={toLocalInput(custom ?? Date.now(), tz)} min={toLocalInput(Date.now(), tz)}
-              onChange={(e) => { const t = parseLocalInput(e.currentTarget.value, tz); if (t) setCustom(t); }} />
-          </label>
-        )}
-        <div class="chips" role="group" aria-label="What are you in the mood for?">
-          {CHIPS.map(([label, word]) => (
-            <button type="button" class="chip" aria-pressed={chips.includes(word)}
-              onClick={() => setChips(chips.includes(word) ? chips.filter((c) => c !== word) : word === 'surprise me' ? [word] : [...chips.filter((c) => c !== 'surprise me'), word])}>
-              {label}
-            </button>
-          ))}
-        </div>
-        <div class="say">
-          <label class="sr" for="say">Or say it your own way</label>
-          <input id="say" type="text" value={draft} placeholder="or say it: “rainy afternoon, two hours, cheap”" autocomplete="off" enterkeyhint="go"
-            onInput={(e) => setDraft(e.currentTarget.value)} />
-          <button type="submit" class="go">Go</button>
-        </div>
-        {text && heard.length > 0 && <p class="heard">Heard: {heard.join(', ')}. <button type="button" class="link" onClick={() => { setText(''); setDraft(''); }}>Clear</button></p>}
-      </form>
-
-      <main aria-live="polite" aria-busy={!view}>
-        {!view && <p class="note">Looking outside…</p>}
-        {r?.note && <p class="note">{r.note}</p>}
-        {view && r && !r.conditions.known && r.picks.some((p) => p.option.setting === 'out') && (
-          <p class="note small">I couldn't get the weather just now, so take the outdoor ideas with a look out the window.</p>
-        )}
-        <ol class="picks">
-          {view && r?.picks.map((p) => (
-            <li key={p.option.id}>
-              <Card pick={p} now={now} mode={view.req.mode} origin={origin} expanded={open === p.option.id} onToggle={() => setOpen(open === p.option.id ? null : p.option.id)}
-                saved={memory.saved.includes(p.option.id)} venueNudge={p.option.placeId ? byId(p.option.placeId)?.nudge : undefined}
-                onSave={() => toggleSave(p.option.id)} onShare={() => share(p.option)} onSkip={() => swap(p.option.id)} onGo={() => record(p.option.id, 'go')} />
-            </li>
-          ))}
-        </ol>
-        {view && r && r.picks.length > 0 && (
-          <p class="again">
-            <button class="link" onClick={() => setShuffles((n) => n + 1)}>Ask again</button>
+      {stage === 'time' && (
+        <main class="step" key="time">
+          <div class="tiles">
+            {DURATIONS.map(([minutes, label, sub], i) => (
+              <button class="tile" style={{ '--i': i }} onClick={() => chooseDuration(minutes)}>
+                <strong>{label}</strong>
+                <span>{sub}</span>
+              </button>
+            ))}
+          </div>
+          <p class="sentence">
+            Starting{' '}
+            <select aria-label="Starting when" value={startKey} onChange={(e) => { setStartKey(e.currentTarget.value); if (e.currentTarget.value === 'pick' && !custom) setCustom(Date.now() + 2 * HOUR); }}>
+              {STARTS.map(([v, l]) => <option value={v}>{l}</option>)}
+            </select>
+            , getting there{' '}
+            <select aria-label="How you're getting around" value={mode} onChange={(e) => { const m = e.currentTarget.value as Mode; setMode(m); saveMode(m); }}>
+              {MODES.map(([v, l]) => <option value={v}>{l}</option>)}
+            </select>
+            , from{' '}
+            <button type="button" class="link" onClick={locate} aria-pressed={Boolean(origin)}>{origin ? 'where I am' : city.centerName}</button>.
           </p>
-        )}
-        {debug && view && r && <Debug result={r} />}
-      </main>
+          {startKey === 'pick' && (
+            <label class="pick">
+              <span>When ({city.name} time)</span>
+              <input type="datetime-local" value={toLocalInput(custom ?? Date.now(), tz)} min={toLocalInput(Date.now(), tz)}
+                onChange={(e) => { const t = parseLocalInput(e.currentTarget.value, tz); if (t) setCustom(t); }} />
+            </label>
+          )}
+          <p class="back"><button class="link" onClick={() => setStage('mood')}>← Back</button></p>
+        </main>
+      )}
+
+      {stage === 'thinking' && <main class="step waiting" key="thinking" aria-hidden="true"><span /><span /><span /></main>}
+
+      {results && r && (
+        <main class="step" key="results" aria-live="polite">
+          {r.note && <p class="note">{r.note}</p>}
+          {!r.conditions.known && r.picks.some((p) => p.option.setting === 'out') && (
+            <p class="note quiet">I couldn't get the weather just now, so take the outdoor ideas with a look out the window.</p>
+          )}
+          <ol class={`deck n${r.picks.length}`} ref={deck}>
+            {r.picks.map((p, i) => (
+              <li key={p.option.id} style={{ '--i': i }}>
+                <Card pick={p} index={i} total={r.picks.length} now={view.req.now} mode={view.req.mode} origin={origin}
+                  saved={memory.saved.includes(p.option.id)} venueNudge={p.option.placeId ? byId(p.option.placeId)?.nudge : undefined}
+                  onSave={() => toggleSave(p.option.id)} onShare={() => share(p.option)} onSkip={() => swap(p.option.id)} onGo={() => record(p.option.id, 'go')} />
+              </li>
+            ))}
+          </ol>
+          {r.picks.length > 1 && <p class="hint">Swipe for the others</p>}
+          <p class="after">
+            {r.picks.length > 0 && <button class="ghost" onClick={again}>Deal three more</button>}
+            <button class="ghost" onClick={() => setStage('mood')}>Start over</button>
+          </p>
+          {debug && <Debug result={r} />}
+        </main>
+      )}
 
       <footer>
         <div class="row">
           <button class="link" onClick={() => setSheet(true)}>Saved ({memory.saved.length}/{MAX_SAVED}) · Been ({memory.went.size})</button>
-          <button class="link" onClick={() => { const next: Theme = theme === 'auto' ? 'dark' : theme === 'dark' ? 'light' : 'auto'; setTheme(next); saveTheme(next); }}>
-            Theme: {theme}
-          </button>
+          <button class="link" onClick={() => { const next: Theme = theme === 'auto' ? 'dark' : theme === 'dark' ? 'light' : 'auto'; setTheme(next); saveTheme(next); }}>Theme: {theme}</button>
         </div>
-        <p>
-          “Usually open” means the hours haven't been checked by hand yet, so confirm before a long trip. Travel times are estimates. Your history
-          stays on this device.
-        </p>
+        {results && <p>“Usually open” means the hours haven't been checked by hand yet, so confirm before a long trip. Travel times are estimates. Your history stays on this device.</p>}
       </footer>
 
       {sheet && (
@@ -332,35 +388,46 @@ export function App() {
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 function Card(props: {
-  pick: Pick; now: number; mode: Mode; origin: LatLng | null; expanded: boolean; saved: boolean; venueNudge?: string;
-  onToggle: () => void; onSave: () => void; onShare: () => void; onSkip: () => void; onGo: () => void;
+  pick: Pick; index: number; total: number; now: number; mode: Mode; origin: LatLng | null; saved: boolean; venueNudge?: string;
+  onSave: () => void; onShare: () => void; onSkip: () => void; onGo: () => void;
 }) {
-  const { pick, expanded } = props;
+  const { pick } = props;
   const o = pick.option;
-  const panel = `more-${o.id}`;
+  const turn = pick.reason.startsWith('The left turn. ');
   return (
-    <article class={`card${expanded ? ' open' : ''}`}>
-      <button class="head" aria-expanded={expanded} aria-controls={panel} onClick={props.onToggle}>
-        <span class="kicker">{o.kind === 'event' ? 'Happening' : cap(o.category)} · {o.hood}{o.price === 0 ? ' · free' : ''}</span>
-        <span class="name">{o.name}</span>
-        <span class="what">{o.what}</span>
-      </button>
-      <p class="reason">{pick.reason}</p>
-      <p class="status">
-        <span>{statusLine(pick, props.now, tz)}</span>
-        <span>{travelLabel(pick.travelMin, props.mode)}</span>
-      </p>
-      <div id={panel} hidden={!expanded} class="more">
-        <p>{o.story}</p>
+    <article class={`card g-${GROUP[o.category]}`}>
+      <div class="plate">
+        <span class="num" aria-hidden="true">{props.index + 1}</span>
+        <span class="kicker">{o.kind === 'event' ? 'Happening' : cap(o.category)} · {o.hood}</span>
+        <span class="tags">
+          {turn && <b>The left turn</b>}
+          {o.price === 0 && <b>Free</b>}
+        </span>
+        <svg viewBox="0 0 400 40" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M0 22 C 50 8, 100 34, 150 20 S 250 6, 300 22 S 370 32, 400 16" />
+          <path d="M0 32 C 60 20, 110 42, 170 30 S 260 18, 320 32 S 380 38, 400 28" />
+        </svg>
+      </div>
+      <div class="body">
+        <h3>{o.name}</h3>
+        <p class="what">{o.what}</p>
+        <p class="reason">{turn ? pick.reason.slice(15) : pick.reason}</p>
+        <p class="facts">
+          <span class="open">{statusLine(pick, props.now, tz)}</span>
+          <span>{cap(travelLabel(pick.travelMin, props.mode))}</span>
+        </p>
+        <p class="story">{o.story}</p>
         {o.nudge && <p class="nudge"><span>Do this</span>{o.nudge}</p>}
         {!o.nudge && props.venueNudge && <p class="nudge"><span>While you're there</span>{props.venueNudge}</p>}
         {o.url && <p class="source"><a href={o.url} target="_blank" rel="noopener">Details and tickets ({o.source === 'uw' ? 'UW–Madison' : 'Isthmus'})</a></p>}
       </div>
       <div class="actions">
-        <a class="primary" href={directionsUrl(o.venue ?? o.name, city.label, props.mode, props.origin ?? undefined)} target="_blank" rel="noopener" onClick={props.onGo}>Directions</a>
-        <button onClick={props.onSave} aria-pressed={props.saved}>{props.saved ? 'Saved' : 'Save'}</button>
-        <button onClick={props.onShare}>Share</button>
-        <button onClick={props.onSkip} aria-label={`Not ${o.name}. Show me something else`}>Not this</button>
+        <a class="primary" href={directionsUrl(o.venue ?? o.name, city.label, props.mode, props.origin ?? undefined)} target="_blank" rel="noopener" onClick={props.onGo}>Take me there</a>
+        <div>
+          <button onClick={props.onSave} aria-pressed={props.saved}>{props.saved ? 'Saved' : 'Save'}</button>
+          <button onClick={props.onShare}>Share</button>
+          <button onClick={props.onSkip} aria-label={`Not ${o.name}. Show me something else`}>Not this</button>
+        </div>
       </div>
     </article>
   );
