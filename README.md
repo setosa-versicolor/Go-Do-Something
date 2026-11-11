@@ -57,11 +57,28 @@ Past versions were wrong quietly. The rules now:
 
 ### Known gaps
 
-- The ~60 places were written from general knowledge of Madison, not verified on the ground. Hours, a few specifics in the nudges, and whether each business is still operating need a hand check. When you check one, fix it, set `trust: 'solid'` and `checked: 'YYYY-MM-DD'`.
+- The ~60 places were written from general knowledge of Madison, not verified on the ground. Hours, a few specifics in the nudges, and whether each business is still operating need a hand check. Checks go in `reviews.json` (see Scheduled review).
 - Coordinates are approximate (good to a few blocks). They're only used for travel estimates; directions search by name.
 - Travel times are straight-line estimates with a detour factor, not routing.
 - The target is 200+ places. Add them slowly.
 - Not built yet: itineraries, group decisions, live conditions (beach closures, ice).
+
+## Scheduled review (for a reviewing agent)
+
+Some facts can only be settled by reading a place's own website: its real hours, whether it still exists. That work is meant to be done on a schedule by a reviewer (a person, or an agent with repo write access) and has its own file so the reviewer never edits the prose:
+
+- **Queue:** `npm run review-queue -- --json` lists what's never been checked or is coming due, most overdue first.
+- **Write:** one entry per place in `src/cities/madison/reviews.json`:
+
+  ```json
+  { "bradburys": { "checked": "2026-11-20", "source": "https://…/hours", "hours": "mo-fr 07:00-15:00; sa,su 08:00-15:00" } }
+  ```
+
+  Omit `hours` to confirm the existing ones; use `[{ "season": "04-15..10-20", "hours": "…" }]` for seasonal hours; set `"closed": true` if it's gone for good; `note` is free text for a human.
+- **Gate:** `npm test` must pass. An unknown id, a missing `https` source, a bad date or unparseable hours fails the build, so a bad review can't ship.
+- **Effect:** a reviewed place shows firm hours ("Open until 9 pm") for 180 days, then drops back to "Usually" and re-enters the queue.
+
+Anything outside this contract (rewriting a story or nudge, adding a place) should come as a pull request for a person to read.
 
 ## Adding a place
 
