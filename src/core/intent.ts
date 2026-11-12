@@ -21,6 +21,8 @@ export interface Intent {
   cheap: boolean;
   inside: boolean;
   surprise: boolean;
+  /** Only what is specifically on that day: dated events and markets. A wall, unlike moods. */
+  today: boolean;
   /** A vibe id from vibes.ts. A lean, never a wall. */
   vibe?: string;
   durationMin?: number;
@@ -35,7 +37,7 @@ interface Entry {
   re: RegExp;
   moods?: Partial<Record<Mood, number>>;
   kinds?: Category[];
-  flag?: 'withKids' | 'cheap' | 'inside' | 'surprise';
+  flag?: 'withKids' | 'cheap' | 'inside' | 'surprise' | 'today';
 }
 
 // Order doesn't matter; every entry is tried. Keep phrases human, not clever.
@@ -59,6 +61,8 @@ const LEXICON: Entry[] = [
   { re: /\b(weird|odd|strange|different|unusual|hidden|secret|never been|new to me|bored)\b/, moods: { odd: 1 } },
   // "a free evening" is about time, not money.
   { re: /\b(cheap|free(?! (hour|time|evening|afternoon|morning|day|night|weekend|minute|sat|sun|mon|tue|wed|thu|fri)\w*)|broke|no money|budget|inexpensive)\b/, flag: 'cheap' },
+  // "Local today": what's on, not what's always there.
+  { re: /\b(local today|what'?s on|what is on|happening|going on|events?)\b/, flag: 'today' },
   { re: /\b(surprise( me)?|anything|whatever|dealer'?s choice|you pick|don'?t care|no idea)\b/, flag: 'surprise' },
 ];
 
@@ -109,7 +113,7 @@ function parseStart(text: string, heard: string[]): StartHint | undefined {
 
 export function parseIntent(raw: string): Intent {
   const text = raw.toLowerCase().replace(/[’]/g, "'").trim();
-  const intent: Intent = { moods: {}, kinds: [], withKids: false, cheap: false, inside: false, surprise: false, heard: [], lost: false };
+  const intent: Intent = { moods: {}, kinds: [], withKids: false, cheap: false, inside: false, surprise: false, today: false, heard: [], lost: false };
   for (const e of LEXICON) {
     const m = e.re.exec(text);
     if (!m) continue;

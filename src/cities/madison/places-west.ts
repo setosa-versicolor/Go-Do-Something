@@ -155,4 +155,37 @@ export const PLACES_WEST: Option[] = [
     story: "The company behind a great deal of the country's medical records software works in buildings themed as a wizard school, a storybook village and a farm with real animals. The public is allowed in for self-guided tours, which is hard to believe until you are standing in it.",
     nudge: "Reserve a time slot on Epic's visiting page first; walk-ins only get in if a slot is open. Park in the visitor lot under the solar panels, pick up a map at reception, and head for the Wizards Academy and Storybook campuses.",
   }),
+
+  // ------------------------------------- Asked for by name (Regent, Monroe St)
+  place({
+    id: 'cafe-domestique-allen', name: 'Cafe Domestique (Allen Street)', what: 'Bike-minded espresso bar, a wine bar after 3',
+    category: 'cafe', hood: 'Regent', lat: 43.0683, lng: -89.4236, price: 1, setting: 'both', minutes: [20, 60], kids: 1,
+    moods: 'cozy! think date', hours: 'mo-fr 07:00-15:00; sa,su 08:00-15:00', best: ['morning'], gem: 0.8,
+    story: "The Willy Street bike cafe, whose owner says the only thing they take seriously is the coffee, has a bright third location a block off Regent Street, with a patio out back. It shares the building with GlouGlou: coffee until 3, then the same address turns into a wine bar.",
+    nudge: "Order an espresso or a cappuccino and take it to the back patio if the weather allows. The coffee side shuts at 3, so come in the morning, and come back after dark for GlouGlou.",
+  }),
+  place({
+    id: 'glouglou', name: 'GlouGlou', what: 'Natural wine bar that takes over a coffee shop',
+    category: 'bar', hood: 'Regent', lat: 43.0683, lng: -89.4236, price: 2, setting: 'both', minutes: [40, 90], kids: 0,
+    moods: 'drink! date! cozy think', hours: 'tu-th 15:00-22:00; fr,sa 15:00-23:00',
+    trust: 'solid', checked: '2026-11-12', url: 'https://www.glouglouwi.com', best: ['night'], gem: 0.85,
+    story: "At 3 in the afternoon Cafe Domestique's Allen Street room stops being a coffee shop and becomes a wine bar run by a sommelier. The list rotates through natural, organic and small-producer bottles, poured by the glass or sold to take home, with beer, sake and good non-alcoholic options alongside.",
+    nudge: "Say what you usually drink and let them pour you something you have not heard of. Food comes from trucks that park outside on some evenings, so eat first or check who is coming. Closed Sunday and Monday.",
+  }),
+  place({
+    id: 'waltzing-matildas', name: "Waltzing Matilda's", what: 'Sit-down breakfast and lunch, no laptops',
+    category: 'food', hood: 'Monroe Street', lat: 43.0641, lng: -89.4181, price: 2, setting: 'in', minutes: [45, 80], kids: 1,
+    moods: 'eat! date cozy kids', hours: 'tu-su 08:00-15:00',
+    trust: 'solid', checked: '2026-11-12', url: 'https://www.waltzingmatildasmadison.com/faq', best: ['morning'], gem: 0.8,
+    story: "The newest place from the people behind Bloom Bake Shop and Lallande, and not Australian despite the name. Breakfast and lunch wander: French toast on Japanese milk bread, a sausage and rice bowl the owner's mother used to make, a croque monsieur. Laptops are not allowed, on purpose.",
+    nudge: "Book on Resy if you have a time in mind, or walk in; they hold seats for that. Get the milk bread French toast or the sausage and rice bowl, and bring a person or a book, not work. It is a meal place, so coffee-and-pastry belongs at Bloom down the street.",
+  }),
+  place({
+    id: 'lallande', name: 'Lallande', what: 'Twelve-table French bistro with an open kitchen',
+    category: 'food', hood: 'Monroe Street', lat: 43.0647, lng: -89.4171, price: 3, setting: 'in', minutes: [90, 150], kids: 1,
+    moods: 'eat! date! cozy showoff', hours: 'we-sa 16:00-21:00',
+    trust: 'solid', checked: '2026-11-12', url: 'https://www.lallandemadison.com/faqs', gem: 0.9,
+    story: "A baker and a pastry chef took the space next to their bakery and made a French bistro with twelve tables and a kitchen you can sit at. Dinner is meant to be coursed and slow: small bites, hors d'oeuvres, then mains that take the time they take, with an all-European wine list.",
+    nudge: "Reserve on Resy; books open 30 days out, and the kitchen bar seats go first and only until 7:30. Order in courses the way the menu suggests and leave room for dessert. Open Wednesday to Saturday, last seating at 9.",
+  }),
 ];

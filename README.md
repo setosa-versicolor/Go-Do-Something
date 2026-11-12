@@ -36,7 +36,7 @@ To turn on deploys: repo Settings → Pages → Source: GitHub Actions.
 1. **The list** (`src/cities/madison/places*.ts`): hand-written, with a story and a nudge for each. This is the product. It always comes first.
 2. **The map** (`public/nearby.json`, built by `npm run nearby`): independent restaurants, cafés, bars, bakeries and ice cream shops from OpenStreetMap that have a name and opening hours we can represent exactly. Chains and anything already on the list are dropped.
 
-The map is only ever used to fill seats the list couldn't: if three hand-written picks fit, no map place is shown. A map place passes the same gates (open, reachable, in time), is tagged "From the map", carries no opinion, and its hours are always shown as "usually open". When any are used, the page says so. The logic is in `match()` (`world.fallback`) and `src/core/nearby.ts`.
+The map is only ever used to fill seats the list couldn't: if three hand-written picks fit, no map place is shown. A "Local today" request never borrows from the map: those are ordinary restaurants, not things happening that day. A map place passes the same gates (open, reachable, in time), is tagged "From the map", carries no opinion, and its hours are always shown as "usually open". When any are used, the page says so. The logic is in `match()` (`world.fallback`) and `src/core/nearby.ts`.
 
 ## The model
 
@@ -67,10 +67,10 @@ To rebuild `shape.json`, fetch the lake polygons from Nominatim (`polygon_geojso
 
 `match(request, world)` in `src/core/match.ts`, in four stages:
 
-1. **Assess.** Hard gates decide whether this person can actually do this thing at that time: open long enough once you arrive (in the city's time zone), in season, enough daylight, weather that suits it, close enough for the time and transport you have, fine for kids if kids are along. Every rejection is recorded with a reason.
+1. **Assess.** Hard gates decide whether this person can actually do this thing at that time: open long enough once you arrive (in the city's time zone), in season, enough daylight, weather that suits it, close enough for the time and transport you have, fine for kids if kids are along. One gate comes from the request itself: `today` (the "Local today" tile, or words like "what's on", "happening tonight", "events") keeps only what is specifically on that day, meaning dated events and markets while they are open, and rules out everything that is always there. For that request other words only lean the order, and the map tier is never used to fill seats. Every rejection is recorded with a reason.
 2. **Score.** Named, additive parts: `mood`, `vibe` (the optional feel chosen in the vibe picker: chill, upbeat, romantic, curious, active or offbeat, defined in `src/core/vibes.ts`; it leans the order and never rules anything out), `moment` (sunset timing, weather, seasonal peaks, one-night events), `time`, `near`, `gem` (editorial weight), `taste` and `seen`/`been`/`skipped`/`saved` from history.
 3. **Choose.** The best fit; then the best fit that is a *different kind of thing*; then a "left turn" drawn at random (seeded) from what still clears the bar.
-4. **Explain.** One line per pick, built from the part that mattered most. No two cards share a reason.
+4. **Explain.** One line per pick, the sharpest true one available, tried in this order: the moment (sunset, weather, a seasonal peak, an event you'd make), the vibe that was picked, the kind of place that was named, the mood, then a fact read straight from the place's data (a few minutes away, open late or early for the hour, free or cheap, high editorial weight, hours checked by hand in the last 60 days, the time it needs), and only then a general line from a small pool per family of place. Facts and pool lines are rotated by a hash of the place's id, so a place tends to keep its line. No two cards share a reason, and no line claims what a field doesn't back. `tests/reasons.test.ts` sweeps about 1,500 requests over the real list and fails if any one line is on more than 15% of cards; run it with `REASONS=1` to print the table.
 
 If fewer than three things pass, it shows fewer and says why. If nothing passes, it says that.
 

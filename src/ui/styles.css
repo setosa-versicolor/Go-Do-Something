@@ -100,6 +100,9 @@ button { cursor: pointer; }
 .pick { display: flex; gap: 0.6rem; align-items: center; margin: 0.8rem 0 0; color: var(--muted); font-size: 0.9rem; }
 .pick input { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 0.4rem 0.5rem; }
 .back { margin: 1.6rem 0 0; }
+/* On the time step the sentence comes first and the tiles last: a tile is the "go". */
+.stage-time .sentence { margin: 0 0 1.1rem; line-height: 2; }
+.stage-time .pick { margin: -0.3rem 0 1.1rem; flex-wrap: wrap; }
 
 .waiting { display: flex; justify-content: center; align-items: flex-start; gap: 0.55rem; padding-top: 2.5rem; }
 .waiting span { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--accent); opacity: 0.25; }
@@ -196,6 +199,7 @@ footer p { margin: 0.8rem 0 0; }
   .sky h1 { animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
   .tile { animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i) * 45ms + 120ms); }
   .sentence, .say, .back, .after, .hint { animation: fade 0.6s 0.5s both; }
+  .stage-time .q, .stage-time .sentence, .stage-time .pick { animation: fade 0.5s 0.1s both; }
   .deck li { animation: deal 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: calc(var(--i) * 160ms + 100ms); }
   .pulse { animation: fade 0.5s both; }
   .waiting span { animation: blink 1s infinite; }
@@ -225,7 +229,7 @@ footer p { margin: 0.8rem 0 0; }
 .shore { z-index: 1; pointer-events: none; }
 .scene-hint { position: absolute; right: 0.9rem; bottom: 3rem; z-index: 2; font-size: 0.72rem; letter-spacing: 0.04em; color: #fff; background: rgb(0 0 0 / 0.4); padding: 0.3rem 0.7rem; border-radius: 999px; pointer-events: none; backdrop-filter: blur(6px); }
 .stage-mood .sky-inner { min-height: clamp(17rem, 42dvh, 30rem); }
-.stage-time .sky-inner { min-height: clamp(17rem, 46dvh, 30rem); }
+.stage-time .sky-inner { min-height: clamp(16rem, 38dvh, 30rem); }
 .stage-thinking .sky-inner { min-height: clamp(20rem, 64dvh, 40rem); }
 .stage-results .sky-inner, .sky.small .sky-inner { min-height: clamp(16rem, 38dvh, 26rem); }
 .sky-inner { transition: min-height 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
@@ -313,3 +317,8 @@ footer p { margin: 0.8rem 0 0; }
 @keyframes v-wobble { 0%, 100% { transform: rotate(-9deg) translateY(0); } 50% { transform: rotate(9deg) translateY(-3px); } }
 @keyframes v-blink { from { fill: #e2574c; } to { fill: #f6d15a; } }
 @keyframes v-hue { to { filter: hue-rotate(360deg); } }
+
+/* ---- zoom ---- */
+.scene-zoom { position: absolute; right: 0.7rem; bottom: 3.4rem; z-index: 3; display: flex; flex-direction: column; gap: 0.35rem; }
+.scene-zoom button { width: 2.1rem; height: 2.1rem; border-radius: 50%; border: 1px solid rgb(255 255 255 / 0.35); background: rgb(0 0 0 / 0.38); color: #fff; font-size: 1.15rem; line-height: 1; cursor: pointer; backdrop-filter: blur(6px); }
+.scene-zoom button:hover, .scene-zoom button:focus-visible { background: rgb(0 0 0 / 0.6); }

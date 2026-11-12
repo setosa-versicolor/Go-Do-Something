@@ -133,4 +133,13 @@ export const PLACES_SOUTH: Option[] = [
     story: "A bakery in a Fish Hatchery Road strip mall whose case leans Russian and European: cakes, cheesecakes, pastries, scones and bread, all made here. The cafe side does breakfast, lunch and soup, in the same home-style spirit.",
     nudge: "Come before 1:45, when the kitchen stops, and have soup or lunch, then choose a slice of cake from the case to take home. It is closed Sundays.",
   }),
+
+  // Asked for by name.
+  place({
+    id: 'greenbush-bar', name: 'Greenbush Bar', what: "Thin-crust pizza under the Italian Workmen's Club",
+    category: 'food', hood: 'Greenbush', lat: 43.0678, lng: -89.4018, price: 2, setting: 'in', minutes: [50, 100], kids: 1,
+    moods: 'eat! drink date cozy showoff', hours: 'mo-sa 16:30-24:00', best: ['night'], gem: 0.85,
+    story: "Down a staircase into the basement of the Italian Workmen's Club, in what is left of Madison's old Italian neighborhood: low ceiling, Christmas lights all year, thin-crust pizza. It changed hands in 2024 and the new owner kept the pizza as it was and the doors open later.",
+    nudge: "Start with the garlic bread, then split a thin-crust pizza; the New Haven, with shallots, roasted garlic and pecorino, is the one the owner points to. Go early on weekends and Badger game days, and call 608-257-2874 before a Sunday visit, since listings disagree about Sundays.",
+  }),
 ];

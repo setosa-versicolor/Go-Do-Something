@@ -10,11 +10,11 @@
 import type { LatLng, Mode } from './geo';
 import { travelMinutes } from './geo';
 import type { Memory } from './history';
-import { inSeason, inSeasonAt, openIntervals } from './hours';
+import { inSeason, inSeasonAt, openIntervals, parseHours } from './hours';
 import type { Intent } from './intent';
 import { sunFor, type Sun } from './sun';
 import { DAY, HOUR, MIN, fmtTime, toLocal } from './time';
-import { GROUP, type City, type Mood, type Option } from './types';
+import { GROUP, type Category, type City, type Mood, type Option } from './types';
 import { VIBES, vibeFit } from './vibes';
 import { conditionsFor, type Conditions, type Weather } from './weather';
 
@@ -43,7 +43,7 @@ export interface World {
 }
 
 export type Gate =
-  | 'dismissed' | 'disliked' | 'mood' | 'kids' | 'price' | 'inside' | 'far'
+  | 'dismissed' | 'disliked' | 'today' | 'mood' | 'kids' | 'price' | 'inside' | 'far'
   | 'season' | 'closed' | 'short' | 'missed' | 'late' | 'dark' | 'weather' | 'unconfirmed';
 
 export interface Rejection {
@@ -96,6 +96,9 @@ export const TUNING = {
   sameSetting: 0.08,
   sameHood: 0.06,
   wildcardFloor: 0.55, // a left turn must still score this share of the top pick
+  closeMin: 6, // this near is worth saying out loud
+  vouchGem: 0.85, // editorial weight from which "I'd vouch for it" is the reason
+  freshCheckDays: 60, // hours checked by hand this recently are worth mentioning
 };
 
 const W = TUNING.weight;
@@ -112,6 +115,17 @@ function reject(id: string, gate: Gate, why: string): Rejection {
   return { id, gate, why };
 }
 
+/**
+ * Specifically on that day, rather than always there: a dated event, or a
+ * market that only sets up a few days a week. A food hall or a shop that is
+ * open most days is a place, whatever its category says.
+ */
+export function happening(opt: Option): boolean {
+  if (opt.kind === 'event') return true;
+  if (opt.category !== 'market') return false;
+  return (opt.rules ?? []).every((r) => parseHours(r.hours).filter((day) => day.length > 0).length <= 3);
+}
+
 function assess(opt: Option, req: Request, world: World): Candidate | Rejection {
   const { intent } = req;
   const { city, memory } = world;
@@ -121,6 +135,8 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   if (req.exclude?.includes(id)) return reject(id, 'dismissed', 'you passed on it');
   const went = memory.went.get(id);
   if (went && !went.liked && req.now - went.t < TUNING.dislikedDays * DAY) return reject(id, 'disliked', "you went and weren't taken with it");
+  // "Local today" is a wall: what's on, not what's always there.
+  if (intent.today && !happening(opt)) return reject(id, 'today', "it's always there, not something on that day");
   if (intent.withKids && opt.kids === 0) return reject(id, 'kids', 'not a place for kids');
   if (intent.cheap && opt.price >= 3) return reject(id, 'price', 'not cheap');
   if (intent.inside && opt.setting === 'out') return reject(id, 'inside', "it's outdoors");
@@ -131,7 +147,8 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   if (wanted.length) {
     const total = wanted.reduce((s, [, w]) => s + w, 0);
     moodFit = wanted.reduce((s, [m, w]) => s + w * (opt.moods[m] ?? 0), 0) / total;
-    if (moodFit === 0 && !kindFit) return reject(id, 'mood', "doesn't match what you asked for");
+    // Asked for what's on, any event or market counts; other words only lean the order.
+    if (moodFit === 0 && !kindFit && !intent.today) return reject(id, 'mood', "doesn't match what you asked for");
   }
 
   const travelMin = travelMinutes(req.origin, opt, req.mode);
@@ -228,10 +245,12 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   }
   if (opt.best?.includes('morning') && hour >= 5 && hour < 10.5) moments.push({ score: 0.2, line: "It's at its best in the morning, and it's morning." });
   if (opt.best?.includes('night') && (hour >= 20 || hour < 3)) moments.push({ score: 0.2, line: 'It gets better after dark, and it is.' });
-  if (opt.when) {
+  if (opt.when || intent.today) {
     const today = toLocal(req.now, tz);
     const same = today.y === local.y && today.mo === local.mo && today.d === local.d;
-    moments.push({ score: 0.25, line: same ? `It's on ${hour >= 17 ? 'tonight' : 'today'}, and you'd make the start.` : "It's on then, and you'd make the start." });
+    const day = same ? (hour >= 17 ? 'tonight' : 'today') : 'then';
+    // A market asked for as "what's on" earns the same credit as an event.
+    moments.push({ score: 0.25, line: opt.when ? `It's on ${day}, and you'd make the start.` : `It's open ${day}, and you can turn up any time.` });
   }
   moments.sort((a, b) => b.score - a.score);
   if (moments.length) parts.moment = W.moment * Math.min(0.6, moments[0]!.score + 0.3 * moments.slice(1).reduce((s, m) => s + m.score, 0));
@@ -340,41 +359,138 @@ const MOOD_LINE: Record<Mood, [string, string]> = {
   odd: ["You wouldn't have thought of it. That's the point.", 'A little off the usual list.'],
 };
 
-const GROUP_LINE: Record<string, string> = {
-  outdoors: "It's close and it's outside. That's most of what you need.",
-  consume: 'Close, open, and very good at one thing.',
-  mind: 'An hour here goes somewhere.',
-  lively: "Something's actually happening here.",
+/** They named this kind of place. Worded by what was asked for, never by a word they may not have used. */
+const KIND_LINE: Partial<Record<Category, string>> = {
+  food: 'You wanted to eat. This is a place that exists to feed you.',
+  market: 'You wanted to eat. This is a market, so you can look before you choose.',
+  bar: 'You wanted a drink. This is a bar, so that part is covered.',
+  cafe: 'This is a cafe first and everything else second, which is what you asked for.',
+  treat: "You wanted something sweet. That's this place's whole job.",
+  museum: 'You wanted something to look at and think about. A museum is built for that.',
+  bookstore: 'You wanted books and ideas. This is a bookstore, so start at any shelf.',
+  library: 'You wanted books and ideas. A library has more of both than you can use.',
+  talk: 'You wanted ideas. This is someone explaining theirs out loud.',
+  music: "You wanted to be in an audience. Here it's for music.",
+  show: 'You wanted to be in an audience. This is a show, so take a seat.',
+  play: 'You wanted to play. This place is set up for exactly that.',
 };
 
-/** `used` holds lines already given to earlier picks: three cards never share a reason. */
+/**
+ * What to say when nothing sharper applies: a few honest lines per family, so
+ * no single one becomes wallpaper. They claim only what the family guarantees.
+ */
+const GROUP_LINES: Record<string, string[]> = {
+  outdoors: [
+    "It's close and it's outside. That's most of what you need.",
+    "You'll be outdoors, which is half the reason to leave the house.",
+    'Open air, and nobody setting the pace.',
+    'Being outside for a while tends to fix more than it should.',
+  ],
+  consume: [
+    'Nothing to plan. You turn up and order.',
+    "It's on a short list that somebody wrote by hand.",
+    'A small decision that is hard to regret.',
+    "Open when you'd get there, and worth the trip on its own.",
+    'The note below says what to do there. That is the whole plan.',
+  ],
+  mind: [
+    'An hour here goes somewhere.',
+    "You'll come out with something to talk about.",
+    'It asks for your attention and gives something back.',
+    'It gives your head something to do besides scroll.',
+  ],
+  lively: [
+    "Something's actually happening here.",
+    'A place with something on, not only somewhere to be.',
+    "You won't have to make your own entertainment.",
+    'It gives the outing a centre: something to do, not just somewhere to sit.',
+  ],
+};
+
+const EVENT_LINES = ["Something's actually happening here.", "It's on the calendar, which most of this list isn't."];
+
+/** The same items, started from a place that depends only on `id`: a given option tends to get the same line. */
+function rotate<T>(items: T[], id: string): T[] {
+  const k = items.length ? hash(id) % items.length : 0;
+  return [...items.slice(k), ...items.slice(0, k)];
+}
+
+/**
+ * True, checkable things about this pick for this request, each straight from
+ * a field: travel time, price, hours, editorial weight, ideal stay, weather.
+ * Nothing here is an opinion the data can't back.
+ */
+function facts(c: Candidate, req: Request, world: World): string[] {
+  const o = c.option;
+  const tz = world.city.tz;
+  const out: string[] = [];
+  if (o.when) {
+    if (!o.dropIn) out.push(`It starts at ${fmtTime(c.begin, tz)}, and you're ${c.travelMin} minutes away.`);
+    if (o.venue) out.push(`It's at ${o.venue}, about ${c.travelMin} minutes from where you're starting.`);
+    return out;
+  }
+  const group = GROUP[o.category];
+  const local = toLocal(c.begin, tz);
+  const hour = local.h + local.mi / 60;
+  const open = o.hoursTrust === 'solid' ? 'Open' : 'Usually open';
+  const idealStay = o.minutes[1];
+  if (c.travelMin >= 2 && c.travelMin <= TUNING.closeMin) out.push(`Only ${c.travelMin} minutes away. You could be there before you talk yourself out of it.`);
+  if ((o.gem ?? 0.5) >= TUNING.vouchGem) out.push("One of the places on this list I'd vouch for hardest.");
+  if (group !== 'outdoors' && c.until - c.begin < 20 * HOUR) {
+    if (hour >= 21 || hour < 4) out.push(`${open} until ${fmtTime(c.until, tz)}, which isn't a given at this hour.`);
+    else if (hour < 7.5 && !c.waits) out.push(`${open} this early, which most places aren't.`);
+  }
+  if (!req.intent.cheap && group !== 'outdoors') {
+    if (o.price === 0) out.push('It costs nothing to walk in.');
+    else if (o.price === 1 && o.category !== 'cafe' && o.category !== 'treat') out.push("It's on the cheap end: a few dollars covers it.");
+  }
+  if (o.hoursTrust === 'solid' && o.checked && Math.abs(req.now - Date.parse(o.checked)) < TUNING.freshCheckDays * DAY) {
+    out.push('The hours on this card were checked by hand, not guessed.');
+  }
+  if (c.stayMin >= idealStay) {
+    if (idealStay <= 30) out.push(`It doesn't ask for long. ${idealStay} minutes does it justice.`);
+    else if (idealStay >= 90) out.push('You have enough time to do it properly, not just look in.');
+  }
+  if (o.setting === 'in' && c.conditions.known && (c.conditions.sky !== 'dry' || c.conditions.feelsF < 25)) {
+    out.push("It's indoors, and in this weather that counts.");
+  }
+  return out;
+}
+
+/**
+ * One reason per card, the sharpest true one: the moment, then what was asked
+ * for, then a fact about this place, and only then a general line.
+ * `used` holds lines already given to earlier picks: three cards never share a reason.
+ */
 function explain(c: Candidate, req: Request, world: World, used: Set<string>): string {
-  let lines: string[] = [];
+  const o = c.option;
+  const lines: string[] = [];
   const top = c.moments[0];
   if (top && top.score >= 0.2) lines.push(top.line);
   const wanted = (Object.entries(req.intent.moods) as [Mood, number][])
-    .map(([m, w]) => [m, w * (c.option.moods[m] ?? 0)] as const)
+    .map(([m, w]) => [m, w * (o.moods[m] ?? 0)] as const)
     .sort((a, b) => b[1] - a[1])[0];
-  const lineFor = (m: Mood) => MOOD_LINE[m][(c.option.moods[m] ?? 0) >= 1 ? 0 : 1].replace('Madison', world.city.name);
+  const lineFor = (m: Mood) => MOOD_LINE[m][(o.moods[m] ?? 0) >= 1 ? 0 : 1].replace('Madison', world.city.name);
   const vibe = VIBES.find((v) => v.id === req.intent.vibe);
-  if (vibe && vibeFit(vibe, c.option.moods) >= 0.6) lines.push(vibe.line);
+  if (vibe && vibeFit(vibe, o.moods) >= 0.6) lines.push(vibe.line);
+  const kind = req.intent.kinds.includes(o.category) ? KIND_LINE[o.category] : undefined;
+  if (kind) lines.push(kind);
   if (wanted && wanted[1] > 0) lines.push(lineFor(wanted[0]));
-  if (req.intent.withKids && wanted?.[0] !== 'kids' && (c.option.moods.kids ?? 0) > 0) lines.push(lineFor('kids'));
-  if (req.intent.cheap && c.option.price === 0) lines.push('And it costs nothing.');
-  if (world.memory.saved.includes(c.option.id)) lines.push("You saved this one. Now's a good time for it.");
+  if (req.intent.withKids && wanted?.[0] !== 'kids' && (o.moods.kids ?? 0) > 0) lines.push(lineFor('kids'));
+  if (req.intent.cheap && o.price === 0) lines.push('And it costs nothing.');
+  if (world.memory.saved.includes(o.id)) lines.push("You saved this one. Now's a good time for it.");
   if (c.parts.been && c.parts.been > 0) lines.push('You liked it last time.');
-  lines.push(GROUP_LINE[GROUP[c.option.category]]!);
+  lines.push(...rotate(facts(c, req, world), o.id));
+  lines.push(...rotate(o.kind === 'event' ? EVENT_LINES : GROUP_LINES[GROUP[o.category]]!, o.id));
   lines.push(`It fits the time you have: about ${c.stayMin} minutes there, ${c.travelMin} each way.`);
-  lines = lines.filter((l) => !used.has(l));
   // One reason. Never a list.
-  lines = lines.slice(0, 1);
-  for (const l of lines) used.add(l);
-  const line = lines.join(' ');
+  const line = lines.find((l) => !used.has(l)) ?? '';
+  used.add(line);
   return c.wildcard ? `The left turn. ${line}` : line;
 }
 
 const GATE_WORDS: Record<Gate, string> = {
-  dismissed: 'you passed on', disliked: "you didn't love", mood: "don't match what you asked for",
+  dismissed: 'you passed on', disliked: "you didn't love", today: "aren't on that day", mood: "don't match what you asked for",
   kids: "aren't for kids", price: "aren't cheap", inside: 'are outdoors', far: 'are too far for the time you have',
   season: 'are out of season', closed: 'are closed then', short: "wouldn't leave you enough time",
   missed: 'have already started', late: 'start too late', dark: 'need daylight', weather: "don't suit the weather",
@@ -386,8 +502,9 @@ function noteFor(picks: Candidate[], rejected: Rejection[], req: Request, world:
   const lost = intent.lost ? "I didn't follow that, so here's what's good regardless. " : '';
   if (picks.length >= 3) return lost || null;
   // Things that simply aren't what was asked for are not a reason; only count those when nothing else explains it.
-  const relevant = rejected.filter((r) => r.gate !== 'dismissed' && r.gate !== 'mood');
-  const counted = relevant.length ? relevant : rejected.filter((r) => r.gate !== 'dismissed');
+  // Nor are the ordinary places a "what's on" request never meant.
+  const relevant = rejected.filter((r) => r.gate !== 'dismissed' && r.gate !== 'mood' && r.gate !== 'today');
+  const counted = relevant.length ? relevant : rejected.filter((r) => r.gate !== 'dismissed' && r.gate !== 'today');
   const counts = new Map<Gate, number>();
   for (const r of counted) counts.set(r.gate, (counts.get(r.gate) ?? 0) + 1);
   const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2);
@@ -405,6 +522,10 @@ function noteFor(picks: Candidate[], rejected: Rejection[], req: Request, world:
       const next = nearest ? ` The nearest is ${nearest.o.venue ?? nearest.o.name}, about ${nearest.min} minutes away.` : '';
       const fix = req.mode === 'drive' ? 'Give it more time and it opens up.' : 'More time, or going by car, opens it up.';
       return `${lost}Nothing close enough. With the time you have I only look within about ${reach} minutes ${how}, and nothing that fits is that near where you're starting.${next} ${fix}`;
+    }
+    if (intent.today) {
+      const known = because ? `Of the events and markets I know about, ${because}.` : "I don't know of an event or a market then.";
+      return `${lost}Nothing on in the time you have. ${known} More time, or a later start, would open things up.`;
     }
     const tip = top[0]?.[0] === 'mood' ? 'Try fewer words, or just ask for a surprise.' : 'A different start time would open things up.';
     return `${lost}Nothing honest to suggest for that. Of the places I know, ${because || 'none fit'}. ${tip}`;
@@ -427,7 +548,8 @@ export function match(req: Request, world: World): Result {
   const used = new Set<string>();
   const chosen = choose(ranked, req, world.memory);
   const own = chosen.length;
-  if (world.fallback?.length && own < 3) {
+  // Never for "what's on": a map place is an ordinary restaurant, not something happening that day.
+  if (world.fallback?.length && own < 3 && !req.intent.today) {
     // The list came up short. Fill the empty seats from the map: same gates, no opinions.
     const extra: Candidate[] = [];
     for (const opt of world.fallback) {

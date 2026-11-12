@@ -28,8 +28,9 @@ const MOODS: [label: string, line: string, say: string][] = [
   ['Art & ideas', 'museums, books, talks', 'art museum books'],
   ['Music & shows', "whatever's on a stage", 'music show'],
   ['Play', 'games and climbing', 'play games'],
-  ['Peace & quiet', 'room to think', 'quiet'],
   ['Something odd', 'off the usual list', 'odd'],
+  // The one tile that is a wall, not a lean: only dated events and markets (intent.today).
+  ['Local today', "markets and what's on", 'local today'],
 ];
 const COMPANY: [label: string, say: string][] = [['Just me', ''], ['A date', 'date'], ['Friends', 'friends'], ['Kids', 'kids'], ['A visitor', 'visiting']];
 // The page can't ask again once a phone or browser has said no, so say where the switch is.
@@ -135,7 +136,8 @@ export function App() {
     const req: Request = { now, start, durationMin, origin: origin ?? city.center, mode, intent, seed: Math.floor(now / DAY) * 31 + q.shuffles };
     const w = world(options, now);
     const result = match(req, w);
-    const tile = MOODS.find((m) => m[2] === q.mood)?.[0];
+    // "Local today" asked about tomorrow is still what's on, just not today.
+    const tile = intent.today && q.mood && fmtDay(start, now, tz) !== 'today' ? "What's on" : MOODS.find((m) => m[2] === q.mood)?.[0];
     const hours = durationMin % 60 === 0 ? `${durationMin / 60} hour${durationMin === 60 ? '' : 's'}` : `${durationMin} minutes`;
     setActive(null);
     setView({ req, result, options, label: [q.text ? `“${q.text}”` : [tile ?? 'Anything', along && along[1] ? along[0].toLowerCase() : null, vibe ? vibeLabel(vibe) : null].filter(Boolean).join(', '), hours].join(' · ') });
@@ -349,7 +351,7 @@ export function App() {
           {stage === 'thinking' && <h1 class="pulse" aria-live="polite">{THINKING[line]}</h1>}
           {results && r && (
             <h1>
-              {r.picks.length === 0 ? (/^Nothing close/.test(r.note ?? '') ? 'Nothing close enough.' : 'Nothing honest to offer.') : `${COUNT[r.picks.length]} for your ${partOfDay(toLocal(view.req.start, tz).h)}.`}
+              {r.picks.length === 0 ? (/^Nothing close/.test(r.note ?? '') ? 'Nothing close enough.' : /Nothing on /.test(r.note ?? '') ? 'Nothing on just then.' : 'Nothing honest to offer.') : `${COUNT[r.picks.length]} for your ${partOfDay(toLocal(view.req.start, tz).h)}.`}
               <em>{view.label}</em>
             </h1>
           )}
@@ -401,14 +403,7 @@ export function App() {
 
       {stage === 'time' && (
         <main class="step" key="time">
-          <div class="tiles">
-            {DURATIONS.map(([minutes, label, sub], i) => (
-              <button class="tile" style={{ '--i': i }} onClick={() => chooseDuration(minutes)}>
-                <strong>{label}</strong>
-                <span>{sub}</span>
-              </button>
-            ))}
-          </div>
+          <h2 class="q">The details <span>change any of them</span></h2>
           <p class="sentence">
             Starting{' '}
             <select aria-label="Starting when" value={startKey} onChange={(e) => { setStartKey(e.currentTarget.value); if (e.currentTarget.value === 'pick' && !custom) setCustom(Date.now() + 2 * HOUR); }}>
@@ -428,7 +423,7 @@ export function App() {
             <button type="button" class="link vibe-link" aria-haspopup="dialog" onClick={() => setVibeOpen(true)}><VibeIcon id={vibe} />{vibeLabel(vibe)}</button>.
           </p>
           {locHelp && (
-            <p class="note" role="status" style={{ margin: "1rem 0 0", fontSize: "0.95rem" }}>
+            <p class="note" role="status" style={{ margin: "0 0 1.1rem", fontSize: "0.95rem" }}>
               {locHelp} Or skip it: pick the nearest area from the “from” list above. It only changes the travel times.
             </p>
           )}
@@ -439,6 +434,16 @@ export function App() {
                 onChange={(e) => { const t = parseLocalInput(e.currentTarget.value, tz); if (t) setCustom(t); }} />
             </label>
           )}
+          {/* Last on purpose: tapping a time is the "go", so everything adjustable sits above it. */}
+          <h2 class="q">How long? <span>tap one to go</span></h2>
+          <div class="tiles">
+            {DURATIONS.map(([minutes, label, sub], i) => (
+              <button class="tile" style={{ '--i': i + 3 }} onClick={() => chooseDuration(minutes)}>
+                <strong>{label}</strong>
+                <span>{sub}</span>
+              </button>
+            ))}
+          </div>
           <p class="back"><button class="link" onClick={() => setStage('mood')}>← Back</button></p>
         </main>
       )}
@@ -560,6 +565,12 @@ function Scene(props: { pose: Pose; sky: SkyInput; pins: Pin[]; home: { east: nu
   return (
     <div class={`scene${on ? ' on' : ''}`}>
       <canvas ref={canvas} aria-label="A small model of Madison under the current sky. Decorative; everything it does is also available below." />
+      {on && (
+        <div class="scene-zoom">
+          <button type="button" aria-label="Zoom in" onClick={() => model.current?.zoom(0.7)}>+</button>
+          <button type="button" aria-label="Zoom out" onClick={() => model.current?.zoom(1 / 0.7)}>−</button>
+        </div>
+      )}
       {on && hint && <span class="scene-hint">{props.live.length ? 'Drag to look. Tap a beam to see what’s on tonight.' : 'Drag to look around. Tap things.'}</span>}
     </div>
   );

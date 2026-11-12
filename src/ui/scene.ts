@@ -54,6 +54,8 @@ export interface Diorama {
   setHome(home: { east: number; north: number } | null): void;
   setLive(spots: Live[]): void;
   focus(index: number | null): void;
+  /** Step the zoom: below 1 moves in, above 1 moves out. */
+  zoom(factor: number): void;
   dispose(): void;
 }
 
@@ -255,7 +257,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'low-power' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 220);
+  const camera = new THREE.PerspectiveCamera(40, 1, 0.25, 220);
   scene.fog = new THREE.Fog('#cfe6f2', 11, 44);
 
   // The lens. The scene is drawn off-screen, then shown through a tilt-shift
@@ -428,8 +430,29 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   scene.add(new THREE.Mesh(ribbons(shape.rivers.map((points) => ({ points, width: 0.045 })), 0.011), waterMat));
 
   // Roads: pale by day, amber threads at night.
-  const roadMat = new THREE.MeshBasicMaterial({ color: '#d9d0bd' });
-  scene.add(new THREE.Mesh(ribbons(shape.roads.map((r) => ({ points: r.slice(1), width: r[0] === 2 ? 0.05 : 0.032 })), 0.016), roadMat));
+  // Where a road crosses open water it rides a causeway: a low bank of fill
+  // with the road on top, clear of the surface.
+  const roadMat = new THREE.MeshBasicMaterial({ color: '#d9d0bd', polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
+  const bankMat = flat('#a9a08a', { polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const onLand: { points: number[]; width: number }[] = [];
+  const onWater: { points: number[]; width: number }[] = [];
+  for (const r of shape.roads) {
+    const width = r[0] === 2 ? 0.05 : 0.032;
+    for (let i = 1; i + 3 < r.length; i += 2) {
+      const ax = r[i]!;
+      const ay = r[i + 1]!;
+      const bx = r[i + 2]!;
+      const by = r[i + 3]!;
+      const steps = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 0.06));
+      for (let k = 0; k < steps; k++) {
+        const p = [ax + ((bx - ax) * k) / steps, ay + ((by - ay) * k) / steps, ax + ((bx - ax) * (k + 1)) / steps, ay + ((by - ay) * (k + 1)) / steps];
+        (wet((p[0]! + p[2]!) / 2, (p[1]! + p[3]!) / 2) ? onWater : onLand).push({ points: p, width });
+      }
+    }
+  }
+  scene.add(new THREE.Mesh(ribbons(onLand, 0.02), roadMat));
+  scene.add(new THREE.Mesh(ribbons(onWater.map((w) => ({ points: w.points, width: w.width + 0.09 })), 0.026), bankMat));
+  scene.add(new THREE.Mesh(ribbons(onWater, 0.034), roadMat));
 
   // The building at the center: for Madison, the Capitol. Four wings to the
   // compass points, a drum, a ribbed dome, a lantern, and the gilt lady on top.
@@ -825,7 +848,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     return { pts, cum, len: cum[cum.length - 1]! };
   }).filter((r) => r.len > 0.5);
   const cars = Array.from({ length: routes.length ? 70 : 0 }, () => ({ route: pick(routes), d: rand(), speed: (0.18 + rand() * 0.2) * (rand() < 0.5 ? 1 : -1) }));
-  const traffic = glowPoints(cars.map(() => ({ x: 0, y: 0.03, z: 0, color: '#fff6dd', size: 0.03 })), { attenuate: true, twinkle: 0, speed: 0, sharp: 1 });
+  const traffic = glowPoints(cars.map(() => ({ x: 0, y: 0.05, z: 0, color: '#fff6dd', size: 0.03 })), { attenuate: true, twinkle: 0, speed: 0, sharp: 1 });
   scene.add(traffic.points);
 
   // Fireflies, on warm summer nights.
@@ -1116,7 +1139,11 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   let pose: Pose = 'mood';
   let goal: Rig = { ...POSES.mood };
   const rig: Rig = { ...POSES.mood };
-  const user = { theta: 0, phi: 0 };
+  const user = { theta: 0, phi: 0, zoom: 1 };
+  let zoomNow = 1;
+  const clampZoom = (z: number) => Math.max(0.28, Math.min(2.4, z));
+  /** How far the camera really is from what it's looking at. */
+  const reach = () => Math.max(1.7, rig.r * zoomNow);
 
   const fitPins = (): Rig => {
     if (beacons.length === 0) return { ...POSES.results };
@@ -1137,8 +1164,30 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
 
   const ray = new THREE.Raycaster();
   let down: { x: number; y: number; moved: boolean } | null = null;
-  const onDown = (e: PointerEvent) => { down = { x: e.clientX, y: e.clientY, moved: false }; };
+  // Two fingers pinch to zoom; one drags to look around.
+  const fingers = new Map<number, { x: number; y: number }>();
+  let pinch: { gap: number; zoom: number } | null = null;
+  const gap = () => {
+    const [a, b] = [...fingers.values()];
+    return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
+  };
+  const onDown = (e: PointerEvent) => {
+    fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (fingers.size === 2) {
+      pinch = { gap: gap(), zoom: user.zoom };
+      down = null;
+      cb.onTouch();
+    } else {
+      down = { x: e.clientX, y: e.clientY, moved: false };
+    }
+  };
   const onMove = (e: PointerEvent) => {
+    if (fingers.has(e.pointerId)) fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pinch && fingers.size === 2) {
+      const now = gap();
+      if (now > 0 && pinch.gap > 0) user.zoom = clampZoom((pinch.zoom * pinch.gap) / now);
+      return;
+    }
     if (!down) return;
     const dx = e.clientX - down.x;
     const dy = e.clientY - down.y;
@@ -1151,6 +1200,13 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     down.y = e.clientY;
   };
   const onUp = (e: PointerEvent) => {
+    fingers.delete(e.pointerId);
+    if (pinch) {
+      // Lifting one finger of a pinch is not a tap, and the other finger doesn't start a drag.
+      if (fingers.size === 0) pinch = null;
+      down = null;
+      return;
+    }
     const wasTap = down && !down.moved;
     down = null;
     if (!wasTap) return;
@@ -1161,7 +1217,19 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     cb.onTouch();
     (hit.object.userData.tap as (p: THREE.Vector3) => void)(hit.point);
   };
-  const onLeave = () => { down = null; };
+  const onLeave = (e: PointerEvent) => {
+    fingers.delete(e.pointerId);
+    if (fingers.size === 0) pinch = null;
+    down = null;
+  };
+  // A trackpad pinch arrives as a wheel with ctrl held; so does ctrl or ⌘ + scroll. A plain scroll still scrolls the page.
+  const onWheel = (e: WheelEvent) => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    user.zoom = clampZoom(user.zoom * Math.exp(e.deltaY * 0.01));
+    cb.onTouch();
+  };
+  canvas.addEventListener('wheel', onWheel, { passive: false });
   canvas.addEventListener('pointerdown', onDown);
   canvas.addEventListener('pointermove', onMove);
   canvas.addEventListener('pointerup', onUp);
@@ -1389,13 +1457,13 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       r.dot.visible = grown >= 1 && t <= 1 && !calm;
       if (r.dot.visible) {
         r.dot.position.copy(r.curve.getPoint(t));
-        r.dot.scale.setScalar(Math.max(1, rig.r / 7));
+        r.dot.scale.setScalar(Math.max(1, reach() / 7));
       }
     }
     const beat = 1 + ((clock * 0.7) % 1) * 1.8;
     youRing.scale.set(beat, beat, beat);
     (youRing.material as THREE.MeshBasicMaterial).opacity = 1 - ((clock * 0.7) % 1);
-    const youSize = rig.r * 0.05;
+    const youSize = reach() * 0.05;
     youTag.sprite.scale.set(youSize * 5.33, youSize, 1);
 
     // Searchlights sweep; brighter after dark.
@@ -1417,7 +1485,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       b.ring.scale.set(pulse, pulse, pulse);
       (b.ring.material as THREE.MeshBasicMaterial).opacity = (1 - ((clock * 0.8 + i * 0.3) % 1)) * 0.7 * grown;
       b.label.position.y = h * 1.2 + 0.26;
-      const size = (focused === i ? 0.62 : 0.46) * (rig.r / 9) * grown;
+      const size = (focused === i ? 0.62 : 0.46) * (reach() / 9) * grown;
       b.label.scale.set(size, size, size);
     });
 
@@ -1433,15 +1501,19 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     const drift = calm ? 0 : Math.sin(clock * 0.12) * 0.07;
     const th = rig.theta + user.theta + drift;
     const ph = Math.max(0.35, Math.min(1.5, rig.phi + user.phi));
-    camera.position.set(rig.tx + rig.r * Math.sin(ph) * Math.sin(th), rig.ty + rig.r * Math.cos(ph), rig.tz + rig.r * Math.sin(ph) * Math.cos(th));
-    camera.lookAt(rig.tx, rig.ty, rig.tz);
+    zoomNow += (user.zoom - zoomNow) * (calm ? 1 : 1 - Math.exp(-dt * 9));
+    const far = reach();
+    // Closer in, look lower: the target drops toward the ground so the town doesn't slide off the bottom.
+    const ty = rig.ty * Math.min(1, far / rig.r);
+    camera.position.set(rig.tx + far * Math.sin(ph) * Math.sin(th), ty + far * Math.cos(ph), rig.tz + far * Math.sin(ph) * Math.cos(th));
+    camera.lookAt(rig.tx, ty, rig.tz);
     dome.position.copy(camera.position);
     stars.points.position.copy(camera.position);
 
     if (useLens) {
       lens.focus.value = probe.set(rig.tx, 0.15, rig.tz).project(camera).y * 0.5 + 0.5;
       // The wider the view, the gentler the blur: a whole county shouldn't go soft.
-      lens.strength.value = Math.min(1, Math.max(0.3, 8 / rig.r));
+      lens.strength.value = Math.min(1, Math.max(0.3, 8 / reach()));
       renderer.setRenderTarget(target);
       renderer.render(scene, camera);
       renderer.setRenderTarget(null);
@@ -1490,6 +1562,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       goal = { ...POSES[next] };
       user.theta = 0;
       user.phi = 0;
+      user.zoom = 1;
       if (next !== 'thinking') {
         // Don't unwind the spin: carry on from wherever the camera ended up.
         rig.theta = ((rig.theta + Math.PI) % (Math.PI * 2)) - Math.PI;
@@ -1551,6 +1624,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         return { g, cone, hit, i };
       });
     },
+    zoom(factor) {
+      user.zoom = clampZoom(user.zoom * factor);
+    },
     focus(index) {
       if (index !== null && index !== focused && !calm) {
         // A new deal gets a longer look at the whole map; a swipe gets a quick one.
@@ -1566,6 +1642,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       canvas.removeEventListener('pointerup', onUp);
       canvas.removeEventListener('pointercancel', onLeave);
       canvas.removeEventListener('pointerleave', onLeave);
+      canvas.removeEventListener('wheel', onWheel);
       scene.traverse((o) => {
         const m = o as THREE.Mesh;
         m.geometry?.dispose?.();
