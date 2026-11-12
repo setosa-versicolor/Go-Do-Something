@@ -31,6 +31,13 @@ const MOODS: [label: string, line: string, say: string][] = [
   ['Something odd', 'off the usual list', 'odd'],
 ];
 const COMPANY: [label: string, say: string][] = [['Just me', ''], ['A date', 'date'], ['Friends', 'friends'], ['Kids', 'kids'], ['A visitor', 'visiting']];
+// The page can't ask again once a phone or browser has said no, so say where the switch is.
+const BLOCKED = /iPhone|iPad|iPod/.test(navigator.userAgent)
+  ? 'Your phone isn’t letting this browser share a location. In the Settings app, go to Privacy & Security › Location Services, find this browser in the list, choose “While Using the App”, then come back and reload.'
+  : /Android/.test(navigator.userAgent)
+    ? 'Location is turned off for this site. Tap the icon beside the address, open Permissions, allow Location, then reload.'
+    : 'Location is turned off for this site. Click the icon beside the address, allow Location, then reload.';
+
 const DURATIONS: [number, string, string][] = [[60, 'An hour', 'in and out'], [120, 'Two hours', 'room to linger'], [180, 'Three hours', 'a proper outing'], [300, 'Half the day', 'no rush at all']];
 const STARTS: [string, string][] = [['now', 'now'], ['tonight', 'tonight'], ['tomorrow morning', 'tomorrow morning'], ['saturday morning', 'Saturday morning'], ['pick', 'at a time I pick…']];
 const MODES: [Mode, string][] = [['walk', 'on foot'], ['bike', 'by bike'], ['drive', 'by car']];
@@ -60,6 +67,8 @@ export function App() {
   const [startFrom, setStartFrom] = useState<string>(() => (city.starts.some((s) => s.name === loadStart()) ? loadStart() : ''));
   const [here, setHere] = useState<LatLng | null>(null);
   const [finding, setFinding] = useState(false);
+  /** Why the device wouldn't give a location, and what to do about it. Stays up until they choose again. */
+  const [locHelp, setLocHelp] = useState('');
   const origin: LatLng | null = startFrom === 'me' ? here : city.starts.find((s) => s.name === startFrom) ?? null;
   const [log, setLog] = useState<Entry[]>(loadLog);
   const [view, setView] = useState<View | null>(null);
@@ -240,6 +249,7 @@ export function App() {
 
   /** Pick where travel is measured from. Only "where I am" needs the device; if that fails, say exactly why. */
   const chooseStart = (name: string) => {
+    setLocHelp('');
     if (name !== 'me') {
       setStartFrom(name);
       saveStart(name);
@@ -247,7 +257,7 @@ export function App() {
     }
     const fallBack = (why: string) => {
       setFinding(false);
-      say(`${why} Pick the nearest area from the list instead.`);
+      setLocHelp(why);
     };
     if (!navigator.geolocation) return fallBack("This browser can't share a location.");
     setFinding(true);
@@ -266,7 +276,7 @@ export function App() {
         retried = true;
         return navigator.geolocation.getCurrentPosition(found, failed, { enableHighAccuracy: false, maximumAge: 30 * 60_000, timeout: 20_000 });
       }
-      fallBack(err.code === err.PERMISSION_DENIED ? 'Location is blocked for this site (check the site or browser settings).' : "Your device couldn't work out where it is.");
+      fallBack(err.code === err.PERMISSION_DENIED ? BLOCKED : "Your device couldn't work out where it is just now.");
     };
     let retried = false;
     navigator.geolocation.getCurrentPosition(found, failed, { enableHighAccuracy: false, maximumAge: 5 * 60_000, timeout: 10_000 });
@@ -396,6 +406,11 @@ export function App() {
             </select>.<br />And the vibe is{' '}
             <button type="button" class="link vibe-link" aria-haspopup="dialog" onClick={() => setVibeOpen(true)}><VibeIcon id={vibe} />{vibeLabel(vibe)}</button>.
           </p>
+          {locHelp && (
+            <p class="note" role="status" style={{ margin: "1rem 0 0", fontSize: "0.95rem" }}>
+              {locHelp} Or skip it: pick the nearest area from the “from” list above. It only changes the travel times.
+            </p>
+          )}
           {startKey === 'pick' && (
             <label class="pick">
               <span>When ({city.name} time)</span>

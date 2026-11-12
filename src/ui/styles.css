@@ -284,7 +284,7 @@ footer p { margin: 0.8rem 0 0; }
   .vibe-icon .breathe { transform-origin: center bottom; animation: v-breathe 3.6s ease-in-out infinite; }
   .vibe-icon .zed { animation: v-zed 2.4s ease-in infinite; }
   .vibe-icon .dance { transform-origin: center bottom; animation: v-dance 0.5s ease-in-out infinite alternate; }
-  .vibe-icon .note { animation: v-bob 1s ease-in-out infinite alternate; }
+  .vibe-icon .tune { animation: v-bob 1s ease-in-out infinite alternate; }
   .vibe-icon .n2 { animation-delay: 0.3s; }
   .vibe-icon .beat { animation: v-beat 0.9s ease-in-out infinite; }
   .vibe-icon .sway { transform-origin: center bottom; animation: v-sway 2.4s ease-in-out infinite alternate; }

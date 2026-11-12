@@ -35,8 +35,8 @@ export function VibeIcon({ id }: { id: string }) {
     ),
     upbeat: (
       <g>
-        <text class="note n1" x="6" y="20" font-size="14">♪</text>
-        <text class="note n2" x="48" y="16" font-size="16">♫</text>
+        <text class="tune n1" x="6" y="20" font-size="14">♪</text>
+        <text class="tune n2" x="48" y="16" font-size="16">♫</text>
         <g class="dance">
           <path class="limb" d="M17 36L8 24M47 36L56 24" />
           {body}{eyes}
