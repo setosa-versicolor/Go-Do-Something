@@ -514,7 +514,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   gilt.position.y = 0.51;
   capitol.add(drum, collar, cap, lantern, gilt);
   // Smaller than it once was, so the buildings around the square can stand where they really do.
-  const CAP = 0.5;
+  const CAP = 0.74;
   capitol.scale.setScalar(CAP);
   scene.add(capitol);
 
@@ -551,9 +551,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     }
   });
   glowMap.repeat.set(0.25, 0.25);
-  const towerMat = new THREE.MeshLambertMaterial({ vertexColors: true, map: wallMap, emissive: '#ffffff', emissiveMap: glowMap, emissiveIntensity: 0 });
+  const towerMat = new THREE.MeshLambertMaterial({ vertexColors: true, map: wallMap, emissive: '#ffffff', emissiveMap: glowMap, emissiveIntensity: 0, side: THREE.DoubleSide });
   lit.push({ m: towerMat, k: 0.95 });
-  const roofTopMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const roofTopMat = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
   const wall = { pos: [] as number[], uv: [] as number[], col: [] as number[], nor: [] as number[] };
   const top = { pos: [] as number[], col: [] as number[], nor: [] as number[] };
   /** One box: walls with windows (or plain), and a flat roof a shade darker. */
@@ -572,14 +572,19 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       const len = Math.hypot(bx - ax, bz - az);
       const cols = plain ? 0 : Math.max(1, Math.round(len / 0.021));
       const rows = plain ? 0 : Math.max(1, Math.round(h / 0.019));
-      const nx = (bz - az) / len;
-      const nz = -(bx - ax) / len;
+      // The wall's normal points away from the middle of the building, whichever way the corners wind.
+      let nx = (bz - az) / len;
+      let nz = -(bx - ax) / len;
+      if (nx * ((ax + bx) / 2 - east) + nz * ((az + bz) / 2 + north) < 0) {
+        nx = -nx;
+        nz = -nz;
+      }
       const quad = [[ax, y0, az, 0, 0], [bx, y0, bz, cols, 0], [bx, y0 + h, bz, cols, rows], [ax, y0, az, 0, 0], [bx, y0 + h, bz, cols, rows], [ax, y0 + h, az, 0, rows]];
       for (const [x, y, z, u, v] of quad) {
         wall.pos.push(x!, y!, z!);
         wall.uv.push(plain ? 0.05 : u! + u0, plain ? 0.05 : v! + v0);
         wall.col.push(tmp.r * shade[i]!, tmp.g * shade[i]!, tmp.b * shade[i]!);
-        wall.nor.push(-nx, 0, -nz);
+        wall.nor.push(nx, 0, nz);
       }
     }
     for (const i of [0, 2, 1, 0, 3, 2]) {
@@ -606,7 +611,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       const cupola = new THREE.Mesh(new THREE.SphereGeometry(Math.min(w, d) * 0.3, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshLambertMaterial({ color: '#a9d6e2', flatShading: true, transparent: true, opacity: 0.85 }));
       cupola.position.set(east, h, -north);
       scene.add(cupola);
-    } else if (h > 0.07 && rand() < 0.7) {
+    } else if (h > 0.06 && rand() < 0.6) {
       box(east + (rand() - 0.5) * w * 0.3, north + (rand() - 0.5) * d * 0.3, w * (0.25 + rand() * 0.2), d * (0.35 + rand() * 0.2), 0.012 + rand() * 0.012, turn, color, h, true);
     }
   };
@@ -624,32 +629,38 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     const east = b.east * k;
     const north = b.north * k;
     const turn = b.turn ?? (r < 1.3 ? shape.gridTurn : 0);
-    raise(east, north, b.w * 1.15, b.d * 1.15, b.h * 0.8, turn, b.color, b.style);
-    named.push({ name: b.name, east, north, h: b.h * 0.8 });
+    raise(east, north, b.w * 1.15, b.d * 1.15, b.h * 0.95, turn, b.color, b.style);
+    named.push({ name: b.name, east, north, h: b.h * 0.95 });
   }
   const taken = (east: number, north: number, pad: number) =>
     named.some((b) => Math.hypot(b.east - east, b.north - north) < pad) || shape.landmarks.some((m) => m.kind !== 'woods' && Math.hypot(m.east - east, m.north - north) < pad + 0.06);
 
-  // Then the rest, on the street grid: a ring of tall slabs around the square, stepping down from there.
+  // Then everything else, on the street grid, block after block from shore to
+  // shore: mid-rises packed around the square, three and four stories beyond
+  // them, and low roofs out to where the houses take over. From the air,
+  // downtown Madison has no gaps, so neither does this.
   const gc = Math.cos(shape.gridTurn);
   const gs = Math.sin(shape.gridTurn);
-  const TONES = ['#d9cbb0', '#c9b48f', '#cfc6b8', '#b9b6ad', '#e3ddd0', '#8f4a3a', '#7d3f33', '#d39a78', '#8fa3b3', '#b7a58c'];
-  const BRICK = ['#a8553f', '#b86b4a', '#c9a889', '#d9cfc0', '#8f4a3a'];
-  for (let u = -1.56; u <= 1.56; u += 0.13) {
-    for (let v = -1.56; v <= 1.56; v += 0.13) {
-      const east = u * gc - v * gs + (rand() - 0.5) * 0.02;
-      const north = u * gs + v * gc + (rand() - 0.5) * 0.02;
+  const TONES = ['#d9cbb0', '#c9b48f', '#cfc6b8', '#b9b6ad', '#e3ddd0', '#8f4a3a', '#7d3f33', '#d39a78', '#8fa3b3', '#b7a58c', '#e0d6c2', '#c7b8a2'];
+  const BRICK = ['#a8553f', '#b86b4a', '#c9a889', '#d9cfc0', '#8f4a3a', '#c2a184'];
+  const STEP = 0.082;
+  const EDGE = 1.75;
+  for (let u = -EDGE; u <= EDGE; u += STEP) {
+    for (let v = -EDGE; v <= EDGE; v += STEP) {
+      const east = u * gc - v * gs + (rand() - 0.5) * 0.012;
+      const north = u * gs + v * gc + (rand() - 0.5) * 0.012;
       const d = Math.hypot(east, north);
       const ring = Math.max(Math.abs(u), Math.abs(v));
-      if (ring < SQUARE + 0.02 || d > 1.55 || wet(east, north, 0.085) || quiet(east, north) || taken(east, north, 0.12)) continue;
-      const core = d < 0.55;
-      if (rand() < (core ? 0.06 : 0.1 + d * 0.28)) continue;
+      if (ring < SQUARE + 0.01 || d > EDGE || wet(east, north, 0.05) || quiet(east, north) || taken(east, north, 0.085)) continue;
+      // Thin out only toward the edge, where yards and trees start to show between the roofs.
+      if (rand() < 0.04 + Math.max(0, d - 0.9) * 0.45) continue;
       const campus = east < -0.62;
-      const h = core ? 0.07 + rand() * 0.045 : d < 0.95 ? 0.04 + rand() * 0.065 : 0.022 + rand() * 0.04;
-      const long = 0.09 + rand() * 0.03;
-      const short = 0.065 + rand() * 0.03;
+      const core = d < 0.62;
+      const h = core ? (rand() < 0.45 ? 0.07 + rand() * 0.06 : 0.035 + rand() * 0.04) : d < 1.05 ? 0.025 + rand() * 0.045 + (rand() < 0.12 ? 0.04 : 0) : 0.016 + rand() * 0.026;
+      const long = 0.052 + rand() * 0.02;
+      const short = 0.04 + rand() * 0.022;
       const along = rand() < 0.5;
-      raise(east, north, along ? long : short, along ? short : long, h, shape.gridTurn, pick(campus ? BRICK : TONES), core && rand() < 0.15 ? 'stepped' : 'slab');
+      raise(east, north, along ? long : short, along ? short : long, h, shape.gridTurn, pick(campus ? BRICK : TONES), core && h > 0.1 && rand() < 0.2 ? 'stepped' : 'slab');
     }
   }
   const wallGeo = new THREE.BufferGeometry();
@@ -680,7 +691,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     const a = rand() * Math.PI * 2;
     const east = Math.cos(a) * r;
     const north = Math.sin(a) * r;
-    if (r < 1.1 || rand() < (r / shape.urbanRadius) ** 2 * 0.7 || wet(east, north, 0.07) || quiet(east, north)) continue;
+    if (r < 1.25 || rand() < (r / shape.urbanRadius) ** 2 * 0.7 || wet(east, north, 0.07) || quiet(east, north)) continue;
     const turn = (r < 2.6 ? shape.gridTurn : 0) + (rand() < 0.5 ? 0 : Math.PI / 2);
     const s = 0.9 + rand() * 0.5;
     dummy.position.set(east, 0.015 * s, -north);
@@ -1395,8 +1406,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   interface Rig { tx: number; ty: number; tz: number; theta: number; phi: number; r: number }
   const POSES: Record<Pose, Rig> = {
     // The target sits above the town, so the model rides low in the frame and the sky gets the top.
-    mood: { tx: -0.4, ty: 1.55, tz: -0.8, theta: 0.72, phi: 1.4, r: 8.6 },
-    time: { tx: 0, ty: 0.6, tz: 0, theta: 0.3, phi: 1.36, r: 3.1 },
+    mood: { tx: 0, ty: 1.25, tz: -0.25, theta: 0.72, phi: 1.36, r: 7.2 },
+    time: { tx: 0, ty: 0.75, tz: 0, theta: 0.3, phi: 1.36, r: 3.7 },
     thinking: { tx: 0, ty: 1.0, tz: 0, theta: 2.4, phi: 1.1, r: 11 },
     results: { tx: 0, ty: 1.0, tz: 0, theta: 0.5, phi: 0.98, r: 9 },
   };
@@ -1899,7 +1910,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         g.position.set(s.east, 0, -s.north);
         const cone = new THREE.Mesh(coneGeo, new THREE.MeshBasicMaterial({ color: new THREE.Color(s.color).lerp(new THREE.Color('#fff2cc'), 0.55), transparent: true, opacity: 0.1, depthWrite: false, fog: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
         const lamp = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: s.color, fog: false }));
-        lamp.position.y = 0.05;
+        lamp.scale.setScalar(0.45);
+        lamp.position.y = 0.03;
         const hit = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 6), unseen());
         hit.position.y = 0.35;
         hit.userData.tap = () => say(s.label, new THREE.Vector3(s.east, 1.0, -s.north));
