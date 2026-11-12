@@ -328,7 +328,7 @@ export function App() {
           {stage === 'thinking' && <h1 class="pulse" aria-live="polite">{THINKING[line]}</h1>}
           {results && r && (
             <h1>
-              {r.picks.length === 0 ? 'Nothing honest to offer.' : `${COUNT[r.picks.length]} for your ${partOfDay(toLocal(view.req.start, tz).h)}.`}
+              {r.picks.length === 0 ? (/^Nothing close/.test(r.note ?? '') ? 'Nothing close enough.' : 'Nothing honest to offer.') : `${COUNT[r.picks.length]} for your ${partOfDay(toLocal(view.req.start, tz).h)}.`}
               <em>{view.label}</em>
             </h1>
           )}

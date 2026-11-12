@@ -361,3 +361,14 @@ describe('vibes', () => {
     expect(pick('upbeat').debug.ranked.find((r) => r.option.id === 'quiet')!.parts.vibe).toBeLessThan(0);
   });
 });
+
+describe('when everything that fits is too far', () => {
+  it('says how far it looked and names the nearest miss, not the things nobody asked for', () => {
+    const farWest = { lat: 43.058, lng: -89.503 };
+    const r = match(request(at(2026, 11, 13, 9), 'food', { origin: farWest, mode: 'bike', durationMin: 60 }), world());
+    expect(r.picks).toEqual([]);
+    expect(r.note).toMatch(/within about 18 minutes by bike/);
+    expect(r.note).toMatch(/The nearest is .+, about \d+ minutes away/);
+    expect(r.note).not.toMatch(/don't match what you asked for/);
+  });
+});

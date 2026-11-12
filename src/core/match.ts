@@ -379,18 +379,32 @@ const GATE_WORDS: Record<Gate, string> = {
   unconfirmed: "can't be confirmed",
 };
 
-function noteFor(picks: Candidate[], rejected: Rejection[], intent: Intent): string | null {
+function noteFor(picks: Candidate[], rejected: Rejection[], req: Request, world: World): string | null {
+  const { intent } = req;
   const lost = intent.lost ? "I didn't follow that, so here's what's good regardless. " : '';
   if (picks.length >= 3) return lost || null;
+  // Things that simply aren't what was asked for are not a reason; only count those when nothing else explains it.
+  const relevant = rejected.filter((r) => r.gate !== 'dismissed' && r.gate !== 'mood');
+  const counted = relevant.length ? relevant : rejected.filter((r) => r.gate !== 'dismissed');
   const counts = new Map<Gate, number>();
-  for (const r of rejected) if (r.gate !== 'dismissed') counts.set(r.gate, (counts.get(r.gate) ?? 0) + 1);
+  for (const r of counted) counts.set(r.gate, (counts.get(r.gate) ?? 0) + 1);
   const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2);
   const because = top.map(([g, n]) => `${n} ${GATE_WORDS[g]}`).join(', and ');
   if (picks.length === 0) {
-    const tip =
-      top[0]?.[0] === 'far' ? 'More time, or a faster way to get around, would open things up.'
-      : top[0]?.[0] === 'mood' ? 'Try fewer words, or just ask for a surprise.'
-      : 'A different start time would open things up.';
+    if (top[0]?.[0] === 'far') {
+      // Say how far we were willing to look, and what the nearest miss was, so the fix is obvious.
+      const reach = Math.round(Math.min(TUNING.maxTravelMin, req.durationMin * TUNING.maxTravelShare));
+      const far = new Set(rejected.filter((r) => r.gate === 'far').map((r) => r.id));
+      const nearest = world.options
+        .filter((o) => far.has(o.id))
+        .map((o) => ({ o, min: travelMinutes(req.origin, o, req.mode) }))
+        .sort((a, b) => a.min - b.min)[0];
+      const how = { walk: 'on foot', bike: 'by bike', drive: 'by car' }[req.mode];
+      const next = nearest ? ` The nearest is ${nearest.o.venue ?? nearest.o.name}, about ${nearest.min} minutes away.` : '';
+      const fix = req.mode === 'drive' ? 'Give it more time and it opens up.' : 'More time, or going by car, opens it up.';
+      return `${lost}Nothing close enough. With the time you have I only look within about ${reach} minutes ${how}, and nothing that fits is that near where you're starting.${next} ${fix}`;
+    }
+    const tip = top[0]?.[0] === 'mood' ? 'Try fewer words, or just ask for a surprise.' : 'A different start time would open things up.';
     return `${lost}Nothing honest to suggest for that. Of the places I know, ${because || 'none fit'}. ${tip}`;
   }
   const n = picks.length === 1 ? 'one thing' : 'two things';
@@ -413,7 +427,7 @@ export function match(req: Request, world: World): Result {
   const strip = ({ conditions: _c, moments: _m, moodFit: _f, ...pick }: Candidate): Pick => pick;
   return {
     picks: picks.map(strip),
-    note: noteFor(picks, rejected, req.intent),
+    note: noteFor(picks, rejected, req, world),
     conditions: conditionsFor(world.weather, req.start, req.start + req.durationMin * MIN),
     sun: sunFor(req.start, world.city.center.lat, world.city.center.lng, world.city.tz),
     debug: { ranked: ranked.map(strip), rejected },
