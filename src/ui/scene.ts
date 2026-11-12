@@ -65,6 +65,9 @@ interface Callbacks {
   onTouch(): void;
 }
 
+/** Labels sit on their own layer, drawn after the lens blur so they are always sharp. */
+const LABELS = 1;
+
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
 
@@ -218,6 +221,7 @@ function textSprite(): { sprite: THREE.Sprite; write(text: string): void } {
   tex.colorSpace = THREE.SRGBColorSpace;
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, fog: false, transparent: true, opacity: 0 }));
   sprite.renderOrder = 10;
+  sprite.layers.set(LABELS);
   return {
     sprite,
     write(text) {
@@ -1350,7 +1354,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     x.fillText(String(n), 64, 70);
     const tex = new THREE.CanvasTexture(c);
     tex.colorSpace = THREE.SRGBColorSpace;
-    return new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, fog: false, transparent: true }));
+    const tag = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, fog: false, transparent: true }));
+    tag.layers.set(LABELS);
+    return tag;
   };
 
   // Routes: from where you're starting, an arc out to each pick, with a small traveller on it.
@@ -1810,6 +1816,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       lens.focus.value = probe.set(rig.tx, 0.15, rig.tz).project(camera).y * 0.5 + 0.5;
       // The wider the view, the gentler the blur: a whole county shouldn't go soft.
       lens.strength.value = Math.min(1, Math.max(0.3, 8 / reach()));
+      camera.layers.set(0);
       renderer.setRenderTarget(target);
       renderer.render(scene, camera);
       renderer.setRenderTarget(null);
@@ -1825,7 +1832,14 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         }
         if (lit === 0) useLens = false;
       }
+      // Then the labels, on top and in focus.
+      camera.layers.set(LABELS);
+      renderer.autoClear = false;
+      renderer.clearDepth();
+      renderer.render(scene, camera);
+      renderer.autoClear = true;
     } else {
+      camera.layers.enableAll();
       renderer.render(scene, camera);
     }
   };
