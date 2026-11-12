@@ -334,3 +334,30 @@ describe('explainability', () => {
     expect(toLocal(r.picks[0]!.begin, TZ).h).toBe(9);
   });
 });
+
+describe('vibes', () => {
+  const start = at(2026, 7, 11, 18);
+  const quiet = option({ id: 'quiet', category: 'food', moods: { eat: 1, cozy: 1 } });
+  const loud = option({ id: 'loud', category: 'food', moods: { eat: 1, lively: 1 } });
+  const library = option({ id: 'library', category: 'library', moods: { cozy: 1 } });
+  const pick = (vibe?: string) => {
+    const req = request(start, 'hungry');
+    req.intent.vibe = vibe;
+    return match(req, world({ options: [quiet, loud, library] }));
+  };
+
+  it('lean the order toward the feel that was asked for', () => {
+    expect(ids(pick('chill'))[0]).toBe('quiet');
+    expect(ids(pick('upbeat'))[0]).toBe('loud');
+  });
+
+  it("never let in something that isn't what was asked for, and never shut anything out", () => {
+    expect(ids(pick('chill'))).not.toContain('library');
+    expect(ids(pick('chill')).sort()).toEqual(ids(pick()).sort());
+  });
+
+  it('are named as the reason when they tipped it', () => {
+    expect(pick('chill').picks.find((p) => p.option.id === 'quiet')!.reason).toBe('Easygoing, like you asked.');
+    expect(pick('upbeat').debug.ranked.find((r) => r.option.id === 'quiet')!.parts.vibe).toBeLessThan(0);
+  });
+});

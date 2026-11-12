@@ -15,6 +15,7 @@ import type { Intent } from './intent';
 import { sunFor, type Sun } from './sun';
 import { DAY, HOUR, MIN, fmtTime, toLocal } from './time';
 import { GROUP, type City, type Mood, type Option } from './types';
+import { VIBES, vibeFit } from './vibes';
 import { conditionsFor, type Conditions, type Weather } from './weather';
 
 export interface Request {
@@ -82,7 +83,7 @@ export const TUNING = {
   lateGraceMin: 10, // may arrive this late to a timed event
   overrunMin: 30, // a timed event may run this far past the window
   twilightMin: 20,
-  weight: { mood: 1, kind: 0.4, moment: 1, time: 0.25, near: 0.2, gem: 0.25, kids: 0.35, cheap: 0.3, taste: 0.25, jitter: 0.06 },
+  weight: { mood: 1, vibe: 0.6, kind: 0.4, moment: 1, time: 0.25, near: 0.2, gem: 0.25, kids: 0.35, cheap: 0.3, taste: 0.25, jitter: 0.06 },
   shownPenalty: 0.3,
   shownQuietHours: 3, // don't reshuffle on every reload
   wentPenalty: 0.5,
@@ -236,6 +237,9 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   if (wanted.length) parts.mood = W.mood * moodFit;
   // They named this kind of place outright ("coffee", "a bar").
   if (kindFit) parts.kind = W.kind;
+  const vibe = VIBES.find((v) => v.id === intent.vibe);
+  // A lean, not a gate: the right feel is worth a lot, the wrong one costs a little.
+  if (vibe) parts.vibe = W.vibe * vibeFit(vibe, opt.moods) || -0.15;
   parts.time = W.time * Math.min(1, stayMin / idealStay);
   // A fifteen-minute curiosity is thin for a whole afternoon.
   if (idealStay < (req.durationMin - 2 * travelMin) * 0.25) parts.slight = -0.1;
@@ -350,6 +354,8 @@ function explain(c: Candidate, req: Request, world: World, used: Set<string>): s
     .map(([m, w]) => [m, w * (c.option.moods[m] ?? 0)] as const)
     .sort((a, b) => b[1] - a[1])[0];
   const lineFor = (m: Mood) => MOOD_LINE[m][(c.option.moods[m] ?? 0) >= 1 ? 0 : 1].replace('Madison', world.city.name);
+  const vibe = VIBES.find((v) => v.id === req.intent.vibe);
+  if (vibe && vibeFit(vibe, c.option.moods) >= 0.6) lines.push(vibe.line);
   if (wanted && wanted[1] > 0) lines.push(lineFor(wanted[0]));
   if (req.intent.withKids && wanted?.[0] !== 'kids' && (c.option.moods.kids ?? 0) > 0) lines.push(lineFor('kids'));
   if (req.intent.cheap && c.option.price === 0) lines.push('And it costs nothing.');

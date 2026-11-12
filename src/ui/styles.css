@@ -242,3 +242,74 @@ footer p { margin: 0.8rem 0 0; }
 .sky:has(.scene.on) .brand { margin-bottom: 0; }
 .sky:has(.scene.on) .sky-inner { justify-content: flex-start; }
 .scene-hint { bottom: 2.9rem; }
+
+/* ---- vibes ---- */
+.vibes-sub { margin: 0 0 1rem; color: var(--muted); font-size: 0.9rem; }
+.vibe-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.sheet.vibes { overflow: auto; }
+.vibe-grid .vibe:first-child { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 0.8rem; text-align: left; }
+.vibe-grid .vibe:first-child .vibe-icon { width: 3rem; height: 3rem; }
+.vibe { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; padding: 0.7rem 0.5rem 0.8rem; background: var(--bg); border: 1.5px solid var(--line); border-radius: 16px; cursor: pointer; text-align: center; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s; }
+.vibe:hover, .vibe:focus-visible { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 20px -12px rgb(0 0 0 / 0.5); }
+.vibe[aria-pressed='true'] { border-color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.vibe strong { font: 600 1.05rem var(--serif); }
+.vibe span { font-size: 0.76rem; line-height: 1.25; color: var(--muted); }
+.vibe-icon { width: 3.6rem; height: 3.6rem; overflow: visible; --c: #e9b44c; }
+.vibe-icon.v-chill { --c: #7fa8d9; }
+.vibe-icon.v-upbeat { --c: #f08a4b; }
+.vibe-icon.v-romantic { --c: #e88aa6; }
+.vibe-icon.v-curious { --c: #62b6a4; }
+.vibe-icon.v-active { --c: #8cc152; }
+.vibe-icon.v-offbeat { --c: #a78bda; }
+.vibe-icon * { transform-box: fill-box; transform-origin: center; }
+.vibe-icon .body { fill: var(--c); }
+.vibe-icon .ink { fill: #23303a; }
+.vibe-icon .white { fill: #fff; }
+.vibe-icon .line { fill: none; stroke: #23303a; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.vibe-icon .limb { fill: none; stroke: var(--c); stroke-width: 4; stroke-linecap: round; }
+.vibe-icon .heart { fill: #d6336c; }
+.vibe-icon .blush { fill: #d6336c; opacity: 0.35; }
+.vibe-icon .spark { fill: var(--c); }
+.vibe-icon .shadow { fill: currentColor; opacity: 0.18; }
+.vibe-icon .whoosh { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; opacity: 0.35; }
+.vibe-icon .band { fill: none; stroke: #e2574c; stroke-width: 3; stroke-linecap: round; }
+.vibe-icon .blink { fill: #e2574c; }
+.vibe-icon text { fill: currentColor; font-family: var(--serif); font-weight: 700; opacity: 0.75; }
+.sentence .vibe-link { display: inline-flex; align-items: center; gap: 0.3rem; vertical-align: baseline; }
+.sentence .vibe-link .vibe-icon { width: 1.6rem; height: 1.6rem; align-self: center; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .vibe { animation: rise 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i) * 40ms); }
+  .vibe-icon .spark { animation: v-twinkle 1.6s ease-in-out infinite; }
+  .vibe-icon .breathe { transform-origin: center bottom; animation: v-breathe 3.6s ease-in-out infinite; }
+  .vibe-icon .zed { animation: v-zed 2.4s ease-in infinite; }
+  .vibe-icon .dance { transform-origin: center bottom; animation: v-dance 0.5s ease-in-out infinite alternate; }
+  .vibe-icon .note { animation: v-bob 1s ease-in-out infinite alternate; }
+  .vibe-icon .n2 { animation-delay: 0.3s; }
+  .vibe-icon .beat { animation: v-beat 0.9s ease-in-out infinite; }
+  .vibe-icon .sway { transform-origin: center bottom; animation: v-sway 2.4s ease-in-out infinite alternate; }
+  .vibe-icon .tilt { transform-origin: center bottom; animation: v-sway 3s ease-in-out infinite alternate; }
+  .vibe-icon .look { animation: v-look 2.6s ease-in-out infinite; }
+  .vibe-icon .ask { animation: v-ask 2.6s ease-in-out infinite; }
+  .vibe-icon .jump { transform-origin: center bottom; animation: v-jump 0.8s cubic-bezier(0.3, 0, 0.6, 1) infinite; }
+  .vibe-icon .shadow { animation: v-shadow 0.8s cubic-bezier(0.3, 0, 0.6, 1) infinite; }
+  .vibe-icon .whoosh { animation: v-whoosh 0.8s linear infinite; }
+  .vibe-icon .wobble { animation: v-wobble 3s ease-in-out infinite; }
+  .vibe-icon .blink { animation: v-blink 1.2s steps(2, jump-none) infinite; }
+  .vibe-icon.v-offbeat .body { animation: v-hue 5s linear infinite; }
+}
+@keyframes v-twinkle { 0%, 100% { transform: scale(0.2) rotate(0); opacity: 0.2; } 50% { transform: scale(1) rotate(45deg); opacity: 1; } }
+@keyframes v-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 1.12); } }
+@keyframes v-zed { 0% { transform: translate(-3px, 6px) scale(0.6); opacity: 0; } 30% { opacity: 0.8; } 100% { transform: translate(4px, -8px) scale(1.1); opacity: 0; } }
+@keyframes v-dance { from { transform: rotate(-11deg) translateY(0); } to { transform: rotate(11deg) translateY(-4px); } }
+@keyframes v-bob { from { transform: translateY(2px) rotate(-8deg); } to { transform: translateY(-4px) rotate(8deg); } }
+@keyframes v-beat { 0%, 100% { transform: scale(2.2); } 15% { transform: scale(2.9); } 30% { transform: scale(2.3); } 45% { transform: scale(2.7); } }
+@keyframes v-sway { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+@keyframes v-look { 0%, 100% { transform: translate(-2.2px, 0); } 25% { transform: translate(0, -1.6px); } 50% { transform: translate(2.2px, 0); } 75% { transform: translate(0, 1.2px); } }
+@keyframes v-ask { 0%, 60%, 100% { transform: scale(1) rotate(0); } 70% { transform: scale(1.35) rotate(12deg); } 85% { transform: scale(0.95) rotate(-6deg); } }
+@keyframes v-jump { 0%, 100% { transform: translateY(2px) scale(1.14, 0.84); } 45%, 55% { transform: translateY(-15px) scale(0.93, 1.1); } }
+@keyframes v-shadow { 0%, 100% { transform: scale(1); opacity: 0.22; } 45%, 55% { transform: scale(0.55); opacity: 0.1; } }
+@keyframes v-whoosh { 0%, 100% { opacity: 0; } 30% { opacity: 0.45; } 60% { opacity: 0; } }
+@keyframes v-wobble { 0%, 100% { transform: rotate(-9deg) translateY(0); } 50% { transform: rotate(9deg) translateY(-3px); } }
+@keyframes v-blink { from { fill: #e2574c; } to { fill: #f6d15a; } }
+@keyframes v-hue { to { filter: hue-rotate(360deg); } }

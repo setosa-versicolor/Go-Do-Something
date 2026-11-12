@@ -21,6 +21,8 @@ export interface Intent {
   cheap: boolean;
   inside: boolean;
   surprise: boolean;
+  /** A vibe id from vibes.ts. A lean, never a wall. */
+  vibe?: string;
   durationMin?: number;
   start?: StartHint;
   /** Phrases we understood, for the UI ("Heard: …") and debugging. */

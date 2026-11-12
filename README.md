@@ -55,7 +55,7 @@ To rebuild `shape.json`, fetch the lake polygons from Nominatim (`polygon_geojso
 `match(request, world)` in `src/core/match.ts`, in four stages:
 
 1. **Assess.** Hard gates decide whether this person can actually do this thing at that time: open long enough once you arrive (in the city's time zone), in season, enough daylight, weather that suits it, close enough for the time and transport you have, fine for kids if kids are along. Every rejection is recorded with a reason.
-2. **Score.** Named, additive parts: `mood`, `moment` (sunset timing, weather, seasonal peaks, one-night events), `time`, `near`, `gem` (editorial weight), `taste` and `seen`/`been`/`skipped`/`saved` from history.
+2. **Score.** Named, additive parts: `mood`, `vibe` (the optional feel chosen in the vibe picker: chill, upbeat, romantic, curious, active or offbeat, defined in `src/core/vibes.ts`; it leans the order and never rules anything out), `moment` (sunset timing, weather, seasonal peaks, one-night events), `time`, `near`, `gem` (editorial weight), `taste` and `seen`/`been`/`skipped`/`saved` from history.
 3. **Choose.** The best fit; then the best fit that is a *different kind of thing*; then a "left turn" drawn at random (seeded) from what still clears the bar.
 4. **Explain.** One line per pick, built from the part that mattered most. No two cards share a reason.
 

@@ -12,6 +12,7 @@ import { GROUP, type Option } from '../core/types';
 import { conditionsFor, fetchWeather, type Weather } from '../core/weather';
 import type { Diorama, Pin, Pose, SkyInput } from './scene';
 import { partOfDay, skyAt } from './sky';
+import { VibeIcon, vibeLabel, VibeSheet } from './vibe';
 import { forgetEverything, loadLog, loadMode, loadStart, loadTheme, saveLog, saveMode, saveStart, saveTheme, type Theme } from './store';
 
 const tz = city.tz;
@@ -66,6 +67,8 @@ export function App() {
   const [shuffles, setShuffles] = useState(0);
   const [line, setLine] = useState(0);
   const [sheet, setSheet] = useState(false);
+  const [vibe, setVibe] = useState('');
+  const [vibeOpen, setVibeOpen] = useState(false);
   const [toast, setToast] = useState('');
   const [active, setActive] = useState<number | null>(null); // the card the model is looking at
   const [theme, setTheme] = useState<Theme>(loadTheme);
@@ -108,6 +111,7 @@ export function App() {
     const now = Date.now();
     const along = COMPANY.find((c) => c[0] === company);
     const intent = parseIntent(q.text || `${q.mood} ${along?.[1] ?? ''}`);
+    if (vibe) intent.vibe = vibe;
     const picked = startKey === 'pick' ? custom : null;
     // Words win over the controls: "tomorrow morning" typed beats "now" selected.
     const start = Math.max(now, picked ?? resolveStart(intent.start ?? parseIntent(startKey).start, now, tz));
@@ -119,7 +123,7 @@ export function App() {
     const tile = MOODS.find((m) => m[2] === q.mood)?.[0];
     const hours = durationMin % 60 === 0 ? `${durationMin / 60} hour${durationMin === 60 ? '' : 's'}` : `${durationMin} minutes`;
     setActive(null);
-    setView({ req, result, options, label: [q.text ? `“${q.text}”` : [tile ?? 'Anything', along && along[1] ? along[0].toLowerCase() : null].filter(Boolean).join(', '), hours].join(' · ') });
+    setView({ req, result, options, label: [q.text ? `“${q.text}”` : [tile ?? 'Anything', along && along[1] ? along[0].toLowerCase() : null, vibe ? vibeLabel(vibe) : null].filter(Boolean).join(', '), hours].join(' · ') });
     setExcluded([]);
     for (const p of result.picks) {
       const last = w.memory.lastShown.get(p.option.id);
@@ -389,7 +393,8 @@ export function App() {
               <option value="">{city.centerName}</option>
               <option value="me">where I am now</option>
               {city.starts.map((s) => <option value={s.name}>{s.name}</option>)}
-            </select>.
+            </select>.<br />And the vibe is{' '}
+            <button type="button" class="link vibe-link" aria-haspopup="dialog" onClick={() => setVibeOpen(true)}><VibeIcon id={vibe} />{vibeLabel(vibe)}</button>.
           </p>
           {startKey === 'pick' && (
             <label class="pick">
@@ -465,6 +470,7 @@ export function App() {
         </Sheet>
       )}
 
+      {vibeOpen && <VibeSheet value={vibe} onPick={(id) => { setVibe(id); setVibeOpen(false); }} onClose={() => setVibeOpen(false)} />}
       {toast && <div class="toast" role="status">{toast}</div>}
     </div>
   );
