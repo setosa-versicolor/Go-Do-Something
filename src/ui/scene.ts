@@ -745,7 +745,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   interface Tree { east: number; north: number; s: number; conifer: boolean; roll: number }
   const forest: Tree[] = [];
   const plant = (east: number, north: number, conifers = 0.16) => {
-    if (wet(east, north, 0.03) || inField(east, north)) return;
+    // Not in the water, not on the airfield, and not inside a stadium or on top of a named building.
+    if (wet(east, north, 0.03) || inField(east, north) || taken(east, north, 0.14)) return;
     forest.push({ east, north, s: 0.7 + rand() * 0.8, conifer: rand() < conifers, roll: rand() });
   };
   for (const m of shape.landmarks) {
