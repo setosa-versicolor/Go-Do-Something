@@ -437,13 +437,27 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   scene.add(new THREE.Mesh(ribbons(shape.rivers.map((points) => ({ points, width: 0.045 })), 0.011), waterMat));
 
   // Roads: pale by day, amber threads at night.
+  // Round the corners off the simplified road lines (two passes of corner-cutting), so a causeway curves instead of kinking.
+  const roads = shape.roads.map((r) => {
+    let pts = r.slice(1);
+    for (let pass = 0; pass < 2 && pts.length >= 6; pass++) {
+      const out = [pts[0]!, pts[1]!];
+      for (let i = 0; i + 3 < pts.length; i += 2) {
+        const [ax, ay, bx, by] = [pts[i]!, pts[i + 1]!, pts[i + 2]!, pts[i + 3]!];
+        out.push(ax * 0.75 + bx * 0.25, ay * 0.75 + by * 0.25, ax * 0.25 + bx * 0.75, ay * 0.25 + by * 0.75);
+      }
+      out.push(pts[pts.length - 2]!, pts[pts.length - 1]!);
+      pts = out;
+    }
+    return [r[0]!, ...pts];
+  });
   // Where a road crosses open water it rides a causeway: a low bank of fill
   // with the road on top, clear of the surface.
   const roadMat = new THREE.MeshBasicMaterial({ color: '#d9d0bd', polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
-  const bankMat = flat('#a9a08a', { polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const bankMat = flat('#cbbf9f', { polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
   const onLand: { points: number[]; width: number }[] = [];
   const onWater: { points: number[]; width: number }[] = [];
-  for (const r of shape.roads) {
+  for (const r of roads) {
     const width = r[0] === 2 ? 0.05 : 0.032;
     for (let i = 1; i + 3 < r.length; i += 2) {
       const ax = r[i]!;
@@ -453,12 +467,12 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       const steps = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 0.06));
       for (let k = 0; k < steps; k++) {
         const p = [ax + ((bx - ax) * k) / steps, ay + ((by - ay) * k) / steps, ax + ((bx - ax) * (k + 1)) / steps, ay + ((by - ay) * (k + 1)) / steps];
-        (wet((p[0]! + p[2]!) / 2, (p[1]! + p[3]!) / 2) ? onWater : onLand).push({ points: p, width });
+        (wet((p[0]! + p[2]!) / 2, (p[1]! + p[3]!) / 2, -0.012) ? onWater : onLand).push({ points: p, width });
       }
     }
   }
   scene.add(new THREE.Mesh(ribbons(onLand, 0.02), roadMat));
-  scene.add(new THREE.Mesh(ribbons(onWater.map((w) => ({ points: w.points, width: w.width + 0.09 })), 0.026), bankMat));
+  scene.add(new THREE.Mesh(ribbons(onWater.map((w) => ({ points: w.points, width: w.width + 0.035 })), 0.026), bankMat));
   scene.add(new THREE.Mesh(ribbons(onWater, 0.034), roadMat));
 
   // The building at the center: for Madison, the Capitol. Four wings to the
@@ -499,40 +513,156 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   const gilt = new THREE.Mesh(new THREE.ConeGeometry(0.014, 0.07, 6), new THREE.MeshLambertMaterial({ color: '#e7b93e', emissive: '#e7b93e', emissiveIntensity: 0.6 }));
   gilt.position.y = 0.51;
   capitol.add(drum, collar, cap, lantern, gilt);
+  // Smaller than it once was, so the buildings around the square can stand where they really do.
+  const CAP = 0.5;
+  capitol.scale.setScalar(CAP);
   scene.add(capitol);
 
-  // Downtown, on the street grid. Nothing taller than the dome (in Madison, it's the law).
-  const blockMat = new THREE.MeshLambertMaterial({ color: '#ffffff', flatShading: true, emissive: '#ffc874', emissiveIntensity: 0 });
-  lit.push({ m: blockMat, k: 0.22 });
-  const blocks = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), blockMat, 420);
+  // Downtown. Seen from across the lake, Madison is broad slabs of nearly even
+  // height (cream, brick, grey stone, a little glass) with the dome just clear
+  // of them, because nothing within a mile may stand taller than its base.
+  // Every building is a box with real windows: one small texture tiled across
+  // the walls by day, and a second that lights some of them after dark.
   const lamps: { x: number; y: number; z: number; color: string; size: number }[] = [];
   const WINDOW = ['#ffcf8a', '#ffd9a0', '#fff1d0', '#ffc070'];
-  let placed = 0;
+  const tile = (size: number, paint: (x: CanvasRenderingContext2D) => void) => {
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
+    paint(c.getContext('2d')!);
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.anisotropy = 4;
+    return t;
+  };
+  const wallMap = tile(32, (x) => {
+    x.fillStyle = '#ffffff';
+    x.fillRect(0, 0, 32, 32);
+    x.fillStyle = '#56636e';
+    x.fillRect(7, 8, 18, 15);
+  });
+  const glowMap = tile(128, (x) => {
+    x.fillStyle = '#000000';
+    x.fillRect(0, 0, 128, 128);
+    for (let i = 0; i < 16; i++) {
+      if (rand() < 0.42) continue;
+      x.fillStyle = pick(WINDOW);
+      x.fillRect((i % 4) * 32 + 7, Math.floor(i / 4) * 32 + 9, 18, 15);
+    }
+  });
+  glowMap.repeat.set(0.25, 0.25);
+  const towerMat = new THREE.MeshLambertMaterial({ vertexColors: true, map: wallMap, emissive: '#ffffff', emissiveMap: glowMap, emissiveIntensity: 0 });
+  lit.push({ m: towerMat, k: 0.95 });
+  const roofTopMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+  const wall = { pos: [] as number[], uv: [] as number[], col: [] as number[], nor: [] as number[] };
+  const top = { pos: [] as number[], col: [] as number[], nor: [] as number[] };
+  /** One box: walls with windows (or plain), and a flat roof a shade darker. */
+  const box = (east: number, north: number, w: number, d: number, h: number, turn: number, color: string, y0 = 0, plain = false) => {
+    const c = Math.cos(turn);
+    const sn = Math.sin(turn);
+    const corner = (x: number, z: number) => [east + x * c - z * sn, -(north + x * sn + z * c)] as const;
+    const cs = [corner(-w / 2, -d / 2), corner(w / 2, -d / 2), corner(w / 2, d / 2), corner(-w / 2, d / 2)];
+    tmp.set(color);
+    const shade = [1, 0.9, 0.82, 0.93];
+    const u0 = Math.floor(rand() * 4);
+    const v0 = Math.floor(rand() * 4);
+    for (let i = 0; i < 4; i++) {
+      const [ax, az] = cs[i]!;
+      const [bx, bz] = cs[(i + 1) % 4]!;
+      const len = Math.hypot(bx - ax, bz - az);
+      const cols = plain ? 0 : Math.max(1, Math.round(len / 0.021));
+      const rows = plain ? 0 : Math.max(1, Math.round(h / 0.019));
+      const nx = (bz - az) / len;
+      const nz = -(bx - ax) / len;
+      const quad = [[ax, y0, az, 0, 0], [bx, y0, bz, cols, 0], [bx, y0 + h, bz, cols, rows], [ax, y0, az, 0, 0], [bx, y0 + h, bz, cols, rows], [ax, y0 + h, az, 0, rows]];
+      for (const [x, y, z, u, v] of quad) {
+        wall.pos.push(x!, y!, z!);
+        wall.uv.push(plain ? 0.05 : u! + u0, plain ? 0.05 : v! + v0);
+        wall.col.push(tmp.r * shade[i]!, tmp.g * shade[i]!, tmp.b * shade[i]!);
+        wall.nor.push(-nx, 0, -nz);
+      }
+    }
+    for (const i of [0, 2, 1, 0, 3, 2]) {
+      top.pos.push(cs[i]![0], y0 + h, cs[i]![1]);
+      top.col.push(tmp.r * 0.72, tmp.g * 0.72, tmp.b * 0.74);
+      top.nor.push(0, 1, 0);
+    }
+  };
+  /** A building: the main slab, usually with something on the roof. */
+  const raise = (east: number, north: number, w: number, d: number, h: number, turn: number, color: string, style: string = 'slab') => {
+    if (style === 'stepped') {
+      box(east, north, w, d, h * 0.62, turn, color);
+      box(east, north, w * 0.5, d * 0.85, h * 0.38, turn, color, h * 0.62);
+      return;
+    }
+    box(east, north, w, d, h, turn, color);
+    if (style === 'stacks') {
+      for (let i = 0; i < 4; i++) {
+        const stack = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.008, 0.16, 8), flat('#e3ddd0'));
+        stack.position.set(east + (i - 1.5) * 0.02 * Math.cos(turn), h + 0.08, -(north + (i - 1.5) * 0.02 * Math.sin(turn)));
+        scene.add(stack);
+      }
+    } else if (style === 'dome') {
+      const cupola = new THREE.Mesh(new THREE.SphereGeometry(Math.min(w, d) * 0.3, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshLambertMaterial({ color: '#a9d6e2', flatShading: true, transparent: true, opacity: 0.85 }));
+      cupola.position.set(east, h, -north);
+      scene.add(cupola);
+    } else if (h > 0.07 && rand() < 0.7) {
+      box(east + (rand() - 0.5) * w * 0.3, north + (rand() - 0.5) * d * 0.3, w * (0.25 + rand() * 0.2), d * (0.35 + rand() * 0.2), 0.012 + rand() * 0.012, turn, color, h, true);
+    }
+  };
+
+  // First the ones people would recognise, where they really stand. Anything
+  // closer to the center than the Capitol model's own footprint is nudged out
+  // to the edge of the square along the same bearing.
+  const SQUARE = 0.3 * CAP + 0.06;
+  const named: { name: string; east: number; north: number; h: number }[] = [];
+  for (const b of shape.buildings ?? []) {
+    const r = Math.hypot(b.east, b.north);
+    let k = r < 0.25 && r > 0 ? (SQUARE + r * 0.5) / r : 1;
+    // The isthmus is narrow: if the nudge put it in the lake, walk it back to dry land.
+    while (k > 0.3 && wet(b.east * k, b.north * k, 0.06)) k -= 0.04;
+    const east = b.east * k;
+    const north = b.north * k;
+    const turn = b.turn ?? (r < 1.3 ? shape.gridTurn : 0);
+    raise(east, north, b.w * 1.15, b.d * 1.15, b.h * 0.8, turn, b.color, b.style);
+    named.push({ name: b.name, east, north, h: b.h * 0.8 });
+  }
+  const taken = (east: number, north: number, pad: number) =>
+    named.some((b) => Math.hypot(b.east - east, b.north - north) < pad) || shape.landmarks.some((m) => m.kind !== 'woods' && Math.hypot(m.east - east, m.north - north) < pad + 0.06);
+
+  // Then the rest, on the street grid: a ring of tall slabs around the square, stepping down from there.
   const gc = Math.cos(shape.gridTurn);
   const gs = Math.sin(shape.gridTurn);
-  for (let u = -1.6; u <= 1.6 && placed < 420; u += 0.1) {
-    for (let v = -1.6; v <= 1.6 && placed < 420; v += 0.1) {
+  const TONES = ['#d9cbb0', '#c9b48f', '#cfc6b8', '#b9b6ad', '#e3ddd0', '#8f4a3a', '#7d3f33', '#d39a78', '#8fa3b3', '#b7a58c'];
+  const BRICK = ['#a8553f', '#b86b4a', '#c9a889', '#d9cfc0', '#8f4a3a'];
+  for (let u = -1.56; u <= 1.56; u += 0.13) {
+    for (let v = -1.56; v <= 1.56; v += 0.13) {
       const east = u * gc - v * gs + (rand() - 0.5) * 0.02;
       const north = u * gs + v * gc + (rand() - 0.5) * 0.02;
       const d = Math.hypot(east, north);
-      if (Math.max(Math.abs(u), Math.abs(v)) < 0.33 || d > 1.6 || rand() < 0.12 + d * 0.36 || wet(east, north, 0.07) || quiet(east, north)) continue;
-      const h = 0.05 + rand() ** 1.6 * 0.3 * Math.max(0.12, 1 - d / 1.5);
-      const campus = east < -0.65;
-      dummy.position.set(east, h / 2, -north);
-      dummy.scale.set(0.05 + rand() * 0.035, h, 0.05 + rand() * 0.035);
-      dummy.rotation.set(0, shape.gridTurn, 0);
-      dummy.updateMatrix();
-      blocks.setMatrixAt(placed, dummy.matrix);
-      blocks.setColorAt(placed, tmp.set(pick(campus ? ['#a8553f', '#b86b4a', '#d9cfc0', '#c9a889'] : ['#d9cfc0', '#b9ab98', '#a8b4bd', '#c7b8a2', '#8fa3b3', '#cfc6b8'])));
-      placed++;
-      for (let w = 0; w < 2 + Math.round(h * 16); w++) {
-        const side = rand() * Math.PI * 2;
-        lamps.push({ x: east + Math.cos(side) * 0.035, y: 0.02 + rand() * (h - 0.02), z: -north + Math.sin(side) * 0.035, color: pick(WINDOW), size: 0.03 });
-      }
+      const ring = Math.max(Math.abs(u), Math.abs(v));
+      if (ring < SQUARE + 0.02 || d > 1.55 || wet(east, north, 0.085) || quiet(east, north) || taken(east, north, 0.12)) continue;
+      const core = d < 0.55;
+      if (rand() < (core ? 0.06 : 0.1 + d * 0.28)) continue;
+      const campus = east < -0.62;
+      const h = core ? 0.07 + rand() * 0.045 : d < 0.95 ? 0.04 + rand() * 0.065 : 0.022 + rand() * 0.04;
+      const long = 0.09 + rand() * 0.03;
+      const short = 0.065 + rand() * 0.03;
+      const along = rand() < 0.5;
+      raise(east, north, along ? long : short, along ? short : long, h, shape.gridTurn, pick(campus ? BRICK : TONES), core && rand() < 0.15 ? 'stepped' : 'slab');
     }
   }
-  blocks.count = placed;
-  scene.add(blocks);
+  const wallGeo = new THREE.BufferGeometry();
+  wallGeo.setAttribute('position', new THREE.Float32BufferAttribute(wall.pos, 3));
+  wallGeo.setAttribute('uv', new THREE.Float32BufferAttribute(wall.uv, 2));
+  wallGeo.setAttribute('color', new THREE.Float32BufferAttribute(wall.col, 3));
+  wallGeo.setAttribute('normal', new THREE.Float32BufferAttribute(wall.nor, 3));
+  const topGeo = new THREE.BufferGeometry();
+  topGeo.setAttribute('position', new THREE.Float32BufferAttribute(top.pos, 3));
+  topGeo.setAttribute('color', new THREE.Float32BufferAttribute(top.col, 3));
+  topGeo.setAttribute('normal', new THREE.Float32BufferAttribute(top.nor, 3));
+  scene.add(new THREE.Mesh(wallGeo, towerMat), new THREE.Mesh(topGeo, roofTopMat));
+  let placed = 0;
 
   // Neighborhoods: small houses with pitched roofs, thinning toward the edge of town.
   const houseMat = new THREE.MeshLambertMaterial({ color: '#ffffff', flatShading: true, emissive: '#ffc874', emissiveIntensity: 0 });
@@ -619,8 +749,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   for (let i = 0; i < 20; i++) {
     // A ring of old trees around the square.
     const a = (i / 20) * Math.PI * 2;
-    const r = 0.26 + (i % 2) * 0.035;
-    forest.push({ east: Math.cos(a) * r * 1.02, north: Math.sin(a) * r * 1.02, s: 0.55, conifer: false, roll: rand() });
+    const r = (0.26 + (i % 2) * 0.035) * CAP;
+    forest.push({ east: Math.cos(a) * r * 1.02, north: Math.sin(a) * r * 1.02, s: 0.4, conifer: false, roll: rand() });
   }
   for (let i = 0; i < 700; i++) {
     const r = 0.45 + Math.sqrt(rand()) * (shape.urbanRadius + 0.6);
@@ -757,34 +887,42 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       g.add(wall, roof);
       return 0.2;
     },
-    terrace(g) {
-      // A white crescent stepping out over the water.
-      const deck = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.05, 18, 1, false, 0, Math.PI), pale);
+    terrace(g, m) {
+      // A low white crescent stepping out over the water, with a band of dark arched glass facing the lake.
+      // It belongs on the shore, so slide it along its bearing from the center until it meets the water.
+      const far = Math.hypot(m.east, m.north) || 1;
+      let r = SQUARE + 0.08;
+      while (r < 0.9 && !wet((m.east / far) * r, (m.north / far) * r, 0.0)) r += 0.02;
+      g.position.set((m.east / far) * (r - 0.03), 0, -(m.north / far) * (r - 0.03));
+      const deck = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.035, 20, 1, false, 0, Math.PI), pale);
       deck.position.y = 0.03;
-      const top = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 0.012, 18, 1, false, 0, Math.PI), pitchMat);
-      top.position.y = 0.06;
-      for (const z of [-0.1, 0.1]) {
-        const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.09, 10), pale);
-        tower.position.set(-0.01, 0.045, z);
-        g.add(tower);
+      const glassBand = new THREE.Mesh(new THREE.CylinderGeometry(0.112, 0.112, 0.016, 20, 1, true, 0.5, Math.PI - 1), flat('#2f5f7a', { emissive: '#ffd9a0', emissiveIntensity: 0 }));
+      lit.push({ m: glassBand.material as THREE.MeshLambertMaterial, k: 0.8 });
+      glassBand.position.y = 0.032;
+      const garden = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.085, 0.008, 20, 1, false, 0, Math.PI), pitchMat);
+      garden.position.y = 0.05;
+      for (const z of [-0.07, 0.07]) {
+        const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.06, 10), pale);
+        drum.position.set(-0.005, 0.035, z);
+        g.add(drum);
       }
-      g.add(deck, top);
-      return 0.22;
+      g.add(deck, glassBand, garden);
+      return 0.15;
     },
     union(g) {
       const hall = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 0.16), brick);
       hall.position.set(-0.05, 0.035, 0);
       const patio = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.008, 0.2), concrete);
-      patio.position.set(0.04, 0.008, 0);
+      patio.position.set(0.04, 0.018, 0);
       const pier = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.008, 0.012), flat('#8a6a48'));
-      pier.position.set(0.15, 0.02, 0.05);
+      pier.position.set(0.15, 0.028, 0.05);
       g.add(hall, patio, pier);
       // The sunburst chairs: green, yellow, orange.
       const chair = new THREE.BoxGeometry(0.012, 0.014, 0.012);
       const paints = ['#3f9a4a', '#f2c230', '#ee7a2a'].map((c) => flat(c, { emissive: c, emissiveIntensity: 0.25 }));
       for (let i = 0; i < 21; i++) {
         const c = new THREE.Mesh(chair, paints[i % 3]!);
-        c.position.set(0.012 + (i % 3) * 0.026 + rand() * 0.008, 0.02, -0.085 + Math.floor(i / 3) * 0.028 + rand() * 0.008);
+        c.position.set(0.012 + (i % 3) * 0.026 + rand() * 0.008, 0.032, -0.085 + Math.floor(i / 3) * 0.028 + rand() * 0.008);
         g.add(c);
       }
       return 0.2;
@@ -800,8 +938,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       return 0.2;
     },
     tower(g) {
-      const t = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.3, 0.045), new THREE.MeshLambertMaterial({ color: '#c9bca8', flatShading: true, emissive: '#ffc874', emissiveIntensity: 0 }));
-      lit.push({ m: t.material, k: 0.4 });
+      const t = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.3, 0.045), flat('#c9bca8'));
       t.position.y = 0.15;
       g.add(t);
       return 0.16;
@@ -923,20 +1060,23 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     },
     woods: (_g, m) => (m.radius ?? 0.3) * 0.8,
   };
-  const named = new Set<string>();
+  for (const b of named) touchable(b.name, b.east, b.north, 0.07, b.h);
+  const seenNames = new Set<string>();
   for (const m of shape.landmarks) {
     const g = new THREE.Group();
     g.position.set(m.east, 0, -m.north);
     g.rotation.y = m.turn ?? 0;
     const reach = build[m.kind](g, m);
+    // A builder may move itself (the terrace finds the shore); name it where it ended up.
+    const spot = { east: g.position.x, north: -g.position.z };
     scene.add(g);
-    if (m.kind === 'woods' && (named.has(m.name) || reach < 0.2)) continue;
-    named.add(m.name);
-    touchable(m.name, m.east, m.north, reach, m.kind === 'woods' ? 0.2 : m.kind === 'tower' ? 0.34 : 0.14);
+    if (m.kind === 'woods' && (seenNames.has(m.name) || reach < 0.2)) continue;
+    seenNames.add(m.name);
+    touchable(m.name, m.kind === 'terrace' ? spot.east : m.east, m.kind === 'terrace' ? spot.north : m.north, reach, m.kind === 'woods' ? 0.2 : m.kind === 'tower' ? 0.34 : 0.14);
   }
 
   // Night: windows, porch lights, and lamps along the big roads.
-  for (const r of shape.roads) {
+  for (const r of roads) {
     let carry = 0;
     for (let i = 1; i + 3 < r.length; i += 2) {
       const len = Math.hypot(r[i + 2]! - r[i]!, r[i + 3]! - r[i + 1]!);
@@ -952,7 +1092,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   scene.add(cityLights.points);
 
   // Traffic: a few dozen headlights that follow the real roads.
-  const routes = shape.roads.filter((r) => r.length >= 7).map((r) => {
+  const routes = roads.filter((r) => r.length >= 7).map((r) => {
     const pts = r.slice(1);
     const cum = [0];
     for (let i = 0; i + 3 < pts.length; i += 2) cum.push(cum[cum.length - 1]! + Math.hypot(pts[i + 2]! - pts[i]!, pts[i + 3]! - pts[i + 1]!));
@@ -1136,11 +1276,11 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   scene.add(sparks);
   let sparkLife = 0;
   let capitolPulse = 0;
-  touchable(shape.centerLabel, 0, 0, 0.36, 0.5, () => {
+  touchable(shape.centerLabel, 0, 0, 0.36 * CAP, 0.5 * CAP, () => {
     capitolPulse = 1;
     sparkLife = 1;
     for (let i = 0; i < sparkN; i++) {
-      sparkPos.set([0, 0.5, 0], i * 3);
+      sparkPos.set([0, 0.5 * CAP, 0], i * 3);
       const a = Math.random() * Math.PI * 2;
       const up = 0.9 + Math.random() * 1.4;
       const out = 0.2 + Math.random() * 0.7;
@@ -1256,7 +1396,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   const POSES: Record<Pose, Rig> = {
     // The target sits above the town, so the model rides low in the frame and the sky gets the top.
     mood: { tx: -0.4, ty: 1.55, tz: -0.8, theta: 0.72, phi: 1.4, r: 8.6 },
-    time: { tx: 0, ty: 0.85, tz: 0, theta: 0.3, phi: 1.4, r: 4.0 },
+    time: { tx: 0, ty: 0.6, tz: 0, theta: 0.3, phi: 1.36, r: 3.1 },
     thinking: { tx: 0, ty: 1.0, tz: 0, theta: 2.4, phi: 1.1, r: 11 },
     results: { tx: 0, ty: 1.0, tz: 0, theta: 0.5, phi: 0.98, r: 9 },
   };

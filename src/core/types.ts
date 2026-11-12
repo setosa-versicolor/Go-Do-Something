@@ -130,6 +130,11 @@ export interface CityShape {
   /** Each road is [weight, east, north, east, north, …]; weight 2 is a highway. */
   roads: number[][];
   landmarks: Landmark[];
+  /**
+   * Buildings worth recognising, placed by hand. Sizes are in model units
+   * (miles across, and a stylised height), not surveyed.
+   */
+  buildings?: { name: string; east: number; north: number; turn?: number; w: number; d: number; h: number; color: string; style?: 'slab' | 'stepped' | 'glass' | 'stacks' | 'dome' }[];
   /** The airport's real layout, if the city has one worth drawing. Outlines are closed rings. */
   airfield?: { runways: { ref: string; line: number[] }[]; taxiways: number[][]; aprons: number[][]; terminals: number[][] };
   /** The street grid's angle downtown, radians. */
