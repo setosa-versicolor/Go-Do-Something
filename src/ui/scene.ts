@@ -310,9 +310,16 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   });
   const wet = (east: number, north: number, pad = 0) =>
     lakeBox.some((b) => east > b.x0 - pad && east < b.x1 + pad && north > b.y0 - pad && north < b.y1 + pad && edgeDistance(b.l.outline, east, north) < pad);
+  // The airfield, when we have its real layout: nothing is built or planted inside the box around its runways.
+  const field = shape.airfield;
+  const fieldBox = field ? field.runways.reduce((b, r) => ({
+    x0: Math.min(b.x0, r.line[0]!, r.line[2]!) - 0.14, x1: Math.max(b.x1, r.line[0]!, r.line[2]!) + 0.14,
+    y0: Math.min(b.y0, r.line[1]!, r.line[3]!) - 0.14, y1: Math.max(b.y1, r.line[1]!, r.line[3]!) + 0.14,
+  }), { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity }) : null;
+  const inField = (east: number, north: number) => Boolean(fieldBox && east > fieldBox.x0 && east < fieldBox.x1 && north > fieldBox.y0 && north < fieldBox.y1);
   const kept = shape.landmarks.filter((m) => m.kind === 'woods' || m.kind === 'airport' || m.kind === 'stadium');
   const quiet = (east: number, north: number) =>
-    kept.some((m) => Math.hypot(east - m.east, north - m.north) < (m.kind === 'woods' ? m.radius ?? 0.3 : m.kind === 'airport' ? 0.8 : 0.22));
+    inField(east, north) || kept.some((m) => Math.hypot(east - m.east, north - m.north) < (m.kind === 'woods' ? m.radius ?? 0.3 : m.kind === 'airport' ? (field ? 0 : 0.8) : 0.22));
 
   // Sky dome: a gradient we repaint every frame, with a glow around the sun or moon.
   const skyUniforms = {
@@ -597,7 +604,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   interface Tree { east: number; north: number; s: number; conifer: boolean; roll: number }
   const forest: Tree[] = [];
   const plant = (east: number, north: number, conifers = 0.16) => {
-    if (wet(east, north, 0.03)) return;
+    if (wet(east, north, 0.03) || inField(east, north)) return;
     forest.push({ east, north, s: 0.7 + rand() * 0.8, conifer: rand() < conifers, roll: rand() });
   };
   for (const m of shape.landmarks) {
@@ -681,6 +688,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
 
   const tappable: THREE.Object3D[] = [];
   const pinHits: THREE.Object3D[] = [];
+  let visit: { x: number; z: number; until: number } | null = null;
   const nameTag = textSprite();
   scene.add(nameTag.sprite);
   let nameLife = 0;
@@ -694,6 +702,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     hit.position.set(east, height * 0.5, -north);
     hit.userData.tap = () => {
       say(name, new THREE.Vector3(east, height + 0.22, -north));
+      // Go and have a look: the camera visits for a few seconds, then returns to where it was.
+      visit = { x: east, z: -north, until: clock + 6.5 };
       also?.();
     };
     tappable.push(hit);
@@ -708,6 +718,22 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   const gold = new THREE.MeshLambertMaterial({ color: '#e7b93e', flatShading: true, emissive: '#e7b93e', emissiveIntensity: 0.4 });
   lit.push({ m: brick, k: 0.25 }, { m: pale, k: 0.45 }, { m: glass, k: 0.9 });
   const pitchMat = flat('#4f9a4a');
+  const infieldMat = flat('#7fa466', { polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 6), new THREE.MeshBasicMaterial({ color: '#58f08a', fog: false }));
+  const aircraft = (scale: number) => {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.012, 0.24, 8), pale);
+    body.rotation.x = Math.PI / 2;
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.006, 0.05), pale);
+    wing.position.z = -0.02;
+    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.006, 0.03), pale);
+    tail.position.z = 0.11;
+    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.05, 0.035), flat('#c5050c'));
+    fin.position.set(0, 0.025, 0.11);
+    g.add(body, wing, tail, fin);
+    g.scale.setScalar(scale);
+    return g;
+  };
   let airport: Landmark | undefined;
   const build: Record<Landmark['kind'], (g: THREE.Group, m: Landmark) => number> = {
     stadium(g) {
@@ -798,17 +824,102 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     },
     airport(g, m) {
       airport = m;
-      const tarmac = flat('#5a5d62');
-      for (const [turn, len] of [[0, 1.5], [1.05, 1.2]] as const) {
-        const strip = new THREE.Mesh(new THREE.BoxGeometry(len, 0.006, 0.06), tarmac);
-        strip.rotation.y = turn;
-        strip.position.y = 0.006;
-        g.add(strip);
+      if (!field) {
+        // No layout on file: two crossed strips stand in.
+        const tarmac = flat('#5a5d62');
+        for (const [turn, len] of [[0, 1.5], [1.05, 1.2]] as const) {
+          const strip = new THREE.Mesh(new THREE.BoxGeometry(len, 0.006, 0.06), tarmac);
+          strip.rotation.y = turn;
+          strip.position.y = 0.006;
+          g.add(strip);
+        }
+        return 0.5;
       }
-      const terminal = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.04, 0.07), pale);
-      terminal.position.set(-0.3, 0.02, 0.35);
-      g.add(terminal);
-      return 0.5;
+      // The real thing, in world coordinates: mown infield, aprons, taxiways, runways with their markings, the terminal and its tower.
+      const lift = (y: number, extra: THREE.MeshLambertMaterialParameters = {}) => ({ polygonOffset: true, polygonOffsetFactor: -y, polygonOffsetUnits: -y, ...extra });
+      const area = (ring: number[], y: number, mat: THREE.Material) => {
+        const sh = new THREE.Shape();
+        for (let i = 0; i < ring.length; i += 2) (i === 0 ? sh.moveTo : sh.lineTo).call(sh, ring[i]!, ring[i + 1]!);
+        const geo = new THREE.ShapeGeometry(sh);
+        geo.rotateX(-Math.PI / 2);
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.y = y;
+        scene.add(mesh);
+      };
+      const b = fieldBox!;
+      area([b.x0, b.y0, b.x1, b.y0, b.x1, b.y1, b.x0, b.y1], 0.006, infieldMat);
+      const concrete2 = flat('#b9b8b0', lift(2));
+      for (const ring of field.aprons) area(ring, 0.009, concrete2);
+      scene.add(new THREE.Mesh(ribbons(field.taxiways.map((points) => ({ points, width: 0.022 })), 0.012), flat('#8f918d', lift(3))));
+      scene.add(new THREE.Mesh(ribbons(field.runways.map((r) => ({ points: r.line, width: 0.062 })), 0.015), flat('#3d4044', lift(4))));
+      // Paint: a dashed centerline and the bars at each threshold.
+      const paint: { points: number[]; width: number }[] = [];
+      for (const r of field.runways) {
+        const [ax, ay, bx, by] = r.line as [number, number, number, number];
+        const len = Math.hypot(bx - ax, by - ay);
+        const ux = (bx - ax) / len;
+        const uy = (by - ay) / len;
+        for (let d = 0.12; d < len - 0.12; d += 0.07) paint.push({ points: [ax + ux * d, ay + uy * d, ax + ux * (d + 0.03), ay + uy * (d + 0.03)], width: 0.005 });
+        for (const end of [0.02, len - 0.045]) {
+          for (let k = -2; k <= 2; k++) {
+            const ox = -uy * k * 0.011;
+            const oy = ux * k * 0.011;
+            paint.push({ points: [ax + ux * end + ox, ay + uy * end + oy, ax + ux * (end + 0.025) + ox, ay + uy * (end + 0.025) + oy], width: 0.005 });
+          }
+        }
+        // Edge lights, white down the sides and green across the ends.
+        for (let d = 0; d <= len; d += 0.055) {
+          for (const side of [-1, 1]) lamps.push({ x: ax + ux * d - uy * side * 0.036, y: 0.03, z: -(ay + uy * d + ux * side * 0.036), color: '#f4f8ff', size: 0.026 });
+        }
+        for (const end of [0, len]) for (let k = -2; k <= 2; k++) lamps.push({ x: ax + ux * end - uy * k * 0.014, y: 0.03, z: -(ay + uy * end + ux * k * 0.014), color: '#58f08a', size: 0.03 });
+      }
+      scene.add(new THREE.Mesh(ribbons(paint, 0.018), new THREE.MeshBasicMaterial({ color: '#eef0ea', polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6 })));
+      for (const t of field.taxiways) for (let i = 0; i + 1 < t.length; i += 2) lamps.push({ x: t[i]!, y: 0.025, z: -t[i + 1]!, color: '#5a8cff', size: 0.022 });
+      // The terminal, on its own footprint, with a glass face and the tower beside it.
+      let tx = m.east;
+      let tn = m.north;
+      for (const ring of field.terminals) {
+        const sh = new THREE.Shape();
+        for (let i = 0; i < ring.length; i += 2) (i === 0 ? sh.moveTo : sh.lineTo).call(sh, ring[i]!, ring[i + 1]!);
+        const geo = new THREE.ExtrudeGeometry(sh, { depth: 0.05, bevelEnabled: false });
+        geo.rotateX(-Math.PI / 2);
+        scene.add(new THREE.Mesh(geo, pale));
+        const roofGeo = new THREE.ShapeGeometry(sh);
+        roofGeo.rotateX(-Math.PI / 2);
+        const roof = new THREE.Mesh(roofGeo, glass);
+        roof.position.y = 0.052;
+        scene.add(roof);
+        tx = ring.filter((_, i) => i % 2 === 0).reduce((a, v) => a + v, 0) / (ring.length / 2);
+        tn = ring.filter((_, i) => i % 2 === 1).reduce((a, v) => a + v, 0) / (ring.length / 2);
+      }
+      const tower = new THREE.Group();
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.016, 0.2, 8), pale);
+      shaft.position.y = 0.1;
+      const cab = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.02, 0.035, 8), glass);
+      cab.position.y = 0.215;
+      const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.032, 0.012, 8), pale);
+      lid.position.y = 0.24;
+      beacon.position.y = 0.26;
+      tower.add(shaft, cab, lid, beacon);
+      tower.position.set(tx + 0.1, 0, -(tn + 0.16));
+      scene.add(tower);
+      // A few aircraft at the gates.
+      field.terminals[0]?.forEach((_, i, ring) => {
+        if (i % 2 || (i / 2) % Math.max(1, Math.floor(ring.length / 8)) !== 0) return;
+        const e = ring[i]!;
+        const n = ring[i + 1]!;
+        // Only on the airfield side: the side facing the runways.
+        const out = Math.hypot(e - tx, n - tn) || 1;
+        const px = e + ((e - tx) / out) * 0.06;
+        const pn = n + ((n - tn) / out) * 0.06;
+        if (px < tx) return;
+        const parked = aircraft(0.45);
+        parked.position.set(px, 0.03, -pn);
+        parked.rotation.y = Math.atan2(-(pn - tn), px - tx) - Math.PI / 2;
+        scene.add(parked);
+      });
+      g.position.set(tx, 0, -tn);
+      return 0.35;
     },
     woods: (_g, m) => (m.radius ?? 0.3) * 0.8,
   };
@@ -935,18 +1046,11 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   tappable.push(balloonHit);
   scene.add(balloon);
 
-  // A small plane on a wide loop out of the airport. Tap it for a barrel roll.
+  // A small plane that takes off down the long runway, circles the city, and comes back in to land.
   const plane = new THREE.Group();
   let roll = 0;
+  let flight: THREE.CatmullRomCurve3 | null = null;
   if (airport) {
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.012, 0.24, 8), pale);
-    body.rotation.x = Math.PI / 2;
-    const wing = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.006, 0.05), pale);
-    wing.position.z = -0.02;
-    const tail = new THREE.Mesh(new THREE.BoxGeometry(0.11, 0.006, 0.03), pale);
-    tail.position.z = 0.11;
-    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.006, 0.05, 0.035), flat('#c5050c'));
-    fin.position.set(0, 0.025, 0.11);
     const hit = new THREE.Mesh(new THREE.SphereGeometry(0.45, 6, 4), unseen());
     const name = airport.name;
     hit.userData.tap = () => {
@@ -954,8 +1058,28 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       say(`Out of ${name.replace(/ (Regional |International )?Airport$/, '')}`, plane.position.clone().add(new THREE.Vector3(0, 0.4, 0)));
     };
     tappable.push(hit);
-    plane.add(body, wing, tail, fin, hit);
+    plane.add(aircraft(1), hit);
     scene.add(plane);
+    const long = field?.runways.slice().sort((p, q) => Math.hypot(q.line[2]! - q.line[0]!, q.line[3]! - q.line[1]!) - Math.hypot(p.line[2]! - p.line[0]!, p.line[3]! - p.line[1]!))[0];
+    if (long) {
+      const [ax, ay, bx, by] = long.line as [number, number, number, number];
+      const len = Math.hypot(bx - ax, by - ay);
+      const ux = (bx - ax) / len;
+      const uy = (by - ay) / len;
+      const at = (e: number, n: number, y: number) => new THREE.Vector3(e, y, -n);
+      const pts = [at(ax, ay, 0.035), at(ax + ux * len * 0.5, ay + uy * len * 0.5, 0.035), at(bx, by, 0.14), at(bx + ux * 1.3, by + uy * 1.3, 0.9)];
+      // Round the city: start from where the climb-out leaves off and sweep most of a circle back to the approach.
+      const from = Math.atan2(by + uy * 1.3, bx + ux * 1.3);
+      const to = Math.atan2(ay - uy * 2.6, ax - ux * 2.6);
+      let sweep = to - from;
+      while (sweep <= 0.6) sweep += Math.PI * 2;
+      for (let k = 1; k <= 6; k++) {
+        const a2 = from + (sweep * k) / 7;
+        pts.push(at(Math.cos(a2) * 5.4, Math.sin(a2) * 5.4, 1.5 + Math.sin((k / 7) * Math.PI) * 0.8));
+      }
+      pts.push(at(ax - ux * 2.6, ay - uy * 2.6, 0.75), at(ax - ux * 0.9, ay - uy * 0.9, 0.24));
+      flight = new THREE.CatmullRomCurve3(pts, true, 'centripetal');
+    }
   }
 
   // Birds.
@@ -1382,13 +1506,32 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     });
     traffic.geo.attributes.position!.needsUpdate = true;
 
-    // The plane.
+    // The plane: along its flight path if it has one, otherwise a plain loop.
     if (airport) {
       roll = Math.max(0, roll - dt * 0.8);
-      const pa = clock * 0.085 + 2;
-      plane.position.set(Math.cos(pa) * 4.6 + airport.east * 0.35, 2.1 + Math.sin(clock * 0.3) * 0.15, Math.sin(pa) * 3.6 - airport.north * 0.35);
-      plane.rotation.set(0, -pa + Math.PI, 0);
-      plane.rotateZ(-0.25 + (1 - roll) * Math.PI * 2 * (roll > 0 ? 1 : 0));
+      if (flight) {
+        const t = (clock / 95 + 0.02) % 1;
+        const here2 = flight.getPointAt(t);
+        const next = flight.getPointAt((t + 0.004) % 1);
+        const after = flight.getPointAt((t + 0.02) % 1);
+        plane.position.copy(here2);
+        plane.lookAt(next);
+        plane.rotateY(Math.PI); // the model's nose points down -z
+        // Bank into the turn.
+        const h1 = Math.atan2(next.x - here2.x, next.z - here2.z);
+        const h2 = Math.atan2(after.x - next.x, after.z - next.z);
+        let turn = h2 - h1;
+        while (turn > Math.PI) turn -= Math.PI * 2;
+        while (turn < -Math.PI) turn += Math.PI * 2;
+        plane.rotateZ(Math.max(-0.5, Math.min(0.5, turn * 4)) + (roll > 0 ? (1 - roll) * Math.PI * 2 : 0));
+      } else {
+        const pa = clock * 0.085 + 2;
+        plane.position.set(Math.cos(pa) * 4.6 + airport.east * 0.35, 2.1 + Math.sin(clock * 0.3) * 0.15, Math.sin(pa) * 3.6 - airport.north * 0.35);
+        plane.rotation.set(0, -pa + Math.PI, 0);
+        plane.rotateZ(-0.25 + (1 - roll) * Math.PI * 2 * (roll > 0 ? 1 : 0));
+      }
+      // The tower's beacon turns: green, then white.
+      (beacon.material as THREE.MeshBasicMaterial).color.set(Math.floor(clock * 1.2) % 2 ? '#58f08a' : '#ffffff');
     }
 
     // Names fade.
@@ -1491,7 +1634,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
 
     // Camera: ease toward the pose, plus whatever the person has dragged.
     if (pose === 'thinking' && !calm) spinning += dt * 0.9;
-    const g = pose === 'results' ? fitPins() : goal;
+    const base = pose === 'results' ? fitPins() : goal;
+    const g = visit && clock < visit.until && pose !== 'thinking' ? { ...base, tx: visit.x, tz: visit.z, ty: 0.55, r: 3.4, phi: 1.12 } : base;
     rig.tx += (g.tx - rig.tx) * ease;
     rig.ty += (g.ty - rig.ty) * ease;
     rig.tz += (g.tz - rig.tz) * ease;
@@ -1546,6 +1690,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       rimMat.color.set(ground);
       lawnMat.color.set(snow ? '#eef2f4' : input.month >= 4 && input.month <= 10 ? '#5c9153' : '#8a8f62');
       pitchMat.color.set(snow ? '#e3ebe6' : '#4f9a4a');
+      infieldMat.color.set(snow ? '#e6ecea' : input.month >= 4 && input.month <= 10 ? '#7fa466' : '#9a9a6c');
       roofMat.color.set(snow ? '#f4f6f7' : '#ffffff');
       shoreMat.color.set(snow ? '#f4f7f9' : '#d8c9a2');
       dress(input.month, snow);
@@ -1563,6 +1708,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       user.theta = 0;
       user.phi = 0;
       user.zoom = 1;
+      visit = null;
       if (next !== 'thinking') {
         // Don't unwind the spin: carry on from wherever the camera ended up.
         rig.theta = ((rig.theta + Math.PI) % (Math.PI * 2)) - Math.PI;

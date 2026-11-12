@@ -19,6 +19,7 @@ export const shape: CityShape = {
   lakes: data.lakes,
   rivers: data.rivers,
   roads: data.roads,
+  airfield: data.airfield,
   gridTurn: Math.PI / 4,
   urbanRadius: 5.2,
   landmarks: [

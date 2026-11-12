@@ -130,6 +130,8 @@ export interface CityShape {
   /** Each road is [weight, east, north, east, north, …]; weight 2 is a highway. */
   roads: number[][];
   landmarks: Landmark[];
+  /** The airport's real layout, if the city has one worth drawing. Outlines are closed rings. */
+  airfield?: { runways: { ref: string; line: number[] }[]; taxiways: number[][]; aprons: number[][]; terminals: number[][] };
   /** The street grid's angle downtown, radians. */
   gridTurn: number;
   /** Roughly how far out the houses go. */

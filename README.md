@@ -42,10 +42,10 @@ The map is only ever used to fill seats the list couldn't: if three hand-written
 
 The top of the page is a small 3D model of Madison (`src/ui/scene.ts`, three.js, loaded on demand), under the real sky for the time, season and weather. One unit is one mile, so a place's coordinates drop straight onto it.
 
-What's real: the shorelines of the four lakes, the Yahara River and the main roads come from OpenStreetMap, simplified and stored as miles from the Capitol in `src/cities/madison/shape.json`. The landmarks (Camp Randall, the Kohl Center, Monona Terrace, the Union Terrace, Bascom Hill, Olbrich, the airport, the big parks and preserves) are placed by hand in `shape.ts`. What's invented: every individual house, tree, barn and downtown block is scattered by a seeded random number generator inside those real outlines, so the town looks the same on every visit but no single building is a real one.
+What's real: the shorelines of the four lakes, the Yahara River and the main roads come from OpenStreetMap, simplified and stored as miles from the Capitol in `src/cities/madison/shape.json`. The landmarks (Camp Randall, the Kohl Center, Monona Terrace, the Union Terrace, Bascom Hill, Olbrich, the airport, the big parks and preserves) are placed by hand in `shape.ts`. The airport is drawn from its real runways, taxiways, aprons and terminal footprint (also OpenStreetMap), with a plane that takes off down the long runway, circles the city and lands. Roads that cross open water ride a raised causeway. What's invented: every individual house, tree, barn and downtown block is scattered by a seeded random number generator inside those real outlines, so the town looks the same on every visit but no single building is a real one.
 
-- Drag to look around.
-- Tap a landmark or a lake for its name. Tap the Capitol, a sailboat, the plane or the water for a small reaction. Tap the sun or moon to run the day forward.
+- Drag to look around. Pinch, ctrl-scroll or use the + and − buttons to zoom.
+- Tap a landmark or a lake for its name; the camera flies over for a few seconds and comes back. Tap the Capitol, a sailboat, the plane or the water for a small reaction. Tap the sun or moon to run the day forward.
 - Tap the balloon to ask for a surprise.
 - When three picks are dealt, each stands as a numbered beacon where it really is. Tap a beacon to bring up its card; swipe the cards and the camera leans toward that pick.
 
