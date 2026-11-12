@@ -10,7 +10,8 @@
     "test": "vitest run",
     "events": "tsx scripts/fetch-events.ts",
     "explain": "tsx scripts/explain.ts",
-    "review-queue": "tsx scripts/review-queue.ts"
+    "review-queue": "tsx scripts/review-queue.ts",
+    "nearby": "tsx scripts/fetch-nearby.ts"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",

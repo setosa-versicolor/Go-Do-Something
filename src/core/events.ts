@@ -31,6 +31,7 @@ export const SOURCES: Record<string, string> = {
   isthmus: 'Isthmus',
   uw: 'UW–Madison',
   mcm: "Madison Children's Museum",
+  osm: 'OpenStreetMap',
 };
 
 /** How far from the city centre an event with only raw coordinates may be. */

@@ -38,6 +38,8 @@ export interface World {
   options: Option[];
   weather: Weather | null;
   memory: Memory;
+  /** Unvouched places from the map. Only ever used to fill seats the main list couldn't. */
+  fallback?: Option[];
 }
 
 export type Gate =
@@ -423,11 +425,42 @@ export function match(req: Request, world: World): Result {
   }
   ranked.sort((a, b) => b.score - a.score || a.option.id.localeCompare(b.option.id));
   const used = new Set<string>();
-  const picks = choose(ranked, req, world.memory).map((c) => ({ ...c, reason: explain(c, req, world, used) }));
+  const chosen = choose(ranked, req, world.memory);
+  const own = chosen.length;
+  if (world.fallback?.length && own < 3) {
+    // The list came up short. Fill the empty seats from the map: same gates, no opinions.
+    const extra: Candidate[] = [];
+    for (const opt of world.fallback) {
+      const a = assess(opt, req, world);
+      if (!('gate' in a)) extra.push(a);
+    }
+    extra.sort((a, b) => b.score - a.score || a.option.id.localeCompare(b.option.id));
+    chosen.push(...extra.filter((c) => req.keep?.includes(c.option.id)).slice(0, 3 - chosen.length));
+    while (chosen.length < 3) {
+      let best: Candidate | undefined;
+      let bestValue = -Infinity;
+      for (const c of extra) {
+        if (chosen.includes(c)) continue;
+        const value = c.score - chosen.reduce((s, x) => s + overlap(c.option, x.option), 0);
+        if (value > bestValue) [best, bestValue] = [c, value];
+      }
+      if (!best) break;
+      chosen.push(best);
+    }
+  }
+  const borrowed = chosen.length - own;
+  const picks = chosen.map((c, i) => ({
+    ...c,
+    reason: i < own ? explain(c, req, world, used) : `Open, and about ${c.travelMin} minutes away. Beyond that, you'd be finding out for me.`,
+  }));
   const strip = ({ conditions: _c, moments: _m, moodFit: _f, ...pick }: Candidate): Pick => pick;
   return {
     picks: picks.map(strip),
-    note: noteFor(picks, rejected, req, world),
+    note: borrowed
+      ? own === 0
+        ? 'Nothing on my own list fits from where you are, so these come from the map: open and nearby, but nobody has vouched for them.'
+        : `Only ${own === 1 ? 'one' : 'two'} from my own list ${own === 1 ? 'fits' : 'fit'}, so the rest ${borrowed === 1 ? 'comes' : 'come'} from the map: open and nearby, but not vouched for.`
+      : noteFor(picks, rejected, req, world),
     conditions: conditionsFor(world.weather, req.start, req.start + req.durationMin * MIN),
     sun: sunFor(req.start, world.city.center.lat, world.city.center.lng, world.city.tz),
     debug: { ranked: ranked.map(strip), rejected },

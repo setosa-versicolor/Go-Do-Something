@@ -2,6 +2,7 @@ import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { city, places, shape } from '../cities/madison';
 import { loadEvents, SOURCES } from '../core/events';
+import { loadNearby } from '../core/nearby';
 import { directionsUrl, miles, offsetMiles, travelLabel, type LatLng, type Mode } from '../core/geo';
 import { append, MAX_SAVED, pendingCheckIn, summarize, type Entry, type Verb } from '../core/history';
 import { parseIntent, resolveStart } from '../core/intent';
@@ -86,6 +87,7 @@ export function App() {
 
   const weather = useRef<Weather | null>(null);
   const events = useRef<Option[]>([]);
+  const nearby = useRef<Option[]>([]);
   const loaded = useRef<Promise<unknown>>(Promise.resolve());
   const logRef = useRef(log);
   const deck = useRef<HTMLOListElement>(null);
@@ -110,10 +112,14 @@ export function App() {
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => void (events.current = loadEvents(json, Date.now())))
       .catch(() => undefined);
-    loaded.current = Promise.all([w, e]);
+    const n = fetch('./nearby.json')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((json) => void (nearby.current = loadNearby(json)))
+      .catch(() => undefined);
+    loaded.current = Promise.all([w, e, n]);
   }, []);
 
-  const world = (options: Option[], now: number) => ({ city, options, weather: weather.current, memory: summarize(logRef.current, options, now) });
+  const world = (options: Option[], now: number) => ({ city, options, weather: weather.current, memory: summarize(logRef.current, options, now), fallback: nearby.current });
 
   /** Ask the matcher. Everything the person chose is passed in, so nothing here reads stale state. */
   const ask = (q: { mood: string; text: string; duration: number; shuffles: number }) => {
@@ -226,7 +232,7 @@ export function App() {
   };
 
   const memory = useMemo(() => summarize(log, view?.options ?? places, Date.now()), [log, view]);
-  const byId = (id: string) => (view?.options ?? places).find((o) => o.id === id);
+  const byId = (id: string) => (view?.options ?? places).find((o) => o.id === id) ?? nearby.current.find((o) => o.id === id);
 
   const toggleSave = (id: string) => {
     if (memory.saved.includes(id)) return record(id, 'unsave');
@@ -350,7 +356,7 @@ export function App() {
               </div>
             </section>
           )}
-          {shared && <Shared id={shared} options={[...places, ...events.current]} weather={weather.current} mode={mode} onClose={() => { history.replaceState(null, '', location.pathname + location.search); setShared(null); }} />}
+          {shared && <Shared id={shared} options={[...places, ...events.current, ...nearby.current]} weather={weather.current} mode={mode} onClose={() => { history.replaceState(null, '', location.pathname + location.search); setShared(null); }} />}
           <h2 class="q">Who's coming? <span>optional</span></h2>
           <div class="pills" role="group" aria-label="Who's coming">
             {COMPANY.map(([label]) => (
@@ -453,7 +459,7 @@ export function App() {
           <button class="link" onClick={() => setSheet(true)}>Saved ({memory.saved.length}/{MAX_SAVED}) · Been ({memory.went.size})</button>
           <button class="link" onClick={() => { const next: Theme = theme === 'auto' ? 'dark' : theme === 'dark' ? 'light' : 'auto'; setTheme(next); saveTheme(next); }}>Theme: {theme}</button>
         </div>
-        <p>Map shapes © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors.</p>
+        <p>Map shapes and “from the map” places © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors.</p>
         {results && <p>“Usually open” means the hours haven't been checked by hand yet, so confirm before a long trip. Travel times are estimates. Your history stays on this device.</p>}
       </footer>
 
@@ -556,6 +562,7 @@ function Card(props: {
         <span class="kicker">{o.kind === 'event' ? 'Happening' : cap(o.category)} · {o.hood}</span>
         <span class="tags">
           {turn && <b>The left turn</b>}
+          {o.source === 'osm' && <b>From the map</b>}
           {o.price === 0 && <b>Free</b>}
         </span>
         <svg viewBox="0 0 400 40" preserveAspectRatio="none" aria-hidden="true">
@@ -574,7 +581,7 @@ function Card(props: {
         <p class="story">{o.story}</p>
         {o.nudge && <p class="nudge"><span>Do this</span>{o.nudge}</p>}
         {!o.nudge && props.venueNudge && <p class="nudge"><span>While you're there</span>{props.venueNudge}</p>}
-        {o.url && <p class="source"><a href={o.url} target="_blank" rel="noopener">Details and tickets ({SOURCES[o.source ?? ''] ?? 'source'})</a></p>}
+        {o.url && <p class="source"><a href={o.url} target="_blank" rel="noopener">{o.source === 'osm' ? 'Their website' : o.source ? `Details and tickets (${SOURCES[o.source] ?? 'source'})` : 'Their website'}</a></p>}
       </div>
       <div class="actions">
         <a class="primary" href={directionsUrl(o.venue ?? o.name, city.label, props.mode, props.origin ?? undefined)} target="_blank" rel="noopener" onClick={props.onGo}>Take me there</a>

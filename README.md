@@ -31,6 +31,13 @@ A static site. No server, no database, no accounts, no API keys.
 
 To turn on deploys: repo Settings → Pages → Source: GitHub Actions.
 
+## Two tiers of places
+
+1. **The list** (`src/cities/madison/places*.ts`): hand-written, with a story and a nudge for each. This is the product. It always comes first.
+2. **The map** (`public/nearby.json`, built by `npm run nearby`): independent restaurants, cafés, bars, bakeries and ice cream shops from OpenStreetMap that have a name and opening hours we can represent exactly. Chains and anything already on the list are dropped.
+
+The map is only ever used to fill seats the list couldn't: if three hand-written picks fit, no map place is shown. A map place passes the same gates (open, reachable, in time), is tagged "From the map", carries no opinion, and its hours are always shown as "usually open". When any are used, the page says so. The logic is in `match()` (`world.fallback`) and `src/core/nearby.ts`.
+
 ## The model
 
 The top of the page is a small 3D model of Madison (`src/ui/scene.ts`, three.js, loaded on demand), under the real sky for the time, season and weather. One unit is one mile, so a place's coordinates drop straight onto it.

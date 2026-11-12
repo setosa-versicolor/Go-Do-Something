@@ -35,6 +35,9 @@ jobs:
       # A failed fetch must not block the deploy: the app ignores a stale file.
       - run: npm run events
         continue-on-error: true
+      # Same for the map tier: the committed copy is used if this fails.
+      - run: npm run nearby
+        continue-on-error: true
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
