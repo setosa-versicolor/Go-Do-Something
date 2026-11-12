@@ -7,33 +7,8 @@
 // parks are open 4 am–10 pm by ordinance) or were checked by hand — set
 // `checked` to the date. Everything else is shown to people as "usually open".
 
-import type { Mood, Option, Rule } from '../../core/types';
-
-type Draft = Omit<Option, 'kind' | 'dropIn' | 'hoursTrust' | 'rules' | 'moods' | 'hood'> & {
-  hood: string;
-  /** "think! nature date" — `!` marks what the place is *for*. */
-  moods: string;
-  hours: string | Rule[];
-  trust?: 'solid';
-  kind?: 'event';
-};
-
-const PARK = 'daily 04:00-22:00';
-const ALWAYS = 'daily 00:00-24:00';
-
-function place(d: Draft): Option {
-  const { moods, hours, trust, kind, ...rest } = d;
-  const parsed: Partial<Record<Mood, number>> = {};
-  for (const word of moods.split(/\s+/)) parsed[word.replace('!', '') as Mood] = word.endsWith('!') ? 1 : 0.6;
-  return {
-    ...rest,
-    kind: kind ?? 'place',
-    dropIn: true,
-    moods: parsed,
-    rules: typeof hours === 'string' ? [{ hours }] : hours,
-    hoursTrust: trust ?? 'unverified',
-  };
-}
+import type { Option } from '../../core/types';
+import { ALWAYS, PARK, place } from './place';
 
 export const PLACES: Option[] = [
   // ------------------------------------------------------------- outdoors

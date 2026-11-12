@@ -1,6 +1,12 @@
 import { applyReviews, type Reviews } from '../../core/reviews';
 import type { City, Option } from '../../core/types';
-import { PLACES } from './places';
+import { PLACES as CORE } from './places';
+import { PLACES_CENTRAL } from './places-central';
+import { PLACES_NORTH_EAST } from './places-north-east';
+import { PLACES_SOUTH } from './places-south';
+import { PLACES_WEST } from './places-west';
+
+const PLACES = [...CORE, ...PLACES_CENTRAL, ...PLACES_WEST, ...PLACES_NORTH_EAST, ...PLACES_SOUTH];
 import reviewData from './reviews.json';
 export { VENUES as venues } from './venues';
 export { shape } from './shape';
