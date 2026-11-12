@@ -167,7 +167,9 @@ describe('broad asks stay broad', () => {
     }
     const doable = match(request(at(2026, 11, 13, 20), 'drinks', { durationMin: 180 }), world()).debug.ranked.map((p) => p.option.id);
     for (const id of ['gibs', 'robin-room', 'merchant', 'mickeys', 'le-tigre']) expect(doable).toContain(id);
-    expect(['gibs', 'robin-room', 'merchant', 'natt-spil'].some((id) => seen.has(id))).toBe(true);
+    // Some pick, across a dozen deals, is a bar you'd choose for a date and not only a dive.
+    const classy = places.filter((p) => p.category === 'bar' && p.moods.date === 1).map((p) => p.id);
+    expect(classy.some((id) => seen.has(id))).toBe(true);
   });
 
   it('puts the named kind of place first, and still varies the rest', () => {

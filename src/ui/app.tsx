@@ -11,7 +11,7 @@ import { sunFor } from '../core/sun';
 import { DAY, HOUR, MIN, fmtDay, fmtTime, parseLocalInput, toLocal, toLocalInput } from '../core/time';
 import { GROUP, type Option } from '../core/types';
 import { conditionsFor, fetchWeather, type Weather } from '../core/weather';
-import type { Diorama, Pin, Pose, SkyInput } from './scene';
+import type { Diorama, Live, Pin, Pose, SkyInput } from './scene';
 import { partOfDay, skyAt } from './sky';
 import { VibeIcon, vibeLabel, VibeSheet } from './vibe';
 import { forgetEverything, loadLog, loadMode, loadStart, loadTheme, saveLog, saveMode, saveStart, saveTheme, type Theme } from './store';
@@ -110,7 +110,7 @@ export function App() {
     const w = fetchWeather(city.center, Date.now()).then((x) => { weather.current = x; setWeatherTick((n) => n + 1); });
     const e = fetch('./events.json')
       .then((r) => (r.ok ? r.json() : null))
-      .then((json) => void (events.current = loadEvents(json, Date.now())))
+      .then((json) => { events.current = loadEvents(json, Date.now()); setWeatherTick((n) => n + 1); })
       .catch(() => undefined);
     const n = fetch('./nearby.json')
       .then((r) => (r.ok ? r.json() : null))
@@ -307,8 +307,23 @@ export function App() {
     ? view.result.picks.map((p) => ({
         ...offsetMiles(city.center, p.option),
         color: PIN_COLOR[GROUP[p.option.category]]!,
+        minutes: p.travelMin,
       }))
     : [];
+  const home = results ? offsetMiles(city.center, view.req.origin) : null;
+  // What's on in the next few hours, one light per venue, for the opening scene.
+  const live: Live[] = [];
+  if (!results) {
+    const soon = events.current.filter((e) => e.when!.end > skyTime && e.when!.start < skyTime + 6 * HOUR).sort((a, b) => a.when!.start - b.when!.start);
+    const taken = new Set<string>();
+    for (const e of soon) {
+      const key = `${e.lat.toFixed(3)},${e.lng.toFixed(3)}`;
+      if (taken.has(key) || live.length >= 9) continue;
+      taken.add(key);
+      const label = `${fmtTime(e.when!.start, tz)} · ${e.name}`;
+      live.push({ ...offsetMiles(city.center, e), color: PIN_COLOR[GROUP[e.category]]!, label: label.length > 34 ? `${label.slice(0, 33)}…` : label });
+    }
+  }
   const now = Date.now();
   const checkIn = pendingCheckIn(log, now);
   const checkInPlace = checkIn ? byId(checkIn) ?? places.find((p) => p.id === checkIn) : undefined;
@@ -322,7 +337,7 @@ export function App() {
   return (
     <div class={`page stage-${stage}`}>
       <header class={`sky ${sky.phase}${conditions.known && conditions.sky !== 'dry' ? ' grey' : ''}${results ? ' small' : ''}`}>
-        <Scene pose={stage} sky={skyInput} pins={pins} active={active} onPin={onPin} onBalloon={onBalloon} />
+        <Scene pose={stage} sky={skyInput} pins={pins} home={home} live={live} active={active} onPin={onPin} onBalloon={onBalloon} />
         <div class="orb" aria-hidden="true" style={{ left: `${10 + 80 * sky.progress}%`, top: `${62 - Math.sin(Math.PI * sky.progress) * 44}%` }} />
         <div class="sky-inner">
           <p class="brand">
@@ -503,7 +518,7 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * The 3D model behind the header. Loaded on demand; if it can't start (no
  * WebGL, an old phone), nothing is rendered and the painted sky stays.
  */
-function Scene(props: { pose: Pose; sky: SkyInput; pins: Pin[]; active: number | null; onPin: (i: number) => void; onBalloon: () => void }) {
+function Scene(props: { pose: Pose; sky: SkyInput; pins: Pin[]; home: { east: number; north: number } | null; live: Live[]; active: number | null; onPin: (i: number) => void; onBalloon: () => void }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const model = useRef<Diorama | null>(null);
   const latest = useRef(props);
@@ -538,12 +553,14 @@ function Scene(props: { pose: Pose; sky: SkyInput; pins: Pin[]; active: number |
   useEffect(() => model.current?.setSky(s), [on, Math.round(s.time / 60_000), s.wet, s.snowing, s.frozen, Math.round(s.snowIn), s.month]);
   useEffect(() => model.current?.setPose(props.pose), [on, props.pose]);
   useEffect(() => model.current?.setPins(props.pins), [on, props.pins.map((p) => `${p.east.toFixed(3)},${p.north.toFixed(3)}`).join('|')]);
+  useEffect(() => model.current?.setHome(props.home), [on, props.home ? `${props.home.east.toFixed(3)},${props.home.north.toFixed(3)}` : '']);
+  useEffect(() => model.current?.setLive(props.live), [on, props.live.map((l) => l.label).join('|')]);
   useEffect(() => model.current?.focus(props.active), [on, props.active]);
 
   return (
     <div class={`scene${on ? ' on' : ''}`}>
       <canvas ref={canvas} aria-label="A small model of Madison under the current sky. Decorative; everything it does is also available below." />
-      {on && hint && <span class="scene-hint">Drag to look around. Tap things.</span>}
+      {on && hint && <span class="scene-hint">{props.live.length ? 'Drag to look. Tap a beam to see what’s on tonight.' : 'Drag to look around. Tap things.'}</span>}
     </div>
   );
 }

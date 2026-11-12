@@ -32,6 +32,16 @@ export interface Pin {
   east: number;
   north: number;
   color: string;
+  /** One-way travel time, to pace the little traveller on its route. */
+  minutes?: number;
+}
+
+/** Something on tonight: a searchlight over its venue on the opening scene. */
+export interface Live {
+  east: number;
+  north: number;
+  label: string;
+  color: string;
 }
 
 export type Pose = 'mood' | 'time' | 'thinking' | 'results';
@@ -40,6 +50,9 @@ export interface Diorama {
   setSky(input: SkyInput): void;
   setPose(pose: Pose): void;
   setPins(pins: Pin[]): void;
+  /** Where the person is starting from, for the routes out to each pick. */
+  setHome(home: { east: number; north: number } | null): void;
+  setLive(spots: Live[]): void;
   focus(index: number | null): void;
   dispose(): void;
 }
@@ -208,7 +221,7 @@ function textSprite(): { sprite: THREE.Sprite; write(text: string): void } {
     write(text) {
       const x = c.getContext('2d')!;
       x.clearRect(0, 0, 512, 96);
-      x.font = '600 40px Georgia, serif';
+      x.font = `600 ${text.length > 22 ? 30 : 40}px Georgia, serif`;
       const w = Math.min(492, x.measureText(text).width + 56);
       x.fillStyle = 'rgba(16, 22, 34, 0.78)';
       x.beginPath();
@@ -244,6 +257,37 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 220);
   scene.fog = new THREE.Fog('#cfe6f2', 11, 44);
+
+  // The lens. The scene is drawn off-screen, then shown through a tilt-shift
+  // blur: sharp across the middle, soft toward the top and bottom, which is
+  // what makes a real city photographed from above look like a toy. If the
+  // off-screen buffer doesn't work on a device, we fall back to drawing direct.
+  const target = new THREE.WebGLRenderTarget(4, 4, { samples: 4 });
+  target.texture.colorSpace = THREE.SRGBColorSpace;
+  const lens = { map: { value: target.texture }, px: { value: new THREE.Vector2(1, 1) }, focus: { value: 0.4 }, strength: { value: 1 } };
+  const lensScene = new THREE.Scene();
+  const lensCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  lensScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+    uniforms: lens, depthTest: false, depthWrite: false,
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+    fragmentShader: `uniform sampler2D map; uniform vec2 px; uniform float focus; uniform float strength; varying vec2 vUv;
+      void main(){
+        float amt = smoothstep(0.1, 0.52, abs(vUv.y - focus)) * strength;
+        vec2 r = px * amt;
+        vec3 c = texture2D(map, vUv).rgb;
+        c += texture2D(map, vUv + r * vec2(0.0, 1.0)).rgb + texture2D(map, vUv + r * vec2(0.87, 0.5)).rgb + texture2D(map, vUv + r * vec2(0.87, -0.5)).rgb;
+        c += texture2D(map, vUv + r * vec2(0.0, -1.0)).rgb + texture2D(map, vUv + r * vec2(-0.87, -0.5)).rgb + texture2D(map, vUv + r * vec2(-0.87, 0.5)).rgb;
+        c += texture2D(map, vUv + r * vec2(0.5, 0.0)).rgb + texture2D(map, vUv + r * vec2(-0.5, 0.0)).rgb + texture2D(map, vUv + r * vec2(0.0, 0.5)).rgb + texture2D(map, vUv + r * vec2(0.0, -0.5)).rgb;
+        c /= 11.0;
+        float l = dot(c, vec3(0.299, 0.587, 0.114));
+        c = mix(vec3(l), c, 1.14);
+        c *= mix(0.8, 1.0, smoothstep(1.05, 0.35, length(vUv - 0.5)));
+        gl_FragColor = vec4(c, 1.0);
+        #include <colorspace_fragment>
+      }`,
+  })));
+  let useLens = true;
+  let frames = 0;
 
   const hemi = new THREE.HemisphereLight('#ffffff', '#9a9c86', 1);
   const sunLight = new THREE.DirectionalLight('#ffffff', 2);
@@ -1010,6 +1054,55 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     return new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, fog: false, transparent: true }));
   };
 
+  // Routes: from where you're starting, an arc out to each pick, with a small traveller on it.
+  let home: THREE.Vector3 | null = null;
+  let lastPins: Pin[] = [];
+  interface Route { tube: THREE.Mesh; dot: THREE.Mesh; curve: THREE.QuadraticBezierCurve3; total: number; period: number; born: number }
+  let trips: Route[] = [];
+  const youTag = textSprite();
+  youTag.write('You');
+  youTag.sprite.material.opacity = 1;
+  const you = new THREE.Group();
+  const youRing = new THREE.Mesh(new THREE.RingGeometry(0.1, 0.14, 28), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, side: THREE.DoubleSide, depthWrite: false, fog: false }));
+  youRing.rotation.x = -Math.PI / 2;
+  youRing.position.y = 0.03;
+  const youDot = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 8), new THREE.MeshBasicMaterial({ color: '#ffffff', fog: false }));
+  youDot.position.y = 0.09;
+  youTag.sprite.position.y = 0.42;
+  you.add(youRing, youDot, youTag.sprite);
+  you.visible = false;
+  scene.add(you);
+  const dotGeo = new THREE.SphereGeometry(0.05, 10, 8);
+  const layRoutes = () => {
+    for (const r of trips) {
+      scene.remove(r.tube, r.dot);
+      r.tube.geometry.dispose();
+    }
+    trips = [];
+    you.visible = Boolean(home) && lastPins.length > 0;
+    if (!home || !you.visible) return;
+    you.position.copy(home);
+    lastPins.forEach((p, i) => {
+      const end = new THREE.Vector3(p.east, 0.03, -p.north);
+      const start = home!.clone().setY(0.06);
+      const far = start.distanceTo(end);
+      if (far < 0.12) return;
+      const mid = start.clone().add(end).multiplyScalar(0.5).setY(Math.min(2.4, Math.max(0.3, far * 0.24)));
+      const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
+      const geo = new THREE.TubeGeometry(curve, 48, Math.min(0.05, Math.max(0.018, far * 0.006)), 6);
+      const tube = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: new THREE.Color(p.color).lerp(new THREE.Color('#ffffff'), 0.35), transparent: true, opacity: 0.9, fog: false, depthWrite: false }));
+      const dot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: '#ffffff', fog: false }));
+      scene.add(tube, dot);
+      trips.push({ tube, dot, curve, total: geo.index!.count, period: Math.min(9, Math.max(2.5, (p.minutes ?? 10) / 4)), born: clock + 0.6 + i * 0.3 });
+    });
+  };
+
+  // Tonight: a searchlight over every venue with something on in the next few hours.
+  interface Beam { g: THREE.Group; cone: THREE.Mesh; hit: THREE.Mesh; i: number }
+  let beams: Beam[] = [];
+  const coneGeo = new THREE.CylinderGeometry(0.075, 0.008, 1.7, 10, 1, true);
+  coneGeo.translate(0, 0.85, 0);
+
   // ------------------------------------------------------------ camera rig
 
   interface Rig { tx: number; ty: number; tz: number; theta: number; phi: number; r: number }
@@ -1027,9 +1120,11 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
 
   const fitPins = (): Rig => {
     if (beacons.length === 0) return { ...POSES.results };
-    const cx = beacons.reduce((s, b) => s + b.pos.x, 0) / beacons.length;
-    const cz = beacons.reduce((s, b) => s + b.pos.z, 0) / beacons.length;
-    const spread = Math.max(...beacons.map((b) => Math.hypot(b.pos.x - cx, b.pos.z - cz)));
+    // Frame the picks and where you're starting from together.
+    const pts = [...beacons.map((b) => b.pos), ...(home ? [home] : [])];
+    const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+    const cz = pts.reduce((s, p) => s + p.z, 0) / pts.length;
+    const spread = Math.max(...pts.map((p) => Math.hypot(p.x - cx, p.z - cz)));
     const all = Math.min(28, Math.max(8, 6 + spread * 3.4));
     const one = focused === null ? undefined : beacons[focused];
     if (!one) return { tx: cx, ty: all * 0.1, tz: cz, theta: 0.5, phi: 1.0, r: all };
@@ -1083,6 +1178,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   let raf = 0;
   let spinning = 0;
   const white = new THREE.Color('#ffffff');
+  const probe = new THREE.Vector3();
 
   const resize = () => {
     const w = canvas.clientWidth;
@@ -1090,6 +1186,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     if (!w || !h) return;
     if (canvas.width !== Math.round(w * renderer.getPixelRatio()) || canvas.height !== Math.round(h * renderer.getPixelRatio())) {
       renderer.setSize(w, h, false);
+      const pr = renderer.getPixelRatio();
+      target.setSize(Math.round(w * pr), Math.round(h * pr));
+      lens.px.value.set(6 / w, 6 / h);
       camera.aspect = w / h;
       // Keep the town in frame on a tall phone and a wide desktop alike.
       camera.fov = w / h < 1 ? 52 : w / h < 1.8 ? 42 : 32;
@@ -1282,6 +1381,30 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
 
     hop = Math.max(0, hop - dt);
 
+    // Routes draw themselves out, then a traveller runs each one, slower for the longer trips.
+    for (const r of trips) {
+      const grown = Math.min(1, Math.max(0, (clock - r.born) * 0.9));
+      r.tube.geometry.setDrawRange(0, Math.floor((r.total * grown) / 3) * 3);
+      const t = ((clock - r.born) / r.period) % 1.25;
+      r.dot.visible = grown >= 1 && t <= 1 && !calm;
+      if (r.dot.visible) {
+        r.dot.position.copy(r.curve.getPoint(t));
+        r.dot.scale.setScalar(Math.max(1, rig.r / 7));
+      }
+    }
+    const beat = 1 + ((clock * 0.7) % 1) * 1.8;
+    youRing.scale.set(beat, beat, beat);
+    (youRing.material as THREE.MeshBasicMaterial).opacity = 1 - ((clock * 0.7) % 1);
+    const youSize = rig.r * 0.05;
+    youTag.sprite.scale.set(youSize * 5.33, youSize, 1);
+
+    // Searchlights sweep; brighter after dark.
+    for (const b of beams) {
+      b.g.visible = pose === 'mood' || pose === 'time';
+      b.cone.rotation.set(Math.sin(clock * 0.5 + b.i * 1.7) * 0.22, 0, Math.cos(clock * 0.4 + b.i * 2.3) * 0.22);
+      (b.cone.material as THREE.MeshBasicMaterial).opacity = 0.05 + look.glow * 0.24;
+    }
+
     // Beacons rise, breathe, and the chosen one stands taller.
     beacons.forEach((b, i) => {
       const grown = Math.min(1, (clock - b.born) * 1.6);
@@ -1315,7 +1438,28 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     dome.position.copy(camera.position);
     stars.points.position.copy(camera.position);
 
-    renderer.render(scene, camera);
+    if (useLens) {
+      lens.focus.value = probe.set(rig.tx, 0.15, rig.tz).project(camera).y * 0.5 + 0.5;
+      // The wider the view, the gentler the blur: a whole county shouldn't go soft.
+      lens.strength.value = Math.min(1, Math.max(0.3, 8 / rig.r));
+      renderer.setRenderTarget(target);
+      renderer.render(scene, camera);
+      renderer.setRenderTarget(null);
+      renderer.render(lensScene, lensCamera);
+      // One check, early: a device that can't fill the buffer shows pure black. Draw direct from then on.
+      if (++frames === 4) {
+        const gl = renderer.getContext();
+        const px = new Uint8Array(4);
+        let lit = 0;
+        for (const [fx, fy] of [[0.5, 0.9], [0.2, 0.6], [0.8, 0.3], [0.5, 0.5]]) {
+          gl.readPixels(Math.floor(gl.drawingBufferWidth * fx!), Math.floor(gl.drawingBufferHeight * fy!), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+          lit += px[0]! + px[1]! + px[2]!;
+        }
+        if (lit === 0) useLens = false;
+      }
+    } else {
+      renderer.render(scene, camera);
+    }
   };
   raf = requestAnimationFrame(frame);
 
@@ -1360,6 +1504,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       focused = null;
       pinHits.length = 0;
       fresh = true;
+      lastPins = pins;
       beacons = pins.map((p, i) => {
         const g = new THREE.Group();
         const pos = new THREE.Vector3(p.east, 0, -p.north);
@@ -1377,6 +1522,33 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         pinHits.push(hit);
         scene.add(g);
         return { g, beam, ring, label: tag, pos, born: clock + i * 0.25 };
+      });
+      layRoutes();
+    },
+    setHome(next) {
+      home = next ? new THREE.Vector3(next.east, 0, -next.north) : null;
+      layRoutes();
+    },
+    setLive(spots) {
+      for (const b of beams) {
+        scene.remove(b.g);
+        const at = tappable.indexOf(b.hit);
+        if (at >= 0) tappable.splice(at, 1);
+      }
+      beams = spots.map((s, i) => {
+        const g = new THREE.Group();
+        g.position.set(s.east, 0, -s.north);
+        const cone = new THREE.Mesh(coneGeo, new THREE.MeshBasicMaterial({ color: new THREE.Color(s.color).lerp(new THREE.Color('#fff2cc'), 0.55), transparent: true, opacity: 0.1, depthWrite: false, fog: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
+        const lamp = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: s.color, fog: false }));
+        lamp.position.y = 0.05;
+        const hit = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 6), unseen());
+        hit.position.y = 0.35;
+        hit.userData.tap = () => say(s.label, new THREE.Vector3(s.east, 1.0, -s.north));
+        g.add(cone, lamp, hit);
+        g.visible = pose === 'mood' || pose === 'time';
+        tappable.push(hit);
+        scene.add(g);
+        return { g, cone, hit, i };
       });
     },
     focus(index) {
@@ -1400,6 +1572,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         const mat = m.material as THREE.Material | THREE.Material[] | undefined;
         for (const x of Array.isArray(mat) ? mat : mat ? [mat] : []) x.dispose();
       });
+      target.dispose();
       renderer.dispose();
     },
   };

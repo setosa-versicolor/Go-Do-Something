@@ -49,6 +49,12 @@ What's real: the shorelines of the four lakes, the Yahara River and the main roa
 - Tap the balloon to ask for a surprise.
 - When three picks are dealt, each stands as a numbered beacon where it really is. Tap a beacon to bring up its card; swipe the cards and the camera leans toward that pick.
 
+Three things tie the model to the decision:
+
+- **The lens.** The scene is drawn off-screen and shown through a tilt-shift blur (sharp across the middle, soft above and below), which is what makes it read as a miniature. If a device can't fill the off-screen buffer, it draws direct.
+- **Routes.** In the results, a "You" marker sits where you're starting from, with an arc out to each pick and a small traveller on it, slower for the longer trips.
+- **Tonight.** On the opening screen, a searchlight stands over each venue with something on in the next six hours (from the events file). Tap one for the time and the name.
+
 By season and hour: leaves turn in October and come down in November, the lakes freeze and the boats become ice shanties in a cold winter, windows, street lights and headlights come on at dusk, and fireflies come out on dry summer nights.
 
 A beacon is only as good as the coordinate behind it. Places in the list were located from memory and are right to within a few blocks, not to the door; events are placed by their venue, or by the coordinates their feed supplies. A test fails if any place or venue lands in a lake, which is how one bad coordinate was already caught. Anything beyond about 12 miles is dropped before it gets here, and the detailed part of the model reaches a little past the edge of town.

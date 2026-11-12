@@ -85,7 +85,7 @@ export const TUNING = {
   lateGraceMin: 10, // may arrive this late to a timed event
   overrunMin: 30, // a timed event may run this far past the window
   twilightMin: 20,
-  weight: { mood: 1, vibe: 0.6, kind: 0.4, moment: 1, time: 0.25, near: 0.2, gem: 0.25, kids: 0.35, cheap: 0.3, taste: 0.25, jitter: 0.06 },
+  weight: { mood: 1, vibe: 0.6, kind: 0.4, moment: 1, time: 0.25, near: 0.45, gem: 0.25, kids: 0.35, cheap: 0.3, taste: 0.25, jitter: 0.06 },
   shownPenalty: 0.3,
   shownQuietHours: 3, // don't reshuffle on every reload
   wentPenalty: 0.5,
