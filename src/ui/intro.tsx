@@ -13,7 +13,7 @@ const LINES: [text: string, seconds: number][] = [
   ['You get three options.', 2.8],
   ['Only three.', 2.3],
   ['That’s on purpose.', 2.7],
-  ['Pick one of the three', 5.4],
+  ['Pick one of the three', 7],
 ];
 
 export function Intro({ onDone }: { onDone: () => void }) {
@@ -53,10 +53,18 @@ export function Intro({ onDone }: { onDone: () => void }) {
   return (
     <button type="button" class={`intro${leaving ? ' leaving' : ''}`} onClick={finish} aria-label="Skip the introduction">
       <span class="intro-stage" aria-live="polite">
-        <span class={`intro-line${last ? ' last' : ''}`} key={i} style={{ '--hold': `${seconds}s` }}>
-          {text}
-          {last && <strong class="intro-go">and go do something.</strong>}
-        </span>
+        {!last && <span class="intro-line" key={i} style={{ '--hold': `${seconds}s` }}>{text}</span>}
+        {last && (
+          // The closing line is one sentence set in three beats: the thought, the turn, and the name.
+          <span class="intro-line last" key="last">
+            <span class="beat b1">{text}</span>
+            <span class="beat b2">and go</span>
+            <strong class="intro-go">
+              <span class="w w1">do</span> <span class="w w2">something.</span>
+              <svg class="swash" viewBox="0 0 300 16" preserveAspectRatio="none" aria-hidden="true"><path d="M5 10 C 55 3, 110 14, 170 7 S 262 5, 295 9" /></svg>
+            </strong>
+          </span>
+        )}
       </span>
       <span class="intro-foot" aria-hidden="true">
         <span class="intro-dots">{LINES.map((_, n) => <i class={n <= i ? 'on' : ''} />)}</span>

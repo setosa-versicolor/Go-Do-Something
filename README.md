@@ -55,7 +55,7 @@ Three things tie the model to the decision:
 
 - **The lens.** The scene is drawn off-screen and shown through a tilt-shift blur (sharp across the middle, soft above and below), which is what makes it read as a miniature. If a device can't fill the off-screen buffer, it draws direct.
 - **Routes.** In the results, a "You" marker sits where you're starting from, with an arc out to each pick and a small traveller on it, slower for the longer trips.
-- **Tonight.** On the opening screen, a searchlight stands over each venue with something on in the next six hours (from the events file). Tap one for the time and the name.
+- **Tonight.** Off by default; the "Show key events in Madison" switch at the foot of the page turns it on. On the opening screen, a searchlight then stands over each venue with something on in the next six hours (from the events file). Tap one for the time and the name.
 
 By season and hour: leaves turn in October and come down in November, the lakes freeze and the boats become ice shanties in a cold winter, windows, street lights and headlights come on at dusk, and fireflies come out on dry summer nights.
 

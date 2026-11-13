@@ -8,6 +8,7 @@ const MODE = 'gds:mode';
 const START = 'gds:start';
 const THEME = 'gds:theme';
 const INTRO = 'gds:intro';
+const BEAMS = 'gds:beams';
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -45,6 +46,10 @@ export const saveStart = (name: string) => write(START, name);
 /** Whether the first-visit introduction has been shown on this device. */
 export const seenIntro = (): boolean => read<boolean>(INTRO, false) === true;
 export const markIntroSeen = () => write(INTRO, true);
+
+/** Whether to stand a light over tonight's events on the model. Off unless switched on. */
+export const loadBeams = (): boolean => read<boolean>(BEAMS, false) === true;
+export const saveBeams = (on: boolean) => write(BEAMS, on);
 
 export type Theme = 'auto' | 'light' | 'dark';
 export function loadTheme(): Theme {

@@ -15,7 +15,7 @@ import type { Diorama, Live, Pin, Pose, SkyInput } from './scene';
 import { partOfDay, skyAt } from './sky';
 import { Intro } from './intro';
 import { VibeIcon, vibeLabel, VibeSheet } from './vibe';
-import { forgetEverything, loadLog, loadMode, loadStart, loadTheme, markIntroSeen, saveLog, saveMode, saveStart, saveTheme, seenIntro, type Theme } from './store';
+import { forgetEverything, loadLog, loadBeams, loadMode, loadStart, loadTheme, markIntroSeen, saveLog, saveBeams, saveMode, saveStart, saveTheme, seenIntro, type Theme } from './store';
 
 const tz = city.tz;
 
@@ -81,6 +81,7 @@ export function App() {
   const [sheet, setSheet] = useState(false);
   // The introduction plays on the first visit, and again from the "?" button.
   const [intro, setIntro] = useState(() => !seenIntro() && !/^#\/p\//.test(location.hash));
+  const [beams, setBeams] = useState(loadBeams);
   const endIntro = () => { setIntro(false); markIntroSeen(); };
   const [vibe, setVibe] = useState('');
   const [vibeOpen, setVibeOpen] = useState(false);
@@ -319,7 +320,7 @@ export function App() {
   const home = results ? offsetMiles(city.center, view.req.origin) : null;
   // What's on in the next few hours, one light per venue, for the opening scene.
   const live: Live[] = [];
-  if (!results) {
+  if (!results && beams && !intro) {
     const soon = events.current.filter((e) => e.when!.end > skyTime && e.when!.start < skyTime + 6 * HOUR).sort((a, b) => a.when!.start - b.when!.start);
     const taken = new Set<string>();
     for (const e of soon) {
@@ -485,6 +486,11 @@ export function App() {
           <button class="link" onClick={() => setSheet(true)}>Saved ({memory.saved.length}/{MAX_SAVED}) · Been ({memory.went.size})</button>
           <button class="link" onClick={() => { const next: Theme = theme === 'auto' ? 'dark' : theme === 'dark' ? 'light' : 'auto'; setTheme(next); saveTheme(next); }}>Theme: {theme}</button>
         </div>
+        <label class="switch">
+          <input type="checkbox" role="switch" checked={beams} onChange={(e) => { setBeams(e.currentTarget.checked); saveBeams(e.currentTarget.checked); }} />
+          <span class="track" aria-hidden="true" />
+          Show key events in Madison
+        </label>
         <p>Map shapes and “from the map” places © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors.</p>
         {results && <p>“Usually open” means the hours haven't been checked by hand yet, so confirm before a long trip. Travel times are estimates. Your history stays on this device.</p>}
       </footer>
