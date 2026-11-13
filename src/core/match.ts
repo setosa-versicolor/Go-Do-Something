@@ -13,7 +13,7 @@ import type { Memory } from './history';
 import { inSeason, inSeasonAt, openIntervals, parseHours } from './hours';
 import type { Intent } from './intent';
 import { sunFor, type Sun } from './sun';
-import { DAY, HOUR, MIN, fmtTime, toLocal } from './time';
+import { DAY, HOUR, MIN, fmtTime, startOfDay, toLocal } from './time';
 import { GROUP, type Category, type City, type Mood, type Option } from './types';
 import { VIBES, vibeFit } from './vibes';
 import { conditionsFor, type Conditions, type Weather } from './weather';
@@ -64,6 +64,12 @@ export interface Pick {
   until: number;
   /** It opens (or starts) after you'd arrive. */
   waits: boolean;
+  /**
+   * Said on the card when this isn't quite what was asked for: it starts later
+   * than the time given, or runs past it. Only on picks brought in because too
+   * little that was asked for fits the window itself.
+   */
+  caveat?: string;
   score: number;
   parts: Record<string, number>;
 }
@@ -83,6 +89,8 @@ export const TUNING = {
   maxTravelMin: 45, // …and never more than this
   maxWaitMin: 20, // willing to arrive this long before it opens
   lateGraceMin: 10, // may arrive this late to a timed event
+  stretchUntilHour: 27, // when the window comes up short, look as far as 3 am after that day
+  laterPerHour: 0.05, // among later starts, each hour further off costs this
   overrunMin: 30, // a timed event may run this far past the window
   twilightMin: 20,
   weight: { mood: 1, vibe: 0.6, kind: 0.4, moment: 1, time: 0.25, near: 0.45, gem: 0.25, kids: 0.35, cheap: 0.3, taste: 0.25, jitter: 0.06 },
@@ -106,6 +114,8 @@ const W = TUNING.weight;
 // ---------------------------------------------------------------- stage 1: assess
 
 interface Candidate extends Pick {
+  /** Outside the window as asked: starts after it, or runs past it. */
+  stretched?: 'later' | 'opens' | 'long';
   conditions: Conditions;
   moments: { score: number; line: string }[];
   moodFit: number;
@@ -126,7 +136,12 @@ export function happening(opt: Option): boolean {
   return (opt.rules ?? []).every((r) => parseHours(r.hours).filter((day) => day.length > 0).length <= 3);
 }
 
-function assess(opt: Option, req: Request, world: World): Candidate | Rejection {
+/**
+ * `stretch` is the second look, taken only when too little of what was asked
+ * for fits the window: things on that day may then start after the window, or
+ * run past its end. Everything else is judged exactly as before.
+ */
+function assess(opt: Option, req: Request, world: World, stretch = false): Candidate | Rejection {
   const { intent } = req;
   const { city, memory } = world;
   const tz = city.tz;
@@ -161,14 +176,31 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   const [minStay, idealStay] = opt.minutes;
   let begin: number;
   let until: number;
+  let stretched: Candidate['stretched'];
+  const horizon = startOfDay(req.start, tz) + TUNING.stretchUntilHour * HOUR;
+  const halfway = req.start + (req.durationMin * MIN) / 2;
 
   if (opt.when && !opt.dropIn) {
     // A timed event: you have to be there when it starts.
     begin = opt.when.start;
     until = opt.when.end;
     if (begin < arrive - TUNING.lateGraceMin * MIN) return reject(id, 'missed', "you'd miss the start");
-    if (begin > req.start + (req.durationMin * MIN) / 2) return reject(id, 'late', 'starts too late for your window');
-    if (until > leaveBy + TUNING.overrunMin * MIN) return reject(id, 'short', 'runs longer than you have');
+    const late = begin > halfway;
+    const long = until > leaveBy + TUNING.overrunMin * MIN;
+    if (!stretch) {
+      if (late) return reject(id, 'late', 'starts too late for your window');
+      if (long) return reject(id, 'short', 'runs longer than you have');
+    } else {
+      if (begin > horizon) return reject(id, 'late', "it isn't until another day");
+      stretched = late ? 'later' : long ? 'long' : undefined;
+    }
+  } else if (stretch && happening(opt)) {
+    // A market or a come-and-go event that opens later that day than the window allows.
+    if (!inSeasonAt(opt, arrive, tz)) return reject(id, 'season', 'out of season');
+    const iv = openIntervals(opt, arrive, horizon, tz).find(([s, e]) => s > arrive + TUNING.maxWaitMin * MIN && e - s >= minStay * MIN);
+    if (!iv) return reject(id, 'closed', "it doesn't open later that day");
+    [begin, until] = iv;
+    stretched = 'opens';
   } else {
     if (!inSeasonAt(opt, arrive, tz)) return reject(id, 'season', 'out of season');
     const intervals = openIntervals(opt, arrive, leaveBy, tz);
@@ -182,7 +214,7 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   }
 
   const available = Math.max(0, (Math.min(until, Math.max(leaveBy, begin)) - begin) / MIN);
-  let stayMin = Math.round(Math.min(idealStay, opt.when && !opt.dropIn ? (until - begin) / MIN : available));
+  let stayMin = Math.round(Math.min(idealStay, (opt.when && !opt.dropIn) || stretched ? (until - begin) / MIN : available));
 
   // Daylight and weather are judged for the time you'd actually be there.
   const sun = sunFor(begin, opt.lat, opt.lng, tz);
@@ -275,6 +307,8 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   if (shown !== undefined && req.now - shown > TUNING.shownQuietHours * HOUR) {
     parts.seen = -TUNING.shownPenalty * 0.5 ** ((req.now - shown) / (3 * DAY));
   }
+  // Among things that start after the window, sooner is better.
+  if (stretched === 'later' || stretched === 'opens') parts.later = -TUNING.laterPerHour * Math.max(0, (begin - halfway) / HOUR);
   if (went?.liked) {
     parts.been = req.now - went.t < TUNING.wentCooldownDays * DAY ? -TUNING.wentPenalty : 0.1;
   }
@@ -286,7 +320,7 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   const score = Object.values(parts).reduce((s, v) => s + v, 0);
   return {
     option: opt, reason: '', wildcard: false, travelMin, begin, stayMin, until,
-    waits: begin > arrive + MIN, score, parts, conditions, moments, moodFit,
+    waits: begin > arrive + MIN, score, parts, conditions, moments, moodFit, stretched,
   };
 }
 
@@ -546,7 +580,61 @@ export function match(req: Request, world: World): Result {
   }
   ranked.sort((a, b) => b.score - a.score || a.option.id.localeCompare(b.option.id));
   const used = new Set<string>();
-  const chosen = choose(ranked, req, world.memory);
+  let chosen = choose(ranked, req, world.memory);
+  const tz = world.city.tz;
+
+  // The second look. If fewer than three of the things that were asked for fit
+  // the window, see what is on later that day, or runs past the end of it, and
+  // offer those next, each with a line saying so. What fits the window as asked
+  // always comes first; a later start never pushes one of those out.
+  const { intent } = req;
+  const named = (o: Option) => (intent.today ? true : intent.kinds.length ? intent.kinds.includes(o.category) : true);
+  const asked = (c: Candidate) => named(c.option) || Boolean(req.keep?.includes(c.option.id));
+  let stretchedIn = 0;
+  let fitted = chosen.length;
+  if (ranked.filter((c) => named(c.option)).length < 3) {
+    const inWindow = new Set(ranked.map((c) => c.option.id));
+    const later: Candidate[] = [];
+    for (const opt of world.options) {
+      if (inWindow.has(opt.id) || !happening(opt) || !named(opt)) continue;
+      const a = assess(opt, req, world, true);
+      if (!('gate' in a) && a.stretched) later.push(a);
+    }
+    later.sort((a, b) => b.score - a.score || a.option.id.localeCompare(b.option.id));
+    if (later.length) {
+      // Whatever fits the window and was asked for, then the later ones, then anything else that fit.
+      const first = [...chosen.filter(asked), ...ranked.filter((c) => asked(c) && !chosen.includes(c))].slice(0, 3);
+      const next = [...first, ...later.filter((c) => req.keep?.includes(c.option.id))].slice(0, 3);
+      while (next.length < 3) {
+        let best: Candidate | undefined;
+        let bestValue = -Infinity;
+        for (const c of later) {
+          if (next.includes(c)) continue;
+          const value = c.score - next.reduce((s, x) => s + overlap(c.option, x.option), 0);
+          if (value > bestValue) [best, bestValue] = [c, value];
+        }
+        if (!best) break;
+        next.push(best);
+      }
+      stretchedIn = next.filter((c) => c.stretched).length;
+      if (stretchedIn) {
+        // What fits comes first; the later ones follow in the order they start.
+        next.sort((a, b) => Number(Boolean(a.stretched)) - Number(Boolean(b.stretched)) || (a.stretched ? a.begin - b.begin : 0));
+        for (const c of chosen) if (next.length < 3 && !next.includes(c)) next.push(c);
+        chosen = next;
+        fitted = chosen.length - stretchedIn;
+      }
+    }
+  }
+  const caveat = (c: Candidate): string | undefined =>
+    c.stretched === 'later'
+      ? c.begin < req.start + req.durationMin * MIN
+        // It starts inside the window, but too far in to see much of it before the window ends.
+        ? `Longer than the time you gave: it starts at ${fmtTime(c.begin, tz)} and runs until ${fmtTime(c.until, tz)}.`
+        : `Later than the time you gave: it starts at ${fmtTime(c.begin, tz)}.`
+      : c.stretched === 'opens' ? `Later than the time you gave: it opens at ${fmtTime(c.begin, tz)}.`
+        : c.stretched === 'long' ? `Longer than the time you gave: it runs until ${fmtTime(c.until, tz)}.`
+          : undefined;
   const own = chosen.length;
   // Never for "what's on": a map place is an ordinary restaurant, not something happening that day.
   if (world.fallback?.length && own < 3 && !req.intent.today) {
@@ -573,12 +661,17 @@ export function match(req: Request, world: World): Result {
   const borrowed = chosen.length - own;
   const picks = chosen.map((c, i) => ({
     ...c,
+    caveat: caveat(c),
     reason: i < own ? explain(c, req, world, used) : `Open, and about ${c.travelMin} minutes away. Beyond that, you'd be finding out for me.`,
   }));
-  const strip = ({ conditions: _c, moments: _m, moodFit: _f, ...pick }: Candidate): Pick => pick;
+  const strip = ({ conditions: _c, moments: _m, moodFit: _f, stretched: _s, ...pick }: Candidate): Pick => pick;
+  const count = ['none', 'one', 'two', 'three'];
+  const stretchNote = !stretchedIn ? null
+    : fitted === 0 ? `Nothing ${intent.today ? "that's on" : 'like that'} fits the time you gave, so ${stretchedIn === 1 ? 'this is' : 'these are'} a little outside it. ${stretchedIn === 1 ? 'The card says' : 'Each card says'} how.`
+      : `Only ${count[fitted]} of these ${fitted === 1 ? 'fits' : 'fit'} the time you gave. The other${stretchedIn === 1 ? ' is' : 's are'} a little outside it, and ${stretchedIn === 1 ? 'says' : 'each says'} how.`;
   return {
     picks: picks.map(strip),
-    note: borrowed
+    note: stretchNote ? stretchNote : borrowed
       ? own === 0
         ? 'Nothing on my own list fits from where you are, so these come from the map: open and nearby, but nobody has vouched for them.'
         : `Only ${own === 1 ? 'one' : 'two'} from my own list ${own === 1 ? 'fits' : 'fit'}, so the rest ${borrowed === 1 ? 'comes' : 'come'} from the map: open and nearby, but not vouched for.`

@@ -651,6 +651,7 @@ function Card(props: {
         <h3>{o.name}</h3>
         <p class="what">{o.what}</p>
         <p class="reason">{turn ? pick.reason.slice(15) : pick.reason}</p>
+        {pick.caveat && <p class="caveat">{pick.caveat}</p>}
         <p class="facts">
           <span class="open">{statusLine(pick, props.now, tz)}</span>
           <span>{cap(travelLabel(pick.travelMin, props.mode))}</span>

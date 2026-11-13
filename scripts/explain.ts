@@ -51,6 +51,7 @@ for (const p of result.picks) {
   console.log(`\n  ${p.wildcard ? '↯' : '•'} ${p.option.name} — ${p.option.what}`);
   console.log(`    ${statusLine(p, now, city.tz)} · ${p.travelMin} min · stay ~${p.stayMin} min`);
   console.log(`    ${p.reason}`);
+  if (p.caveat) console.log(`    ! ${p.caveat}`);
   console.log(`    ${p.score.toFixed(2)} = ${Object.entries(p.parts).map(([k, v]) => `${k} ${v.toFixed(2)}`).join(', ')}`);
 }
 console.log(`\nnext best: ${result.debug.ranked.filter((r) => !result.picks.some((p) => p.option.id === r.option.id)).slice(0, 6).map((r) => `${r.option.id} ${r.score.toFixed(2)}`).join(', ')}`);

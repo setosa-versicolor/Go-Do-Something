@@ -74,6 +74,58 @@ describe('matching "local today"', () => {
     expect(reasons.some((l) => /^It starts at 7 pm|^It's at A Room/.test(l))).toBe(true);
   });
 
+  describe('when too little fits the window, it looks later the same day', () => {
+    const bar = option({ id: 'bar', category: 'bar', moods: { lively: 0.6 } });
+
+    it('offers a later start with a line saying so, after whatever fits', () => {
+      const r = match(request(wed6, 'local today', { durationMin: 120 }), world({ options: [show('soon', 18, { when: { start: at(2026, 11, 11, 18, 30), end: at(2026, 11, 11, 19, 30) } }), show('nine', 21), show('ten', 22, { lat: 43.09 })] }));
+      expect(ids(r)).toEqual(['soon', 'nine', 'ten']);
+      expect(r.picks.map((p) => p.caveat)).toEqual([undefined, 'Later than the time you gave: it starts at 9 pm.', 'Later than the time you gave: it starts at 10 pm.']);
+      expect(r.note).toBe('Only one of these fits the time you gave. The others are a little outside it, and each says how.');
+    });
+
+    it('says so when nothing fits the window at all', () => {
+      const r = match(request(wed6, 'local today', { durationMin: 60 }), world({ options: [show('nine', 21)], fallback: map }));
+      expect(ids(r)).toEqual(['nine']);
+      expect(r.note).toBe("Nothing that's on fits the time you gave, so this is a little outside it. The card says how.");
+    });
+
+    it('says when something starts in time but runs past the end', () => {
+      const r = match(request(wed6, 'local today', { durationMin: 120 }), world({ options: [show('long', 19, { when: { start: at(2026, 11, 11, 18, 30), end: at(2026, 11, 11, 22) } })] }));
+      expect(r.picks[0]!.caveat).toBe('Longer than the time you gave: it runs until 10 pm.');
+    });
+
+    it('leaves three that fit alone, and prefers the sooner of the later ones', () => {
+      const three = [show('a', 19), show('b', 19, { lat: 43.08 }), show('c', 19, { lat: 43.09 })];
+      const full = match(request(wed6, 'local today', { durationMin: 240 }), world({ options: [...three, show('nine', 21)] }));
+      expect(full.picks.every((p) => !p.caveat)).toBe(true);
+      expect(ids(full)).not.toContain('nine');
+      const some = match(request(wed6, 'local today', { durationMin: 60 }), world({ options: ['c', 'b', 'a', 'd'].map((id, i) => show(id, 23 - i)) }));
+      expect(ids(some).sort()).toEqual(['a', 'b', 'd']); // 9, 10 and 8 pm; not the 11 pm one
+    });
+
+    it("gives tonight's shows the seats ahead of places that only share the mood", () => {
+      const r = match(request(wed6, 'music', { durationMin: 120 }), world({ options: [bar, show('nine', 21)] }));
+      expect(ids(r)).toEqual(['nine', 'bar']);
+      expect(r.picks[1]!.caveat).toBeUndefined();
+      // With three shows in the window already, nothing is brought in from later.
+      const plenty = match(request(wed6, 'music', { durationMin: 240 }), world({ options: [bar, show('a', 19), show('b', 19, { lat: 43.08 }), show('c', 19, { lat: 43.09 }), show('nine', 21)] }));
+      expect(ids(plenty)).not.toContain('nine');
+    });
+
+    it('never reaches into another day, or back to something already begun', () => {
+      const tomorrow = show('tomorrow', 19, { when: { start: at(2026, 11, 12, 19), end: at(2026, 11, 12, 21) } });
+      const r = match(request(wed6, 'local today', { durationMin: 60 }), world({ options: [tomorrow, show('begun', 17)] }));
+      expect(r.picks).toEqual([]);
+    });
+
+    it('holds a later pick in place when another card is swapped', () => {
+      const options = [show('nine', 21), show('ten', 22, { lat: 43.09 })];
+      const r = match(request(wed6, 'local today', { durationMin: 60, keep: ['ten'], exclude: ['nine'] }), world({ options }));
+      expect(ids(r)).toEqual(['ten']);
+    });
+  });
+
   it('never fills seats from the map', () => {
     const r = match(request(wed6, 'local today', { durationMin: 240 }), world({ options: [show('gig', 19)], fallback: map }));
     expect(ids(r)).toEqual(['gig']);
@@ -86,7 +138,8 @@ describe('matching "local today"', () => {
   });
 
   it('says so plainly when nothing is on, and how to fix it', () => {
-    const late = match(request(wed6, 'local today', { durationMin: 60 }), world({ options: [...places, show('gig', 21)], fallback: map }));
+    // The only thing on has already started: there is no later to offer.
+    const late = match(request(wed6, 'local today', { durationMin: 60 }), world({ options: [...places.filter((p) => !happening(p)), show('gig', 17)], fallback: map }));
     expect(late.picks).toEqual([]);
     expect(late.note).toMatch(/^Nothing on in the time you have\./);
     expect(late.note).toMatch(/More time, or a later start/);

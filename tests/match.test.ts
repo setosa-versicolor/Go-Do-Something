@@ -32,8 +32,8 @@ describe('what gets picked is actually doable', () => {
               // Open for at least the minimum worthwhile visit, starting when we say.
               const open = openIntervals(p.option, p.begin, p.begin + 1, TZ).some(([s, e]) => s <= p.begin && e >= p.begin + p.option.minutes[0] * MIN);
               expect(open, `${p.option.id} at ${mo}/${d} ${h}:20 (${say})`).toBe(true);
-              // And you can get back inside your window.
-              expect(p.begin + p.option.minutes[0] * MIN + p.travelMin * MIN).toBeLessThanOrEqual(end);
+              // And you can get back inside your window, unless the card says outright that it runs later.
+              if (!p.caveat) expect(p.begin + p.option.minutes[0] * MIN + p.travelMin * MIN).toBeLessThanOrEqual(end);
               expect(p.stayMin).toBeGreaterThanOrEqual(p.option.minutes[0]);
               expect(p.reason.length).toBeGreaterThan(10);
             }
