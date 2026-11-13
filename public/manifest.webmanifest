@@ -1,0 +1,14 @@
+{
+  "name": "Do Something · Madison",
+  "short_name": "Do Something",
+  "description": "You have a free evening. Make the most of it. Three good ideas for Madison, WI, right now.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#121819",
+  "theme_color": "#1d3f63",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

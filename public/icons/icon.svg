@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1d3f63"/>
+      <stop offset="0.5" stop-color="#c8664a"/>
+      <stop offset="0.72" stop-color="#f2b366"/>
+    </linearGradient>
+    <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b6f86"/>
+      <stop offset="1" stop-color="#143a4f"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff4cf"/>
+      <stop offset="0.55" stop-color="#ffd27a"/>
+      <stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <circle cx="256" cy="268" r="190" fill="url(#sun)" opacity="0.95"/>
+  <!-- The Capitol, in silhouette: wings, drum, dome, lantern and the figure on top. -->
+  <g fill="#18263a">
+    <rect x="110" y="300" width="292" height="40" rx="3"/>
+    <rect x="150" y="282" width="212" height="22" rx="2"/>
+    <rect x="206" y="236" width="100" height="50" rx="3"/>
+    <rect x="196" y="230" width="120" height="12" rx="3"/>
+    <path d="M206 232 C 206 170, 306 170, 306 232 Z"/>
+    <rect x="246" y="150" width="20" height="34" rx="3"/>
+    <path d="M249 152 L256 118 L263 152 Z" fill="#ffd27a"/>
+  </g>
+  <!-- Lake Monona in front, with the light on it. -->
+  <rect y="336" width="512" height="176" fill="url(#lake)"/>
+  <g stroke="#ffd27a" stroke-linecap="round" opacity="0.8">
+    <line x1="196" y1="368" x2="316" y2="368" stroke-width="7"/>
+    <line x1="218" y1="398" x2="294" y2="398" stroke-width="6"/>
+    <line x1="238" y1="426" x2="274" y2="426" stroke-width="5"/>
+  </g>
+</svg>
