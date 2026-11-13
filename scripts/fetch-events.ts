@@ -24,7 +24,7 @@ const listVenues = process.argv.includes('--venues');
 const strangers = new Map<string, { n: number; sample: string; url: string }>();
 
 async function get(url: string): Promise<string> {
-  const res = await fetch(url, { headers: { 'user-agent': 'go-do-something events fetcher' }, signal: AbortSignal.timeout(20_000) });
+  const res = await fetch(url, { headers: { 'user-agent': 'do-something-madison events fetcher' }, signal: AbortSignal.timeout(20_000) });
   if (!res.ok) throw new Error(`${res.status} ${url}`);
   return res.text();
 }

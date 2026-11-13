@@ -356,7 +356,7 @@ export function App() {
         <div class="orb" aria-hidden="true" style={{ left: `${10 + 80 * sky.progress}%`, top: `${62 - Math.sin(Math.PI * sky.progress) * 44}%` }} />
         <div class="sky-inner">
           <p class="brand">
-            <button class="plain" onClick={() => setStage('mood')} aria-label={`Go Do Something, ${city.name}: start over`}>Go Do Something · {city.name}</button>
+            <button class="plain" onClick={() => setStage('mood')} aria-label={`Do Something ${city.name}: start over`}>Do Something {city.name}</button>
             <span>{moment}</span>
           </p>
           {stage === 'mood' && !intro && <button type="button" class="help" onClick={() => setIntro(true)} aria-label="How this works">?</button>}

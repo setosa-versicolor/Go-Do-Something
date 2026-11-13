@@ -21,7 +21,7 @@ async function overpass(): Promise<{ elements: Parameters<typeof nearbyRow>[0][]
   let last: unknown;
   for (const host of ['overpass-api.de', 'overpass.kumi.systems', 'overpass.private.coffee']) {
     try {
-      const res = await fetch(`https://${host}/api/interpreter?data=${encodeURIComponent(query)}`, { headers: { 'user-agent': 'go-do-something nearby fetcher' }, signal: AbortSignal.timeout(120_000) });
+      const res = await fetch(`https://${host}/api/interpreter?data=${encodeURIComponent(query)}`, { headers: { 'user-agent': 'do-something-madison nearby fetcher' }, signal: AbortSignal.timeout(120_000) });
       if (!res.ok) throw new Error(`${res.status} from ${host}`);
       return (await res.json()) as { elements: Parameters<typeof nearbyRow>[0][] };
     } catch (err) {
