@@ -26,11 +26,13 @@ export interface Conditions {
   feelsF: number;
   tempF: number;
   snowIn: number;
+  /** Fog at the start of the window (WMO 45 or 48). It changes how the sky looks, not what you can do. */
+  foggy: boolean;
   /** "41° and raining" — only meaningful when known. */
   summary: string;
 }
 
-export const UNKNOWN: Conditions = { known: false, sky: 'dry', feelsF: NaN, tempF: NaN, snowIn: 0, summary: '' };
+export const UNKNOWN: Conditions = { known: false, sky: 'dry', feelsF: NaN, tempF: NaN, snowIn: 0, foggy: false, summary: '' };
 
 export function weatherUrl(at: LatLng): string {
   const q = new URLSearchParams({
@@ -105,7 +107,8 @@ export function conditionsFor(w: Weather | null, from: number, to: number): Cond
   const first = hours[0]!;
   const feelsF = Math.min(...hours.map((h) => h.feelsF));
   const temp = Math.round(first.tempF);
+  const foggy = first.code === 45 || first.code === 48;
   const word =
-    sky === 'storm' ? 'storming' : sky === 'wet' ? (snowy ? 'snowing' : 'raining') : sky === 'damp' ? (snowy ? 'flurries' : 'drizzly') : 'dry';
-  return { known: true, sky, feelsF, tempF: first.tempF, snowIn: first.snowIn, summary: `${temp}° and ${word}` };
+    sky === 'storm' ? 'storming' : sky === 'wet' ? (snowy ? 'snowing' : 'raining') : sky === 'damp' ? (snowy ? 'flurries' : 'drizzly') : foggy ? 'foggy' : 'dry';
+  return { known: true, sky, feelsF, tempF: first.tempF, snowIn: first.snowIn, foggy, summary: `${temp}° and ${word}` };
 }

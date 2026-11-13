@@ -18,6 +18,8 @@ export interface SkyInput {
   sunset: number;
   /** 0 clear … 1 pouring. */
   wet: number;
+  /** 0 clear … 1 thick fog. */
+  fog: number;
   snowing: boolean;
   /** Thunder and lightning. */
   storm: boolean;
@@ -111,7 +113,7 @@ export function elevation(time: number, sunrise: number, sunset: number): { e: n
   return { e: -Math.min(1, Math.min(sinceSet, untilRise) / (1.5 * HOUR)), p: sinceSet < untilRise ? 1 : 0 };
 }
 
-function lookAt(e: number, wet: number, storm = 0): Look {
+function lookAt(e: number, wet: number, storm = 0, fog = 0): Look {
   let i = 0;
   while (i < KEYS.length - 2 && e > KEYS[i + 1]![0]) i++;
   const a = KEYS[i]!;
@@ -139,6 +141,15 @@ function lookAt(e: number, wet: number, storm = 0): Look {
     look.sun *= 1 - storm * 0.45;
     look.ambient *= 1 - storm * 0.3;
     look.glow = Math.max(look.glow, storm * 0.45);
+  }
+  if (fog > 0) {
+    // Fog: sky and horizon become the same pale wall, the sun a dim disc behind it, and the lamps stay on.
+    const mist = new THREE.Color(e > 0.25 ? '#cfd3d4' : e > -0.1 ? '#b9b3ad' : '#232733');
+    look.top.lerp(mist.clone().multiplyScalar(0.94), fog * 0.85);
+    look.horizon.lerp(mist, fog * 0.92);
+    look.sun *= 1 - fog * 0.6;
+    look.stars *= 1 - fog;
+    look.glow = Math.max(look.glow, fog * 0.3);
   }
   return look;
 }
@@ -1703,6 +1714,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   const look: Look = lookAt(0.6, 0);
   let wetNow = 0;
   let stormNow = 0;
+  let fogNow = 0;
   let last = performance.now();
   let clock = 0;
   let raf = 0;
@@ -1747,7 +1759,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       const { e, p } = elevation(t, sky.sunrise, sky.sunset);
       wetNow += (sky.wet - wetNow) * ease;
       stormNow += ((sky.storm ? 1 : 0) - stormNow) * ease;
-      const want = lookAt(e, wetNow, stormNow);
+      fogNow += ((sky.fog ?? 0) - fogNow) * ease;
+      const want = lookAt(e, wetNow, stormNow, fogNow);
       const k = lapse > 0 ? 1 : ease;
       look.top.lerp(want.top, k);
       look.horizon.lerp(want.horizon, k);
@@ -1760,6 +1773,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       skyUniforms.top.value.copy(look.top);
       skyUniforms.horizon.value.copy(look.horizon);
       (scene.fog as THREE.Fog).color.copy(look.horizon);
+      // In fog the haze that normally starts miles off closes in: downtown stays, the far shores go.
+      (scene.fog as THREE.Fog).near = 11 - fogNow * 10;
+      (scene.fog as THREE.Fog).far = 44 - fogNow * 31;
       // Rain, as far as the ground is concerned: wet streets and a roughened lake. Snow is neither.
       const raining = sky.snowing ? 0 : Math.max(0, Math.min(1, (wetNow - 0.3) / 0.5));
       waterUniforms.chop.value = raining * (0.5 + stormNow * 0.5);
@@ -1792,10 +1808,10 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       const dry = 1 - wetNow * 0.85;
       skyUniforms.body.value.copy(body.position).sub(camera.position).normalize();
       skyUniforms.bodyColor.value.copy(up ? sunColor : tmp.set('#aab6e8'));
-      skyUniforms.bodyGlow.value = (up ? 0.55 + (1 - Math.max(0, e)) * 0.6 : 0.3 * (moon.material as THREE.MeshBasicMaterial).opacity) * dry;
+      skyUniforms.bodyGlow.value = (up ? 0.55 + (1 - Math.max(0, e)) * 0.6 : 0.3 * (moon.material as THREE.MeshBasicMaterial).opacity) * dry * (1 - fogNow * 0.7);
       waterUniforms.body.value.copy(skyUniforms.body.value);
       waterUniforms.bodyColor.value.copy(skyUniforms.bodyColor.value);
-      waterUniforms.glint.value = (up ? 1 : 0.5) * dry * (1 - waterUniforms.frozen.value * 0.7);
+      waterUniforms.glint.value = (up ? 1 : 0.5) * dry * (1 - fogNow * 0.8) * (1 - waterUniforms.frozen.value * 0.7);
       waterUniforms.skyTop.value.copy(look.top);
       waterUniforms.skyHorizon.value.copy(look.horizon);
       waterUniforms.deep.value.set('#2a78a8').multiplyScalar(Math.min(1, 0.16 + Math.max(0, e + 0.15) * 1.6)).lerp(tmp.set('#5d6f78'), wetNow * 0.5);
@@ -1873,7 +1889,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       c.position.x += (c.userData.speed as number) * dt * (calm ? 0 : 1);
       if (c.position.x > 18) c.position.x = -18;
       // Never fly through one: a cloud close to the camera is just a grey wall.
-      c.visible = i < 4 + Math.round(wetNow * 8) && c.position.distanceTo(camera.position) > 6;
+      c.visible = i < 4 + Math.round(wetNow * 8) && fogNow < 0.5 && c.position.distanceTo(camera.position) > 6;
     });
     cloudMat.opacity = 0.6 + wetNow * 0.35;
 

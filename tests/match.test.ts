@@ -106,6 +106,15 @@ describe('weather', () => {
     expect(r.conditions.summary).toBe('68° and raining');
   });
 
+  it('calls fog fog, without letting it rule anything out', () => {
+    const fog = match(request(noon), world({ weather: weatherOf(noon, { tempF: 52, code: 45 }) }));
+    expect(fog.conditions.foggy).toBe(true);
+    expect(fog.conditions.sky).toBe('dry');
+    expect(fog.conditions.summary).toBe('52° and foggy');
+    const clear = match(request(noon), world({ weather: weatherOf(noon, { tempF: 52 }) }));
+    expect(fog.picks.map((p) => p.option.id)).toEqual(clear.picks.map((p) => p.option.id));
+  });
+
   it('uses the weather as the reason when it is the reason', () => {
     const rain = match(request(noon, 'rainy afternoon', { start: noon }), world({ weather: weatherOf(noon, { tempF: 60, code: 63, precipProb: 90, precipMm: 2 }) }));
     expect(rain.picks.some((p) => /wait it out/.test(p.reason))).toBe(true);
