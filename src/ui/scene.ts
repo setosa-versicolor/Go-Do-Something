@@ -326,6 +326,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     y0: Math.min(b.y0, r.line[1]!, r.line[3]!) - 0.14, y1: Math.max(b.y1, r.line[1]!, r.line[3]!) + 0.14,
   }), { x0: Infinity, x1: -Infinity, y0: Infinity, y1: -Infinity }) : null;
   const inField = (east: number, north: number) => Boolean(fieldBox && east > fieldBox.x0 && east < fieldBox.x1 && north > fieldBox.y0 && north < fieldBox.y1);
+  // How far the solid landmarks reach from their centers, east-west and north-south before any turn, in miles.
+  const FOOT: Partial<Record<Landmark['kind'], readonly [number, number]>> = { stadium: [0.122, 0.196], arena: [0.115, 0.115] };
   const kept = shape.landmarks.filter((m) => m.kind === 'woods' || m.kind === 'airport' || m.kind === 'stadium');
   const quiet = (east: number, north: number) =>
     inField(east, north) || kept.some((m) => Math.hypot(east - m.east, north - m.north) < (m.kind === 'woods' ? m.radius ?? 0.3 : m.kind === 'airport' ? (field ? 0 : 0.8) : 0.22));
@@ -625,6 +627,25 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     }
   };
 
+  /** Whether a building's rectangle touches a landmark's oval footprint, with a little air around it. */
+  const overlaps = (m: Landmark, foot: readonly [number, number], east: number, north: number, w: number, d: number, turn: number) => {
+    const c = Math.cos(turn);
+    const s = Math.sin(turn);
+    const mc = Math.cos(m.turn ?? 0);
+    const ms = Math.sin(m.turn ?? 0);
+    // Walk the rectangle's edge; the footprints are far bigger than any building, so none can hide inside one untouched.
+    for (let i = 0; i < 16; i++) {
+      const t = (i % 4) / 4 - 0.5;
+      const side = i >> 2;
+      const u = (side === 0 ? t : side === 1 ? 0.5 : side === 2 ? -t : -0.5) * w;
+      const v = (side === 0 ? -0.5 : side === 1 ? t : side === 2 ? 0.5 : -t) * d;
+      const pe = east + u * c - v * s - m.east;
+      const pn = north + u * s + v * c - m.north;
+      if (Math.hypot((pe * mc + pn * ms) / (foot[0] + 0.02), (pn * mc - pe * ms) / (foot[1] + 0.02)) < 1) return true;
+    }
+    return false;
+  };
+
   // First the ones people would recognise, where they really stand. Anything
   // closer to the center than the Capitol model's own footprint is nudged out
   // to the edge of the square along the same bearing.
@@ -635,10 +656,25 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     let k = r < 0.25 && r > 0 ? (SQUARE + r * 0.5) / r : 1;
     // The isthmus is narrow: if the nudge put it in the lake, walk it back to dry land.
     while (k > 0.3 && wet(b.east * k, b.north * k, 0.06)) k -= 0.04;
-    const east = b.east * k;
-    const north = b.north * k;
+    let east = b.east * k;
+    let north = b.north * k;
     const turn = b.turn ?? (r < 1.3 ? shape.gridTurn : 0);
-    raise(east, north, b.w * 1.15, b.d * 1.15, b.h * 0.95, turn, b.color, b.style);
+    const w = b.w * 1.15;
+    const d = b.d * 1.15;
+    // The stadium and the arenas are drawn larger than life too, so a real
+    // neighbour can land inside one. Step it straight away until it stands clear.
+    for (const m of shape.landmarks) {
+      const foot = FOOT[m.kind];
+      if (!foot) continue;
+      const far = Math.hypot(east - m.east, north - m.north) || 1;
+      const de = (east - m.east) / far;
+      const dn = (north - m.north) / far;
+      for (let n = 0; n < 60 && overlaps(m, foot, east, north, w, d, turn); n++) {
+        east += de * 0.01;
+        north += dn * 0.01;
+      }
+    }
+    raise(east, north, w, d, b.h * 0.95, turn, b.color, b.style);
     named.push({ name: b.name, east, north, h: b.h * 0.95 });
   }
   const taken = (east: number, north: number, pad: number) =>
@@ -896,7 +932,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       pitch.position.y = 0.006;
       out.position.y = seats.position.y = 0.0375;
       g.add(out, seats, pitch);
-      g.scale.set(0.72, 1, 1.15);
+      g.scale.set(FOOT.stadium![0] / 0.17, 1, FOOT.stadium![1] / 0.17);
       return 0.25;
     },
     arena(g) {
