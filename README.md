@@ -49,6 +49,8 @@ What's real: the shorelines of the four lakes, the Yahara River and the main roa
 - Tap the balloon to ask for a surprise.
 - When three picks are dealt, each stands as a numbered beacon where it really is. Tap a beacon to bring up its card; swipe the cards and the camera leans toward that pick.
 
+The page holds back on first load: a quiet wordmark shows (straight from `index.html`, before any script) until the model has drawn and the weather is in, then the whole page fades in at once. It never waits more than about four seconds; without WebGL it shows the painted sky as soon as the weather is in.
+
 The first visit opens with a short introduction (`src/ui/intro.tsx`): the idea of the app, one sentence at a time, over a scripted 27-second flight across the model. A tap anywhere skips it, the "?" button on the opening screen replays it, and a flag in local storage keeps it from playing twice. With reduced motion the camera holds still and the sentences simply change.
 
 To look at the model in weather you aren't having, add `?weather=snow` (or `rain`, `storm`, `fog`, `clear`) to the URL. It changes only how the model is dressed: the header and the picks still use the real forecast.

@@ -90,14 +90,28 @@ export function App() {
   // The introduction plays on the first visit, and again from the "?" button.
   const [intro, setIntro] = useState(() => !seenIntro() && !/^#\/p\//.test(location.hash));
   const [beams, setBeams] = useState(loadBeams);
-  // The introduction waits for the model to be drawn. If it never is (no WebGL), it starts anyway over the painted sky.
+  // The introduction waits for the page to be shown (below). If the model never draws (no WebGL), that still happens, over the painted sky.
   const [sceneReady, setSceneReady] = useState(false);
-  const [noScene, setNoScene] = useState(false);
+  // The page holds back until the model has drawn and the weather is in (or a few seconds pass), then everything
+  // appears at once, instead of the painted sky and half the controls flashing up first.
+  const [sceneFailed, setSceneFailed] = useState(false);
+  const [weatherIn, setWeatherIn] = useState(false);
+  const [shown, setShown] = useState(false);
   useEffect(() => {
-    if (!intro || sceneReady) return;
-    const t = setTimeout(() => setNoScene(true), 6000);
+    if (shown) return;
+    const reveal = () => {
+      setShown(true);
+      const boot = document.getElementById('boot');
+      if (boot) {
+        boot.classList.add('gone');
+        setTimeout(() => boot.remove(), 900);
+      }
+    };
+    if ((sceneReady || sceneFailed) && weatherIn) return reveal();
+    // Never hold the page for long: a slow network or a slow device gets the page anyway.
+    const t = setTimeout(reveal, sceneReady || sceneFailed ? 1200 : 4000);
     return () => clearTimeout(t);
-  }, [intro, sceneReady]);
+  }, [shown, sceneReady, sceneFailed, weatherIn]);
   const endIntro = () => { setIntro(false); markIntroSeen(); };
   const [vibe, setVibe] = useState('');
   const [vibeOpen, setVibeOpen] = useState(false);
@@ -130,7 +144,7 @@ export function App() {
 
   // Look outside and at the calendar while the person is choosing.
   useEffect(() => {
-    const w = fetchWeather(city.center, Date.now()).then((x) => { weather.current = x; setWeatherTick((n) => n + 1); });
+    const w = fetchWeather(city.center, Date.now()).then((x) => { weather.current = x; setWeatherTick((n) => n + 1); setWeatherIn(true); });
     const e = fetch('./events.json')
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => { events.current = loadEvents(json, Date.now()); setWeatherTick((n) => n + 1); })
@@ -362,9 +376,9 @@ export function App() {
   ].filter(Boolean).join(' · ');
 
   return (
-    <div class={`page stage-${stage}${intro ? ' intro-on' : ''}`}>
+    <div class={`page stage-${stage}${intro ? ' intro-on' : ''}${shown ? ' shown' : ''}`}>
       <header class={`sky ${sky.phase}${conditions.known && conditions.sky !== 'dry' ? ' grey' : ''}${results ? ' small' : ''}`}>
-        <Scene onReady={() => setSceneReady(true)} pose={intro ? (sceneReady ? 'intro' : 'mood') : stage} sky={skyInput} pins={pins} home={home} live={live} active={active} onPin={onPin} onBalloon={onBalloon} />
+        <Scene onReady={() => setSceneReady(true)} onFail={() => setSceneFailed(true)} pose={intro ? (shown && sceneReady ? 'intro' : 'mood') : stage} sky={skyInput} pins={pins} home={home} live={live} active={active} onPin={onPin} onBalloon={onBalloon} />
         <div class="orb" aria-hidden="true" style={{ left: `${10 + 80 * sky.progress}%`, top: `${62 - Math.sin(Math.PI * sky.progress) * 44}%` }} />
         <div class="sky-inner">
           <p class="brand">
@@ -385,7 +399,7 @@ export function App() {
         <svg class="shore" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
           <path d="M0 34 C 150 6, 300 58, 450 32 S 750 8, 900 34 S 1100 54, 1200 26 V60 H0 Z" />
         </svg>
-        {intro && <Intro ready={sceneReady || noScene} onDone={endIntro} />}
+        {intro && <Intro ready={shown} onDone={endIntro} />}
       </header>
 
       {stage === 'mood' && (
@@ -555,7 +569,7 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * The 3D model behind the header. Loaded on demand; if it can't start (no
  * WebGL, an old phone), nothing is rendered and the painted sky stays.
  */
-function Scene(props: { onReady?: () => void; pose: Pose; sky: SkyInput; pins: Pin[]; home: { east: number; north: number } | null; live: Live[]; active: number | null; onPin: (i: number) => void; onBalloon: () => void }) {
+function Scene(props: { onReady?: () => void; onFail?: () => void; pose: Pose; sky: SkyInput; pins: Pin[]; home: { east: number; north: number } | null; live: Live[]; active: number | null; onPin: (i: number) => void; onBalloon: () => void }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const model = useRef<Diorama | null>(null);
   const latest = useRef(props);
@@ -579,7 +593,7 @@ function Scene(props: { onReady?: () => void; pose: Pose; sky: SkyInput; pins: P
         }, calm);
         setOn(true);
       })
-      .catch(() => undefined); // no WebGL: the painted sky is the fallback
+      .catch(() => latest.current.onFail?.()); // no WebGL: the painted sky is the fallback
     const t = setTimeout(() => setHint(false), 12_000);
     return () => {
       gone = true;
