@@ -46,6 +46,13 @@ const STARTS: [string, string][] = [['now', 'now'], ['tonight', 'tonight'], ['to
 const MODES: [Mode, string][] = [['walk', 'on foot'], ['bike', 'by bike'], ['drive', 'by car']];
 const THINKING = ["Checking what's open…", 'Looking at the sky…', 'Leaving out the obvious…'];
 const COUNT = ['Nothing', 'One', 'Two', 'Three'];
+/** `?weather=snow` (or rain, storm, clear) dresses the model for weather we aren't having, to look at it. The picks still use the real forecast. */
+const PREVIEW: Record<string, Partial<SkyInput>> = {
+  snow: { wet: 0.85, snowing: true, snowIn: 4, frozen: true },
+  rain: { wet: 0.85, snowing: false, snowIn: 0, frozen: false },
+  storm: { wet: 1, snowing: false, snowIn: 0, frozen: false },
+  clear: { wet: 0, snowing: false, snowIn: 0, frozen: false },
+};
 const PIN_COLOR: Record<string, string> = { outdoors: '#2fa58a', consume: '#e08a3c', mind: '#8a6fd0', lively: '#e0567a' };
 
 type Stage = 'mood' | 'time' | 'thinking' | 'results';
@@ -106,6 +113,7 @@ export function App() {
   const logRef = useRef(log);
   const deck = useRef<HTMLOListElement>(null);
   const debug = useMemo(() => new URLSearchParams(location.search).has('debug'), []);
+  const preview = useMemo(() => new URLSearchParams(location.search).get('weather'), []);
 
   const record = (id: string, verb: Verb) => {
     const next = append(logRef.current, id, verb, Date.now());
@@ -316,7 +324,9 @@ export function App() {
     time: skyTime, sunrise: sun.sunrise, sunset: sun.sunset,
     wet: !conditions.known ? 0 : { dry: 0, damp: 0.45, wet: 0.85, storm: 1 }[conditions.sky],
     snowing: /snow|flurr/.test(conditions.summary), snowIn: conditions.known ? conditions.snowIn : 0,
-    frozen: conditions.known && conditions.tempF < 30 && (local.mo === 12 || local.mo <= 2), month: local.mo,
+    // The lakes hold ice from about the turn of the year into March; a November snow falls on open water.
+    frozen: conditions.known && conditions.tempF < 33 && (local.mo === 12 || local.mo <= 3), month: local.mo,
+    ...PREVIEW[preview ?? ''],
   };
   const pins: Pin[] = results
     ? view.result.picks.map((p) => ({
