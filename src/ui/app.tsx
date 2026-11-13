@@ -13,8 +13,9 @@ import { GROUP, type Option } from '../core/types';
 import { conditionsFor, fetchWeather, type Weather } from '../core/weather';
 import type { Diorama, Live, Pin, Pose, SkyInput } from './scene';
 import { partOfDay, skyAt } from './sky';
+import { Intro } from './intro';
 import { VibeIcon, vibeLabel, VibeSheet } from './vibe';
-import { forgetEverything, loadLog, loadMode, loadStart, loadTheme, saveLog, saveMode, saveStart, saveTheme, type Theme } from './store';
+import { forgetEverything, loadLog, loadMode, loadStart, loadTheme, markIntroSeen, saveLog, saveMode, saveStart, saveTheme, seenIntro, type Theme } from './store';
 
 const tz = city.tz;
 
@@ -78,6 +79,9 @@ export function App() {
   const [shuffles, setShuffles] = useState(0);
   const [line, setLine] = useState(0);
   const [sheet, setSheet] = useState(false);
+  // The introduction plays on the first visit, and again from the "?" button.
+  const [intro, setIntro] = useState(() => !seenIntro() && !/^#\/p\//.test(location.hash));
+  const endIntro = () => { setIntro(false); markIntroSeen(); };
   const [vibe, setVibe] = useState('');
   const [vibeOpen, setVibeOpen] = useState(false);
   const [toast, setToast] = useState('');
@@ -337,15 +341,16 @@ export function App() {
   ].filter(Boolean).join(' · ');
 
   return (
-    <div class={`page stage-${stage}`}>
+    <div class={`page stage-${stage}${intro ? ' intro-on' : ''}`}>
       <header class={`sky ${sky.phase}${conditions.known && conditions.sky !== 'dry' ? ' grey' : ''}${results ? ' small' : ''}`}>
-        <Scene pose={stage} sky={skyInput} pins={pins} home={home} live={live} active={active} onPin={onPin} onBalloon={onBalloon} />
+        <Scene pose={intro ? 'intro' : stage} sky={skyInput} pins={pins} home={home} live={live} active={active} onPin={onPin} onBalloon={onBalloon} />
         <div class="orb" aria-hidden="true" style={{ left: `${10 + 80 * sky.progress}%`, top: `${62 - Math.sin(Math.PI * sky.progress) * 44}%` }} />
         <div class="sky-inner">
           <p class="brand">
             <button class="plain" onClick={() => setStage('mood')} aria-label={`Go Do Something, ${city.name}: start over`}>Go Do Something · {city.name}</button>
             <span>{moment}</span>
           </p>
+          {stage === 'mood' && !intro && <button type="button" class="help" onClick={() => setIntro(true)} aria-label="How this works">?</button>}
           {stage === 'mood' && <h1>You have a free {part}.<em>Make the most of it.</em></h1>}
           {stage === 'time' && <h1>How long have you got?</h1>}
           {stage === 'thinking' && <h1 class="pulse" aria-live="polite">{THINKING[line]}</h1>}
@@ -359,6 +364,7 @@ export function App() {
         <svg class="shore" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
           <path d="M0 34 C 150 6, 300 58, 450 32 S 750 8, 900 34 S 1100 54, 1200 26 V60 H0 Z" />
         </svg>
+        {intro && <Intro onDone={endIntro} />}
       </header>
 
       {stage === 'mood' && (

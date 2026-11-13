@@ -49,6 +49,8 @@ What's real: the shorelines of the four lakes, the Yahara River and the main roa
 - Tap the balloon to ask for a surprise.
 - When three picks are dealt, each stands as a numbered beacon where it really is. Tap a beacon to bring up its card; swipe the cards and the camera leans toward that pick.
 
+The first visit opens with a short introduction (`src/ui/intro.tsx`): the idea of the app, one sentence at a time, over a scripted 27-second flight across the model. A tap anywhere skips it, the "?" button on the opening screen replays it, and a flag in local storage keeps it from playing twice. With reduced motion the camera holds still and the sentences simply change.
+
 Three things tie the model to the decision:
 
 - **The lens.** The scene is drawn off-screen and shown through a tilt-shift blur (sharp across the middle, soft above and below), which is what makes it read as a miniature. If a device can't fill the off-screen buffer, it draws direct.

@@ -323,3 +323,36 @@ footer p { margin: 0.8rem 0 0; }
 .scene-zoom { position: absolute; right: 0.7rem; bottom: 3.4rem; z-index: 3; display: flex; flex-direction: column; gap: 0.35rem; }
 .scene-zoom button { width: 2.1rem; height: 2.1rem; border-radius: 50%; border: 1px solid rgb(255 255 255 / 0.35); background: rgb(0 0 0 / 0.38); color: #fff; font-size: 1.15rem; line-height: 1; cursor: pointer; backdrop-filter: blur(6px); }
 .scene-zoom button:hover, .scene-zoom button:focus-visible { background: rgb(0 0 0 / 0.6); }
+
+/* ---- the introduction ---- */
+.help { position: absolute; top: 0.85rem; right: 1rem; width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid rgb(255 255 255 / 0.45); background: rgb(0 0 0 / 0.28); color: #fff; font: 600 1rem var(--serif); cursor: pointer; backdrop-filter: blur(6px); }
+.help:hover, .help:focus-visible { background: rgb(0 0 0 / 0.5); }
+.sky:not(:has(.scene.on)) .help { color: inherit; border-color: currentColor; background: none; }
+
+/* While it plays, the sky fills the screen and everything else waits underneath. */
+.intro-on .sky { position: fixed; inset: 0; z-index: 30; }
+.intro-on .sky-inner, .intro-on .shore, .intro-on .scene-zoom, .intro-on .scene-hint, .intro-on .sky::after { display: none; }
+.intro-on .sky .scene { opacity: 1; }
+
+.intro { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem 1.6rem calc(1.4rem + env(safe-area-inset-bottom)); border: 0; margin: 0; width: 100%; color: #fff; text-align: center; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  background: linear-gradient(rgb(8 12 24 / 0.5), rgb(8 12 24 / 0.42) 34%, rgb(8 12 24 / 0.06) 58%, rgb(8 12 24 / 0.1) 78%, rgb(8 12 24 / 0.55)); }
+.intro-stage { flex: 1; display: flex; align-items: flex-start; justify-content: center; width: 100%; max-width: 36rem; padding-top: clamp(4.5rem, 19dvh, 11rem); }
+.intro-line { display: block; font: 600 clamp(2.25rem, 9.4vw, 3.8rem)/1.12 var(--serif); letter-spacing: -0.012em; text-wrap: balance; text-shadow: 0 2px 28px rgb(0 0 0 / 0.6), 0 1px 3px rgb(0 0 0 / 0.45); }
+.intro-go { display: block; margin-top: 0.45em; font: 800 min(1.04em, 8.4vw)/1.05 var(--sans); letter-spacing: -0.025em; white-space: nowrap; }
+.intro-foot { display: flex; flex-direction: column; align-items: center; gap: 0.85rem; }
+.intro-dots { display: flex; gap: 0.4rem; }
+.intro-dots i { width: 1.1rem; height: 2px; border-radius: 2px; background: rgb(255 255 255 / 0.28); transition: background 0.6s; }
+.intro-dots i.on { background: rgb(255 255 255 / 0.85); }
+.intro-skip { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; opacity: 0.62; text-shadow: 0 1px 8px rgb(0 0 0 / 0.6); }
+.intro.leaving { opacity: 0; transition: opacity 0.7s; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .intro { animation: fade 1.2s both; }
+  /* In, hold, out: each line breathes for exactly as long as it is on screen. */
+  .intro-line { animation: intro-line var(--hold) cubic-bezier(0.3, 0.1, 0.2, 1) both; }
+  .intro-line.last { animation-name: intro-stay; animation-duration: 1.3s; }
+  .intro-go { animation: intro-go 1.5s 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+}
+@keyframes intro-line { 0% { opacity: 0; transform: translateY(0.5em); filter: blur(6px); } 22% { opacity: 1; transform: none; filter: none; } 80% { opacity: 1; transform: none; filter: none; } 100% { opacity: 0; transform: translateY(-0.35em); filter: blur(4px); } }
+@keyframes intro-stay { from { opacity: 0; transform: translateY(0.5em); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes intro-go { from { opacity: 0; transform: translateY(0.4em) scale(0.96); letter-spacing: 0.04em; } to { opacity: 1; transform: none; letter-spacing: -0.02em; } }

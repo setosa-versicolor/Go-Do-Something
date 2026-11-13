@@ -7,6 +7,7 @@ const LOG = 'gds:log';
 const MODE = 'gds:mode';
 const START = 'gds:start';
 const THEME = 'gds:theme';
+const INTRO = 'gds:intro';
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -40,6 +41,10 @@ export const saveMode = (m: Mode) => write(MODE, m);
 /** The named area travel is measured from. A device location is never stored. */
 export const loadStart = (): string => read<string>(START, '');
 export const saveStart = (name: string) => write(START, name);
+
+/** Whether the first-visit introduction has been shown on this device. */
+export const seenIntro = (): boolean => read<boolean>(INTRO, false) === true;
+export const markIntroSeen = () => write(INTRO, true);
 
 export type Theme = 'auto' | 'light' | 'dark';
 export function loadTheme(): Theme {

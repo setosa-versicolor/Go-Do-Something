@@ -44,7 +44,10 @@ export interface Live {
   color: string;
 }
 
-export type Pose = 'mood' | 'time' | 'thinking' | 'results';
+export type Pose = 'mood' | 'time' | 'thinking' | 'results' | 'intro';
+
+/** How long the introduction's flyover takes, in seconds. The words over it are paced to match. */
+export const FLYOVER = 27;
 
 export interface Diorama {
   setSky(input: SkyInput): void;
@@ -1417,7 +1420,17 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     time: { tx: 0, ty: 0.75, tz: 0, theta: 0.3, phi: 1.36, r: 3.7 },
     thinking: { tx: 0, ty: 1.0, tz: 0, theta: 2.4, phi: 1.1, r: 11 },
     results: { tx: 0, ty: 1.0, tz: 0, theta: 0.5, phi: 0.98, r: 9 },
-  };
+    intro: { tx: 0, ty: 1.25, tz: -0.25, theta: 0.72, phi: 1.36, r: 7.2 },
+  };  // The flyover's waypoints. The last is the opening view, so the handover is seamless.
+  const FLIGHT: Rig[] = [
+    { tx: -1.9, ty: 1.5, tz: 0.5, theta: -1.7, phi: 1.3, r: 8.4 },
+    { tx: -1.0, ty: 1.15, tz: 0.75, theta: -1.0, phi: 1.33, r: 6.4 },
+    { tx: -0.25, ty: 0.85, tz: 0.5, theta: -0.35, phi: 1.38, r: 4.6 },
+    { tx: 0.05, ty: 0.6, tz: 0.1, theta: 0.22, phi: 1.44, r: 3.2 },
+    { tx: 0, ty: 1.25, tz: -0.25, theta: 0.72, phi: 1.36, r: 7.2 },
+  ];
+  let introFrom = 0;
+
   let pose: Pose = 'mood';
   let goal: Rig = { ...POSES.mood };
   const rig: Rig = { ...POSES.mood };
@@ -1641,7 +1654,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     clouds.forEach((c, i) => {
       c.position.x += (c.userData.speed as number) * dt * (calm ? 0 : 1);
       if (c.position.x > 18) c.position.x = -18;
-      c.visible = i < 4 + Math.round(wetNow * 8);
+      // Never fly through one: a cloud close to the camera is just a grey wall.
+      c.visible = i < 4 + Math.round(wetNow * 8) && c.position.distanceTo(camera.position) > 6;
     });
     cloudMat.opacity = 0.6 + wetNow * 0.35;
 
@@ -1769,7 +1783,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
 
     // Searchlights sweep; brighter after dark.
     for (const b of beams) {
-      b.g.visible = pose === 'mood' || pose === 'time';
+      b.g.visible = pose === 'mood' || pose === 'time' || pose === 'intro';
       b.cone.rotation.set(Math.sin(clock * 0.5 + b.i * 1.7) * 0.22, 0, Math.cos(clock * 0.4 + b.i * 2.3) * 0.22);
       (b.cone.material as THREE.MeshBasicMaterial).opacity = 0.05 + look.glow * 0.24;
     }
@@ -1792,14 +1806,35 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
 
     // Camera: ease toward the pose, plus whatever the person has dragged.
     if (pose === 'thinking' && !calm) spinning += dt * 0.9;
+    if (pose === 'intro' && !calm) {
+      // The introduction: one slow, scripted pass. In from the west, round past the causeway, low
+      // by the Capitol from across Lake Monona, then up and back to where the opening view rests.
+      // Real seconds, not animation ticks: on a slow phone the flight must still keep pace with the words.
+      const raw = Math.min(1, (now / 1000 - introFrom) / FLYOVER);
+      const t = raw * raw * (3 - 2 * raw); // ease in and out
+      const seg = Math.min(FLIGHT.length - 2, Math.floor(t * (FLIGHT.length - 1)));
+      const u = t * (FLIGHT.length - 1) - seg;
+      const key = (i: number) => FLIGHT[Math.max(0, Math.min(FLIGHT.length - 1, i))]!;
+      const along = (pick: (k: Rig) => number) => {
+        const [p0, p1, p2, p3] = [pick(key(seg - 1)), pick(key(seg)), pick(key(seg + 1)), pick(key(seg + 2))];
+        return 0.5 * (2 * p1 + (p2 - p0) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (3 * p1 - p0 - 3 * p2 + p3) * u * u * u);
+      };
+      rig.tx = along((k) => k.tx);
+      rig.ty = along((k) => k.ty);
+      rig.tz = along((k) => k.tz);
+      rig.theta = along((k) => k.theta);
+      rig.phi = along((k) => k.phi);
+      rig.r = along((k) => k.r);
+    }
     const base = pose === 'results' ? fitPins() : goal;
     const g = visit && clock < visit.until && pose !== 'thinking' ? { ...base, tx: visit.x, tz: visit.z, ty: 0.55, r: 3.4, phi: 1.12 } : base;
-    rig.tx += (g.tx - rig.tx) * ease;
-    rig.ty += (g.ty - rig.ty) * ease;
-    rig.tz += (g.tz - rig.tz) * ease;
-    rig.r += (g.r - rig.r) * ease;
-    rig.phi += (g.phi - rig.phi) * ease;
-    rig.theta += (g.theta + (pose === 'thinking' ? spinning : 0) - rig.theta) * ease;
+    const glide = pose === 'intro' && !calm ? 0 : ease;
+    rig.tx += (g.tx - rig.tx) * glide;
+    rig.ty += (g.ty - rig.ty) * glide;
+    rig.tz += (g.tz - rig.tz) * glide;
+    rig.r += (g.r - rig.r) * glide;
+    rig.phi += (g.phi - rig.phi) * glide;
+    rig.theta += (g.theta + (pose === 'thinking' ? spinning : 0) - rig.theta) * glide;
     const drift = calm ? 0 : Math.sin(clock * 0.12) * 0.07;
     const th = rig.theta + user.theta + drift;
     const ph = Math.max(0.35, Math.min(1.5, rig.phi + user.phi));
@@ -1880,7 +1915,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         rig.theta = ((rig.theta + Math.PI) % (Math.PI * 2)) - Math.PI;
         spinning = 0;
       }
-      balloon.visible = next === 'mood' || next === 'time';
+      balloon.visible = next === 'mood' || next === 'time' || next === 'intro';
+      if (next === 'intro') introFrom = performance.now() / 1000;
     },
     setPins(pins) {
       for (const b of beacons) {
@@ -1931,7 +1967,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         hit.position.y = 0.35;
         hit.userData.tap = () => say(s.label, new THREE.Vector3(s.east, 1.0, -s.north));
         g.add(cone, lamp, hit);
-        g.visible = pose === 'mood' || pose === 'time';
+        g.visible = pose === 'mood' || pose === 'time' || pose === 'intro';
         tappable.push(hit);
         scene.add(g);
         return { g, cone, hit, i };
