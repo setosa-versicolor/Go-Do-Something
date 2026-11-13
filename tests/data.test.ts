@@ -59,6 +59,15 @@ describe('the shape of the city', () => {
     expect(soggy).toEqual([]);
   });
 
+  it('leaves no road stopping short in open water', () => {
+    // A road that ends out in a lake, touching no other road, is a causeway with a piece missing.
+    const ends = shape.roads.flatMap((r, i) => [[r[1]!, r[2]!, i], [r[r.length - 2]!, r[r.length - 1]!, i]] as const);
+    const meets = (e: readonly [number, number, number]) =>
+      shape.roads.some((r, i) => i !== e[2] && r.some((_, k) => k % 2 === 1 && Math.hypot(r[k]! - e[0], r[k + 1]! - e[1]) < 0.011));
+    const adrift = ends.filter((e) => water(e[0], e[1]) < -0.02 && !meets(e)).map((e) => [e[0], e[1]]);
+    expect(adrift).toEqual([]);
+  });
+
   it('puts landmarks on land', () => {
     const soggy = shape.landmarks.filter((m) => m.kind !== 'woods' && water(m.east, m.north) < -0.05).map((m) => m.name);
     expect(soggy).toEqual([]);
