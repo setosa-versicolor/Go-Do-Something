@@ -1,4 +1,4 @@
-# Do Something Madison
+# Do Something · Madison
 
 > You have a free evening. Make the most of it.
 
