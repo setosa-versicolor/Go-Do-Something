@@ -1774,8 +1774,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       skyUniforms.horizon.value.copy(look.horizon);
       (scene.fog as THREE.Fog).color.copy(look.horizon);
       // In fog the haze that normally starts miles off closes in: downtown stays, the far shores go.
-      (scene.fog as THREE.Fog).near = 11 - fogNow * 10;
-      (scene.fog as THREE.Fog).far = 44 - fogNow * 31;
+      (scene.fog as THREE.Fog).near = 11 - fogNow * 8;
+      (scene.fog as THREE.Fog).far = 44 - fogNow * 22;
       // Rain, as far as the ground is concerned: wet streets and a roughened lake. Snow is neither.
       const raining = sky.snowing ? 0 : Math.max(0, Math.min(1, (wetNow - 0.3) / 0.5));
       waterUniforms.chop.value = raining * (0.5 + stormNow * 0.5);
