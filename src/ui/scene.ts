@@ -148,28 +148,57 @@ function seeded(seed: number): () => number {
 const flat = (color: string, extra: THREE.MeshLambertMaterialParameters = {}) => new THREE.MeshLambertMaterial({ color, flatShading: true, ...extra });
 const unseen = () => new THREE.MeshBasicMaterial({ visible: false });
 
-/** Flat strips along polylines given as [east, north, …]: roads, shores, the river. */
+/**
+ * Flat strips along polylines given as [east, north, …]: roads, shores, the river.
+ * Each line is one piece: its sides turn the corner together at every bend, so a
+ * curve reads as a curve and not as a row of overlapping planks.
+ */
 function ribbons(lines: { points: number[]; width: number }[], y: number): THREE.BufferGeometry {
   const pos: number[] = [];
   for (const { points, width } of lines) {
-    for (let i = 0; i + 3 < points.length; i += 2) {
-      const ax = points[i]!;
-      const az = -points[i + 1]!;
-      const bx = points[i + 2]!;
-      const bz = -points[i + 3]!;
-      const len = Math.hypot(bx - ax, bz - az);
-      if (len < 1e-4) continue;
-      const ux = (bx - ax) / len;
-      const uz = (bz - az) / len;
-      const h = width / 2;
-      // Run a little past each end so bends don't show gaps.
-      const sx = ax - ux * h;
-      const sz = az - uz * h;
-      const ex = bx + ux * h;
-      const ez = bz + uz * h;
-      const nx = -uz * h;
-      const nz = ux * h;
-      pos.push(sx + nx, y, sz + nz, ex + nx, y, ez + nz, sx - nx, y, sz - nz, ex + nx, y, ez + nz, ex - nx, y, ez - nz, sx - nx, y, sz - nz);
+    // Drop repeated points, then work in the scene's x and z.
+    const xs: number[] = [];
+    const zs: number[] = [];
+    for (let i = 0; i + 1 < points.length; i += 2) {
+      const x = points[i]!;
+      const z = -points[i + 1]!;
+      const n = xs.length;
+      if (n && Math.hypot(x - xs[n - 1]!, z - zs[n - 1]!) < 1e-4) continue;
+      xs.push(x);
+      zs.push(z);
+    }
+    const n = xs.length;
+    if (n < 2) continue;
+    const h = width / 2;
+    const left: number[] = [];
+    const right: number[] = [];
+    for (let i = 0; i < n; i++) {
+      // The directions of the segments into and out of this point.
+      const a = Math.max(0, i - 1);
+      const b = Math.min(n - 1, i + 1);
+      const inLen = Math.hypot(xs[i]! - xs[a]!, zs[i]! - zs[a]!) || 1;
+      const outLen = Math.hypot(xs[b]! - xs[i]!, zs[b]! - zs[i]!) || 1;
+      const ix = i === 0 ? (xs[b]! - xs[i]!) / outLen : (xs[i]! - xs[a]!) / inLen;
+      const iz = i === 0 ? (zs[b]! - zs[i]!) / outLen : (zs[i]! - zs[a]!) / inLen;
+      const ox = i === n - 1 ? ix : (xs[b]! - xs[i]!) / outLen;
+      const oz = i === n - 1 ? iz : (zs[b]! - zs[i]!) / outLen;
+      // The side vector halfway between the two, lengthened so the strip keeps its width round the bend.
+      let mx = -(iz + oz);
+      let mz = ix + ox;
+      const ml = Math.hypot(mx, mz) || 1;
+      mx /= ml;
+      mz /= ml;
+      const reach = h / Math.max(0.5, mx * -iz + mz * ix);
+      // Run a little past each end so pieces that meet at a junction don't show gaps.
+      const px = xs[i]! + (i === 0 ? -ix * h : i === n - 1 ? ox * h : 0);
+      const pz = zs[i]! + (i === 0 ? -iz * h : i === n - 1 ? oz * h : 0);
+      left.push(px + mx * reach, pz + mz * reach);
+      right.push(px - mx * reach, pz - mz * reach);
+    }
+    for (let i = 0; i + 1 < n; i++) {
+      const [lx, lz, mx, mz] = [left[i * 2]!, left[i * 2 + 1]!, left[i * 2 + 2]!, left[i * 2 + 3]!];
+      const [rx, rz, sx, sz] = [right[i * 2]!, right[i * 2 + 1]!, right[i * 2 + 2]!, right[i * 2 + 3]!];
+      pos.push(lx, y, lz, mx, y, mz, rx, y, rz, mx, y, mz, sx, y, sz, rx, y, rz);
     }
   }
   const g = new THREE.BufferGeometry();
@@ -448,10 +477,42 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   scene.add(new THREE.Mesh(ribbons(shape.rivers.map((points) => ({ points, width: 0.045 })), 0.011), waterMat));
 
   // Roads: pale by day, amber threads at night.
-  // Round the corners off the simplified road lines (two passes of corner-cutting), so a causeway curves instead of kinking.
-  const roads = shape.roads.map((r) => {
-    let pts = r.slice(1);
-    for (let pass = 0; pass < 2 && pts.length >= 6; pass++) {
+  // Round the corners off the simplified road lines (three passes of corner-cutting), so a causeway curves instead of kinking.
+  // The map hands a road over in short pieces. Join the pieces end to end first,
+  // wherever exactly two of the same kind meet, so the rounding carries through the joins.
+  const ways = shape.roads.map((r) => ({ kind: r[0]!, pts: r.slice(1), gone: false }));
+  const tip = (w: { pts: number[] }, tail: boolean): [number, number] => (tail ? [w.pts[w.pts.length - 2]!, w.pts[w.pts.length - 1]!] : [w.pts[0]!, w.pts[1]!]);
+  const flip = (pts: number[]) => {
+    const out: number[] = [];
+    for (let i = pts.length - 2; i >= 0; i -= 2) out.push(pts[i]!, pts[i + 1]!);
+    return out;
+  };
+  for (const w of ways) {
+    for (let tail = 0; tail < 2; tail++) {
+      for (let guard = 0; guard < 400 && !w.gone; guard++) {
+        const [x, y] = tip(w, tail === 1);
+        // Every other end that arrives at this spot.
+        const here: { o: (typeof ways)[number]; tail: boolean }[] = [];
+        for (const o of ways) {
+          if (o === w || o.gone) continue;
+          for (const t of [false, true]) {
+            const [ox, oy] = tip(o, t);
+            if (Math.hypot(ox - x, oy - y) < 0.015) here.push({ o, tail: t });
+          }
+        }
+        if (here.length !== 1 || here[0]!.o.kind !== w.kind) break;
+        const { o, tail: oTail } = here[0]!;
+        // Line the other piece up so it carries on from this end, and drop its first point: it is this one.
+        const more = (tail === 1) === oTail ? flip(o.pts) : o.pts;
+        w.pts = tail === 1 ? [...w.pts, ...more.slice(2)] : [...more.slice(0, -2), ...w.pts];
+        o.gone = true;
+      }
+    }
+  }
+  const roads = ways.filter((w) => !w.gone).map((w) => {
+    const r = [w.kind, ...w.pts];
+    let pts = w.pts;
+    for (let pass = 0; pass < 3 && pts.length >= 6; pass++) {
       const out = [pts[0]!, pts[1]!];
       for (let i = 0; i + 3 < pts.length; i += 2) {
         const [ax, ay, bx, by] = [pts[i]!, pts[i + 1]!, pts[i + 2]!, pts[i + 3]!];
@@ -470,6 +531,12 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   const onWater: { points: number[]; width: number }[] = [];
   for (const r of roads) {
     const width = r[0] === 2 ? 0.05 : 0.032;
+    // One strip for each unbroken stretch over land or over water, not one for each short step.
+    let run: number[] = [];
+    let afloat = false;
+    const close = () => {
+      if (run.length >= 4) (afloat ? onWater : onLand).push({ points: run, width });
+    };
     for (let i = 1; i + 3 < r.length; i += 2) {
       const ax = r[i]!;
       const ay = r[i + 1]!;
@@ -478,9 +545,17 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       const steps = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 0.06));
       for (let k = 0; k < steps; k++) {
         const p = [ax + ((bx - ax) * k) / steps, ay + ((by - ay) * k) / steps, ax + ((bx - ax) * (k + 1)) / steps, ay + ((by - ay) * (k + 1)) / steps];
-        (wet((p[0]! + p[2]!) / 2, (p[1]! + p[3]!) / 2, -0.012) ? onWater : onLand).push({ points: p, width });
+        const over = wet((p[0]! + p[2]!) / 2, (p[1]! + p[3]!) / 2, -0.012);
+        if (run.length && over !== afloat) {
+          close();
+          run = [];
+        }
+        if (!run.length) run.push(p[0]!, p[1]!);
+        run.push(p[2]!, p[3]!);
+        afloat = over;
       }
     }
+    close();
   }
   scene.add(new THREE.Mesh(ribbons(onLand, 0.02), roadMat));
   scene.add(new THREE.Mesh(ribbons(onWater.map((w) => ({ points: w.points, width: w.width + 0.035 })), 0.026), bankMat));
