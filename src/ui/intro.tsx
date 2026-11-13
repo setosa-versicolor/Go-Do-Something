@@ -16,8 +16,10 @@ const LINES: [text: string, seconds: number][] = [
   ['Pick one of the three', 7],
 ];
 
-export function Intro({ onDone }: { onDone: () => void }) {
+export function Intro({ ready, onDone }: { ready: boolean; onDone: () => void }) {
   const [i, setI] = useState(0);
+  // The words wait for the model, then give it a moment to fade in before the first one.
+  const [started, setStarted] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -28,9 +30,16 @@ export function Intro({ onDone }: { onDone: () => void }) {
   };
 
   useEffect(() => {
+    if (!ready || started) return;
+    const t = setTimeout(() => setStarted(true), calm ? 0 : 1100);
+    return () => clearTimeout(t);
+  }, [ready]);
+
+  useEffect(() => {
+    if (!started) return;
     const t = setTimeout(() => (i < LINES.length - 1 ? setI(i + 1) : finish()), LINES[i]![1] * 1000);
     return () => clearTimeout(t);
-  }, [i]);
+  }, [i, started]);
 
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
@@ -53,8 +62,9 @@ export function Intro({ onDone }: { onDone: () => void }) {
   return (
     <button type="button" class={`intro${leaving ? ' leaving' : ''}`} onClick={finish} aria-label="Skip the introduction">
       <span class="intro-stage" aria-live="polite">
-        {!last && <span class="intro-line" key={i} style={{ '--hold': `${seconds}s` }}>{text}</span>}
-        {last && (
+        {!started && <span class="intro-wait" aria-label="Loading"><i /><i /><i /></span>}
+        {started && !last && <span class="intro-line" key={i} style={{ '--hold': `${seconds}s` }}>{text}</span>}
+        {started && last && (
           // The closing line is one sentence set in three beats: the thought, the turn, and the name.
           <span class="intro-line last" key="last">
             <span class="beat b1">{text}</span>
@@ -67,7 +77,7 @@ export function Intro({ onDone }: { onDone: () => void }) {
         )}
       </span>
       <span class="intro-foot" aria-hidden="true">
-        <span class="intro-dots">{LINES.map((_, n) => <i class={n <= i ? 'on' : ''} />)}</span>
+        <span class="intro-dots">{LINES.map((_, n) => <i class={started && n <= i ? 'on' : ''} />)}</span>
         <span class="intro-skip">Tap to skip</span>
       </span>
     </button>

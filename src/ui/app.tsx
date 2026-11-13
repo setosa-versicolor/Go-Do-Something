@@ -82,6 +82,14 @@ export function App() {
   // The introduction plays on the first visit, and again from the "?" button.
   const [intro, setIntro] = useState(() => !seenIntro() && !/^#\/p\//.test(location.hash));
   const [beams, setBeams] = useState(loadBeams);
+  // The introduction waits for the model to be drawn. If it never is (no WebGL), it starts anyway over the painted sky.
+  const [sceneReady, setSceneReady] = useState(false);
+  const [noScene, setNoScene] = useState(false);
+  useEffect(() => {
+    if (!intro || sceneReady) return;
+    const t = setTimeout(() => setNoScene(true), 6000);
+    return () => clearTimeout(t);
+  }, [intro, sceneReady]);
   const endIntro = () => { setIntro(false); markIntroSeen(); };
   const [vibe, setVibe] = useState('');
   const [vibeOpen, setVibeOpen] = useState(false);
@@ -344,7 +352,7 @@ export function App() {
   return (
     <div class={`page stage-${stage}${intro ? ' intro-on' : ''}`}>
       <header class={`sky ${sky.phase}${conditions.known && conditions.sky !== 'dry' ? ' grey' : ''}${results ? ' small' : ''}`}>
-        <Scene pose={intro ? 'intro' : stage} sky={skyInput} pins={pins} home={home} live={live} active={active} onPin={onPin} onBalloon={onBalloon} />
+        <Scene onReady={() => setSceneReady(true)} pose={intro ? (sceneReady ? 'intro' : 'mood') : stage} sky={skyInput} pins={pins} home={home} live={live} active={active} onPin={onPin} onBalloon={onBalloon} />
         <div class="orb" aria-hidden="true" style={{ left: `${10 + 80 * sky.progress}%`, top: `${62 - Math.sin(Math.PI * sky.progress) * 44}%` }} />
         <div class="sky-inner">
           <p class="brand">
@@ -365,7 +373,7 @@ export function App() {
         <svg class="shore" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true">
           <path d="M0 34 C 150 6, 300 58, 450 32 S 750 8, 900 34 S 1100 54, 1200 26 V60 H0 Z" />
         </svg>
-        {intro && <Intro onDone={endIntro} />}
+        {intro && <Intro ready={sceneReady || noScene} onDone={endIntro} />}
       </header>
 
       {stage === 'mood' && (
@@ -535,13 +543,15 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * The 3D model behind the header. Loaded on demand; if it can't start (no
  * WebGL, an old phone), nothing is rendered and the painted sky stays.
  */
-function Scene(props: { pose: Pose; sky: SkyInput; pins: Pin[]; home: { east: number; north: number } | null; live: Live[]; active: number | null; onPin: (i: number) => void; onBalloon: () => void }) {
+function Scene(props: { onReady?: () => void; pose: Pose; sky: SkyInput; pins: Pin[]; home: { east: number; north: number } | null; live: Live[]; active: number | null; onPin: (i: number) => void; onBalloon: () => void }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const model = useRef<Diorama | null>(null);
   const latest = useRef(props);
   latest.current = props;
   const [on, setOn] = useState(false);
   const [hint, setHint] = useState(true);
+  // Shown only once it has actually drawn, so nothing half-built ever flashes up.
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     let gone = false;
@@ -553,6 +563,7 @@ function Scene(props: { pose: Pose; sky: SkyInput; pins: Pin[]; home: { east: nu
           onPin: (i) => latest.current.onPin(i),
           onBalloon: () => latest.current.onBalloon(),
           onTouch: () => setHint(false),
+          onReady: () => { setReady(true); latest.current.onReady?.(); },
         }, calm);
         setOn(true);
       })
@@ -575,15 +586,15 @@ function Scene(props: { pose: Pose; sky: SkyInput; pins: Pin[]; home: { east: nu
   useEffect(() => model.current?.focus(props.active), [on, props.active]);
 
   return (
-    <div class={`scene${on ? ' on' : ''}`}>
+    <div class={`scene${ready ? ' on' : ''}`}>
       <canvas ref={canvas} aria-label="A small model of Madison under the current sky. Decorative; everything it does is also available below." />
-      {on && (
+      {ready && (
         <div class="scene-zoom">
           <button type="button" aria-label="Zoom in" onClick={() => model.current?.zoom(0.7)}>+</button>
           <button type="button" aria-label="Zoom out" onClick={() => model.current?.zoom(1 / 0.7)}>−</button>
         </div>
       )}
-      {on && hint && <span class="scene-hint">{props.live.length ? 'Drag to look. Tap a beam to see what’s on tonight.' : 'Drag to look around. Tap things.'}</span>}
+      {ready && hint && <span class="scene-hint">{props.live.length ? 'Drag to look. Tap a beam to see what’s on tonight.' : 'Drag to look around. Tap things.'}</span>}
     </div>
   );
 }

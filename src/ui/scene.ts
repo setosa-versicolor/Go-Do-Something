@@ -66,6 +66,8 @@ interface Callbacks {
   onPin(index: number): void;
   onBalloon(): void;
   onTouch(): void;
+  /** The first frames are on screen: shaders compiled, the town drawn. */
+  onReady?(): void;
 }
 
 /** Labels sit on their own layer, drawn after the lens blur so they are always sharp. */
@@ -1877,7 +1879,10 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       camera.layers.enableAll();
       renderer.render(scene, camera);
     }
+    // A few frames in, the expensive first draw (shader compiles, uploads) is behind us.
+    if (++drawn === 4) cb.onReady?.();
   };
+  let drawn = 0;
   raf = requestAnimationFrame(frame);
 
   // ------------------------------------------------------------ the handle
