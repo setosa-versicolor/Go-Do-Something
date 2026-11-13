@@ -19,6 +19,8 @@ export interface SkyInput {
   /** 0 clear … 1 pouring. */
   wet: number;
   snowing: boolean;
+  /** Thunder and lightning. */
+  storm: boolean;
   /** Snow on the ground, inches. */
   snowIn: number;
   /** Cold enough, late enough in the year, for ice. */
@@ -109,7 +111,7 @@ export function elevation(time: number, sunrise: number, sunset: number): { e: n
   return { e: -Math.min(1, Math.min(sinceSet, untilRise) / (1.5 * HOUR)), p: sinceSet < untilRise ? 1 : 0 };
 }
 
-function lookAt(e: number, wet: number): Look {
+function lookAt(e: number, wet: number, storm = 0): Look {
   let i = 0;
   while (i < KEYS.length - 2 && e > KEYS[i + 1]![0]) i++;
   const a = KEYS[i]!;
@@ -128,6 +130,15 @@ function lookAt(e: number, wet: number): Look {
     look.horizon.lerp(grey.clone().multiplyScalar(1.15), wet * 0.75);
     look.sun *= 1 - wet * 0.55;
     look.stars *= 1 - wet;
+  }
+  if (storm > 0) {
+    // A thunderstorm: the sky goes to slate and the afternoon to dusk.
+    const slate = new THREE.Color(e > 0 ? '#4d555f' : '#12151f');
+    look.top.lerp(slate, storm * 0.7);
+    look.horizon.lerp(slate.clone().multiplyScalar(1.3), storm * 0.6);
+    look.sun *= 1 - storm * 0.45;
+    look.ambient *= 1 - storm * 0.3;
+    look.glow = Math.max(look.glow, storm * 0.45);
   }
   return look;
 }
@@ -430,7 +441,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   // Lakes, on their real shorelines. The water is its own small shader: it
   // mirrors the sky, ripples, and catches the sun.
   const waterUniforms = {
-    time: { value: 0 }, frozen: { value: 0 }, snowy: { value: 0 }, glint: { value: 1 },
+    time: { value: 0 }, frozen: { value: 0 }, snowy: { value: 0 }, chop: { value: 0 }, glint: { value: 1 },
     deep: { value: new THREE.Color('#2a78a8') }, skyTop: { value: new THREE.Color() }, skyHorizon: { value: new THREE.Color() },
     body: { value: new THREE.Vector3(0, 1, 0) }, bodyColor: { value: new THREE.Color('#fff3c4') },
   };
@@ -441,9 +452,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       void main(){ vec4 w = modelMatrix * vec4(position, 1.0); wp = w.xyz; vec4 mvPosition = viewMatrix * w; gl_Position = projectionMatrix * mvPosition;
         #include <fog_vertex>
       }`,
-    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float glint; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; varying vec3 wp;
+    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float chop; uniform float glint; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; varying vec3 wp;
       #include <fog_pars_fragment>
-      void main(){ vec2 p = wp.xz; float amp = 0.0034 * (1.0 - frozen) * clamp(3.5 / length(cameraPosition - wp), 0.12, 1.0);
+      void main(){ vec2 p = wp.xz; float amp = 0.0034 * (1.0 + chop * 1.6) * (1.0 - frozen) * clamp(3.5 / length(cameraPosition - wp), 0.12, 1.0);
         float a = p.x * 9.0 + time * 1.1; float b = p.y * 11.0 - time * 0.9; float c2 = (p.x + p.y) * 17.0 + time * 1.7; float d2 = (p.x - p.y) * 31.0 - time * 2.3;
         vec3 n = normalize(vec3((cos(a) * 9.0 + cos(c2) * 8.5 + cos(d2) * 5.0) * amp, 1.0, (cos(b) * 11.0 + cos(c2) * 8.5 - cos(d2) * 5.0) * amp));
         vec3 v = normalize(cameraPosition - wp);
@@ -1386,8 +1397,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   }
   scene.add(flock);
 
-  // Weather: one cloud of particles reused for rain or snow.
-  const drops = 700;
+  // Weather: one cloud of particles, drawn as flakes for snow and as slanting streaks for rain.
+  const drops = 1400;
   const dropPos = new Float32Array(drops * 3);
   for (let i = 0; i < drops; i++) {
     dropPos[i * 3] = (rand() - 0.5) * 14;
@@ -1399,7 +1410,37 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   const dropMat = new THREE.PointsMaterial({ color: '#dfe8ef', size: 2, sizeAttenuation: false, transparent: true, opacity: 0 });
   const weather = new THREE.Points(dropGeo, dropMat);
   weather.frustumCulled = false;
-  scene.add(weather);
+  const streakPos = new Float32Array(drops * 6);
+  const streakGeo = new THREE.BufferGeometry();
+  streakGeo.setAttribute('position', new THREE.BufferAttribute(streakPos, 3));
+  const streakMat = new THREE.LineBasicMaterial({ color: '#c9d6e0', transparent: true, opacity: 0, depthWrite: false });
+  const rain = new THREE.LineSegments(streakGeo, streakMat);
+  rain.frustumCulled = false;
+  scene.add(weather, rain);
+
+  // Lightning: one bolt, redrawn somewhere new for each strike, and the flash it throws over the town.
+  const boltMat = new THREE.MeshBasicMaterial({ color: '#f4f1ff', fog: false, transparent: true, opacity: 0 });
+  const bolt = new THREE.Mesh(new THREE.BufferGeometry(), boltMat);
+  bolt.frustumCulled = false;
+  bolt.visible = false;
+  scene.add(bolt);
+  let flash = 0;
+  let nextStrike = 2.5;
+  const strike = (x: number, z: number) => {
+    // A crooked path from the cloud base to the ground, wandering less as it comes down.
+    const path: THREE.Vector3[] = [];
+    let px = x + (Math.random() - 0.5) * 1.6;
+    let pz = z + (Math.random() - 0.5) * 1.6;
+    for (let i = 0; i <= 9; i++) {
+      const y = 4.6 * (1 - i / 9);
+      path.push(new THREE.Vector3(px, y, pz));
+      px += (x - px) * 0.3 + (Math.random() - 0.5) * 0.8;
+      pz += (z - pz) * 0.3 + (Math.random() - 0.5) * 0.8;
+    }
+    bolt.geometry.dispose();
+    bolt.geometry = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(path, false, 'catmullrom', 0.05), 36, 0.022, 4);
+    flash = 1;
+  };
 
   // Tapping the center throws a little confetti.
   const sparkN = 120;
@@ -1661,6 +1702,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   let sky: SkyInput | null = null;
   const look: Look = lookAt(0.6, 0);
   let wetNow = 0;
+  let stormNow = 0;
   let last = performance.now();
   let clock = 0;
   let raf = 0;
@@ -1704,7 +1746,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       }
       const { e, p } = elevation(t, sky.sunrise, sky.sunset);
       wetNow += (sky.wet - wetNow) * ease;
-      const want = lookAt(e, wetNow);
+      stormNow += ((sky.storm ? 1 : 0) - stormNow) * ease;
+      const want = lookAt(e, wetNow, stormNow);
       const k = lapse > 0 ? 1 : ease;
       look.top.lerp(want.top, k);
       look.horizon.lerp(want.horizon, k);
@@ -1717,6 +1760,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       skyUniforms.top.value.copy(look.top);
       skyUniforms.horizon.value.copy(look.horizon);
       (scene.fog as THREE.Fog).color.copy(look.horizon);
+      // Rain, as far as the ground is concerned: wet streets and a roughened lake. Snow is neither.
+      const raining = sky.snowing ? 0 : Math.max(0, Math.min(1, (wetNow - 0.3) / 0.5));
+      waterUniforms.chop.value = raining * (0.5 + stormNow * 0.5);
       hemi.intensity = look.ambient * 1.7;
       hemi.color.copy(look.top).lerp(white, 0.55 - look.glow * 0.25);
       hemi.groundColor.set('#9a9c86').lerp(tmp.set('#2a3560'), look.glow * 0.8);
@@ -1727,8 +1773,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       marble.emissiveIntensity = look.glow * 0.55 + capitolPulse * 1.2;
       cityLights.uniforms.opacity.value = look.glow * (1 - wetNow * 0.3);
       traffic.uniforms.opacity.value = 0.35 + look.glow * 0.65;
-      roadMat.color.set(snowCover ? '#a9afb4' : '#d9d0bd').multiplyScalar(0.3 + 0.7 * Math.min(1, look.ambient)).lerp(tmp.set('#6b4a2c'), look.glow * 0.8);
-      cloudMat.color.copy(look.horizon).lerp(white, e > 0.2 ? 0.75 : 0.25);
+      roadMat.color.set(snowCover ? '#a9afb4' : '#d9d0bd').lerp(tmp.set('#8d8a84'), raining * 0.75).multiplyScalar(0.3 + 0.7 * Math.min(1, look.ambient)).lerp(tmp.set('#6b4a2c'), look.glow * 0.8);
+      cloudMat.color.copy(look.horizon).lerp(white, (e > 0.2 ? 0.75 : 0.25) * (1 - stormNow * 0.8));
 
       // The sun crosses the far (north-western) sky so it sets where Madison watches it set: over the big lake.
       const up = e > -0.08;
@@ -1760,19 +1806,65 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       const summer = sky.month >= 6 && sky.month <= 8 && lapse === 0;
       fireflies.uniforms.opacity.value += ((summer && e < -0.15 && sky.wet < 0.3 ? 0.9 : 0) - fireflies.uniforms.opacity.value) * ease;
 
-      // Weather.
-      dropMat.opacity += ((sky.wet > 0.3 ? 0.75 : 0) - dropMat.opacity) * ease;
-      if (dropMat.opacity > 0.02) {
-        const fall = sky.snowing ? 0.9 : 7;
-        for (let i = 0; i < drops; i++) {
+      // Weather. Snow drifts down as flakes; rain comes as streaks, more of them and more aslant the harder it blows.
+      const falling = sky.wet > 0.3;
+      dropMat.opacity += ((falling && sky.snowing ? 0.75 : 0) - dropMat.opacity) * ease;
+      streakMat.opacity += ((falling && !sky.snowing ? 0.3 + sky.wet * 0.25 : 0) - streakMat.opacity) * ease;
+      const live = sky.snowing ? 700 : Math.round(drops * (sky.storm ? 1 : sky.wet > 0.6 ? 0.65 : 0.3));
+      const snowOn = dropMat.opacity > 0.02;
+      const rainOn = streakMat.opacity > 0.02;
+      weather.visible = snowOn;
+      rain.visible = rainOn;
+      if (snowOn || rainOn) {
+        const fall = sky.snowing ? 0.9 : 7 + stormNow * 3;
+        const wind = sky.snowing ? 0 : 0.12 + stormNow * 0.3;
+        const len = 0.16 + stormNow * 0.1;
+        for (let i = 0; i < live; i++) {
+          let x = dropPos[i * 3]! + (sky.snowing ? Math.sin(clock * 1.3 + i) * 0.25 : wind * fall) * dt;
           let y = dropPos[i * 3 + 1]! - fall * dt;
-          if (sky.snowing) dropPos[i * 3] = dropPos[i * 3]! + Math.sin(clock * 1.3 + i) * dt * 0.25;
           if (y < 0) y = 6;
+          if (x > 7) x -= 14;
+          dropPos[i * 3] = x;
           dropPos[i * 3 + 1] = y;
+          if (rainOn) {
+            const z = dropPos[i * 3 + 2]!;
+            streakPos.set([x, y, z, x - wind * len, y + len, z], i * 6);
+          }
         }
-        dropGeo.attributes.position!.needsUpdate = true;
-        dropMat.size = sky.snowing ? 3 : 1.6;
-        weather.position.set(rig.tx, 0, rig.tz);
+        if (snowOn) {
+          dropGeo.setDrawRange(0, live);
+          dropGeo.attributes.position!.needsUpdate = true;
+          dropMat.size = 3;
+          weather.position.set(rig.tx, 0, rig.tz);
+        }
+        if (rainOn) {
+          streakGeo.setDrawRange(0, live * 2);
+          streakGeo.attributes.position!.needsUpdate = true;
+          rain.position.set(rig.tx, 0, rig.tz);
+        }
+      }
+
+      // Lightning, every several seconds while it storms: a bolt somewhere over town and one soft
+      // flash that fades in under half a second. With reduced motion there is none.
+      if (sky.storm && !calm && lapse === 0) {
+        nextStrike -= dt;
+        if (nextStrike <= 0) {
+          nextStrike = 5 + Math.random() * 8;
+          const a = Math.random() * Math.PI * 2;
+          const r = 1.5 + Math.random() * 4;
+          strike(rig.tx + Math.cos(a) * r, rig.tz - 1.5 + Math.sin(a) * r);
+        }
+      }
+      flash = flash > 0.01 ? flash * Math.exp(-dt * 7) : 0;
+      bolt.visible = flash > 0.25;
+      boltMat.opacity = Math.min(1, flash * 1.6);
+      if (flash > 0) {
+        const pale = tmp.set('#c9cff0');
+        hemi.intensity += flash * 0.9;
+        skyUniforms.top.value.lerp(pale, flash * 0.35);
+        skyUniforms.horizon.value.lerp(pale, flash * 0.45);
+        (scene.fog as THREE.Fog).color.lerp(pale, flash * 0.45);
+        cloudMat.color.lerp(pale, flash * 0.5);
       }
     }
 
@@ -2039,7 +2131,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       dress(input.month, snow);
       isFrozen = input.frozen;
       for (const b of boats) {
-        b.sail.visible = b.hull.visible = !input.frozen;
+        // Nobody sails on ice, or under lightning.
+        b.sail.visible = b.hull.visible = !input.frozen && !input.storm;
         b.shanty.visible = input.frozen;
         if (input.frozen) b.speed = 0;
       }

@@ -48,10 +48,10 @@ const THINKING = ["Checking what's open…", 'Looking at the sky…', 'Leaving o
 const COUNT = ['Nothing', 'One', 'Two', 'Three'];
 /** `?weather=snow` (or rain, storm, clear) dresses the model for weather we aren't having, to look at it. The picks still use the real forecast. */
 const PREVIEW: Record<string, Partial<SkyInput>> = {
-  snow: { wet: 0.85, snowing: true, snowIn: 4, frozen: true },
-  rain: { wet: 0.85, snowing: false, snowIn: 0, frozen: false },
-  storm: { wet: 1, snowing: false, snowIn: 0, frozen: false },
-  clear: { wet: 0, snowing: false, snowIn: 0, frozen: false },
+  snow: { wet: 0.85, snowing: true, storm: false, snowIn: 4, frozen: true },
+  rain: { wet: 0.85, snowing: false, storm: false, snowIn: 0, frozen: false },
+  storm: { wet: 1, snowing: false, storm: true, snowIn: 0, frozen: false },
+  clear: { wet: 0, snowing: false, storm: false, snowIn: 0, frozen: false },
 };
 const PIN_COLOR: Record<string, string> = { outdoors: '#2fa58a', consume: '#e08a3c', mind: '#8a6fd0', lively: '#e0567a' };
 
@@ -323,7 +323,7 @@ export function App() {
   const skyInput: SkyInput = {
     time: skyTime, sunrise: sun.sunrise, sunset: sun.sunset,
     wet: !conditions.known ? 0 : { dry: 0, damp: 0.45, wet: 0.85, storm: 1 }[conditions.sky],
-    snowing: /snow|flurr/.test(conditions.summary), snowIn: conditions.known ? conditions.snowIn : 0,
+    snowing: /snow|flurr/.test(conditions.summary), storm: conditions.known && conditions.sky === 'storm', snowIn: conditions.known ? conditions.snowIn : 0,
     // The lakes hold ice from about the turn of the year into March; a November snow falls on open water.
     frozen: conditions.known && conditions.tempF < 33 && (local.mo === 12 || local.mo <= 3), month: local.mo,
     ...PREVIEW[preview ?? ''],
@@ -588,7 +588,7 @@ function Scene(props: { onReady?: () => void; pose: Pose; sky: SkyInput; pins: P
   }, []);
 
   const s = props.sky;
-  useEffect(() => model.current?.setSky(s), [on, Math.round(s.time / 60_000), s.wet, s.snowing, s.frozen, Math.round(s.snowIn), s.month]);
+  useEffect(() => model.current?.setSky(s), [on, Math.round(s.time / 60_000), s.wet, s.snowing, s.storm, s.frozen, Math.round(s.snowIn), s.month]);
   useEffect(() => model.current?.setPose(props.pose), [on, props.pose]);
   useEffect(() => model.current?.setPins(props.pins), [on, props.pins.map((p) => `${p.east.toFixed(3)},${p.north.toFixed(3)}`).join('|')]);
   useEffect(() => model.current?.setHome(props.home), [on, props.home ? `${props.home.east.toFixed(3)},${props.home.north.toFixed(3)}` : '']);
