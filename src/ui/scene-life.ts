@@ -278,7 +278,7 @@ export function addLife(ctx: LifeContext): Life {
       head.position.set(x, 0.2, z);
       head.lookAt(stadium.east, 0.12, -stadium.north);
       masts.add(mast, head);
-      floods.push({ x, y: 0.205, z, color: '#fff6e0', size: 0.11 });
+      floods.push({ x, y: 0.205, z, color: '#fff6e0', size: 0.06 });
     }
     scene.add(masts);
     // People walking in from four sides, as a thin stream of red.
@@ -488,7 +488,7 @@ export function addLife(ctx: LifeContext): Life {
       stands.points.visible = masts.visible = march.points.visible = lamps.points.visible = sparkle.points.visible = game > 0.02;
       if (game > 0.02) {
         stands.uniforms.opacity.value = game * (0.5 + 0.5 * Math.max(day, glow * 0.8));
-        lamps.uniforms.opacity.value = game * (0.35 + 0.65 * glow);
+        lamps.uniforms.opacity.value = game * (0.3 + 0.4 * glow);
         sparkle.uniforms.opacity.value = game * glow;
         marchers.forEach((m, i) => {
           m.t = (m.t + m.pace * dt * (calm ? 0 : 1)) % 1;
@@ -501,12 +501,12 @@ export function addLife(ctx: LifeContext): Life {
         march.uniforms.opacity.value = game * (0.45 + 0.55 * day);
       }
       hall.points.visible = on.arena > 0.02;
-      hall.uniforms.opacity.value = on.arena * (0.08 + 0.34 * glow);
+      hall.uniforms.opacity.value = on.arena * (0.06 + 0.24 * glow);
 
       // The dome is lit every night; the coloured lights only around the holidays.
-      halo.uniforms.opacity.value = glow * 0.28 * (1 - wetNow * 0.4);
+      halo.uniforms.opacity.value = glow * 0.2 * (1 - wetNow * 0.4);
       lights.points.visible = on.holiday > 0.02;
-      lights.uniforms.opacity.value = on.holiday * (0.15 + 0.85 * glow);
+      lights.uniforms.opacity.value = on.holiday * (0.12 + 0.6 * glow);
 
       // Northern lights: low in the north, after dark, when the sky is open.
       const night = Math.max(0, Math.min(1, -e * 2.5));
