@@ -2125,7 +2125,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         const sweep = Math.min(9, Math.abs(b.g.rotation.y - was.turn) / dt);
         const fx = Math.sin(b.g.rotation.y);
         const fz = Math.cos(b.g.rotation.y);
-        const slow = way * 0.5;
+        const slow = way * 0.36;
         const fast = sweep * 0.011;
         dabs.push({ x: b.g.position.x + fx * 0.1, z: b.g.position.z + fz * 0.1, slow, fast, cells: 0.03 * cellsPerMile });
         dabs.push({ x: b.g.position.x - fx * 0.1, z: b.g.position.z - fz * 0.1, slow: -slow * 0.85, fast: -fast, cells: 0.03 * cellsPerMile });
