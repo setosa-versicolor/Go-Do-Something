@@ -2,6 +2,7 @@ import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { city, places, shape } from '../cities/madison';
 import { loadEvents, SOURCES } from '../core/events';
+import { fetchLive, headline, type Live as LiveNow } from '../core/live';
 import { loadNearby } from '../core/nearby';
 import { directionsUrl, miles, offsetMiles, travelLabel, type LatLng, type Mode } from '../core/geo';
 import { append, MAX_SAVED, pendingCheckIn, summarize, type Entry, type Verb } from '../core/history';
@@ -15,7 +16,7 @@ import type { Diorama, Live, Pin, Pose, SkyInput } from './scene';
 import { partOfDay, skyAt } from './sky';
 import { Intro } from './intro';
 import { VibeIcon, vibeLabel, VibeSheet } from './vibe';
-import { forgetEverything, loadLog, loadBeams, loadMode, loadStart, loadTheme, markIntroSeen, saveLog, saveBeams, saveMode, saveStart, saveTheme, seenIntro, type Theme } from './store';
+import { forgetEverything, loadForecast, loadLog, loadBeams, loadMode, loadStart, loadTheme, markIntroSeen, saveForecast, saveLog, saveBeams, saveMode, saveStart, saveTheme, seenIntro, type Theme } from './store';
 
 const tz = city.tz;
 
@@ -122,6 +123,7 @@ export function App() {
   const [shared, setShared] = useState<string | null>(() => /^#\/p\/(.+)$/.exec(location.hash)?.[1] ?? null);
 
   const weather = useRef<Weather | null>(null);
+  const liveNow = useRef<LiveNow | null>(null);
   const events = useRef<Option[]>([]);
   const nearby = useRef<Option[]>([]);
   const loaded = useRef<Promise<unknown>>(Promise.resolve());
@@ -144,7 +146,21 @@ export function App() {
 
   // Look outside and at the calendar while the person is choosing.
   useEffect(() => {
-    const w = fetchWeather(city.center, Date.now()).then((x) => { weather.current = x; setWeatherTick((n) => n + 1); setWeatherIn(true); });
+    // A forecast from the last few minutes is still the forecast; one from the last few hours beats none at all.
+    const kept = loadForecast();
+    const age = kept ? Date.now() - kept.fetchedAt : Infinity;
+    const got = (x: Weather | null) => { weather.current = x; setWeatherTick((n) => n + 1); setWeatherIn(true); };
+    const ask = async () => {
+      const first = await fetchWeather(city.center, Date.now());
+      if (first) return first;
+      await new Promise((r) => setTimeout(r, 1200));
+      return fetchWeather(city.center, Date.now());
+    };
+    const w = age < 15 * MIN
+      ? Promise.resolve(got(kept))
+      : ask().then((x) => { if (x) saveForecast(x); got(x ?? (age < 6 * HOUR ? kept : null)); });
+    // Alerts, air and the like arrive when they arrive. Nothing waits for them.
+    fetchLive(city.center).then((x) => { liveNow.current = x; setWeatherTick((n) => n + 1); });
     const e = fetch('./events.json')
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => { events.current = loadEvents(json, Date.now()); setWeatherTick((n) => n + 1); })
@@ -156,7 +172,7 @@ export function App() {
     loaded.current = Promise.all([w, e, n]);
   }, []);
 
-  const world = (options: Option[], now: number) => ({ city, options, weather: weather.current, memory: summarize(logRef.current, options, now), fallback: nearby.current });
+  const world = (options: Option[], now: number) => ({ city, options, weather: weather.current, live: liveNow.current, memory: summarize(logRef.current, options, now), fallback: nearby.current });
 
   /** Ask the matcher. Everything the person chose is passed in, so nothing here reads stale state. */
   const ask = (q: { mood: string; text: string; duration: number; shuffles: number }) => {
@@ -369,6 +385,8 @@ export function App() {
   const checkIn = pendingCheckIn(log, now);
   const checkInPlace = checkIn ? byId(checkIn) ?? places.find((p) => p.id === checkIn) : undefined;
   const r = view?.result;
+  // The one thing worth knowing about right now, if there is one. Tapping it asks for exactly that.
+  const head = stage === 'mood' && !intro ? headline(now, weather.current, liveNow.current, sun, tz) : null;
   const moment = [
     results && view.req.start - view.req.now > 5 * MIN ? `${cap(fmtDay(view.req.start, view.req.now, tz))}, ${fmtTime(view.req.start, tz)}` : fmtTime(now, tz),
     conditions.known ? conditions.summary : null,
@@ -387,11 +405,14 @@ export function App() {
           </p>
           {stage === 'mood' && !intro && <button type="button" class="help" onClick={() => setIntro(true)} aria-label="How this works">?</button>}
           {stage === 'mood' && <h1>You have a free {part}.<em>Make the most of it.</em></h1>}
+          {head && (head.say
+            ? <button type="button" class="now" onClick={() => chooseMood(head.say!)}><b>Right now</b><span>{head.line}{'\u00a0'}<i aria-hidden="true">→</i></span></button>
+            : <p class="now" role="status"><b>Right now</b><span>{head.line}</span></p>)}
           {stage === 'time' && <h1>How long have you got?</h1>}
           {stage === 'thinking' && <h1 class="pulse" aria-live="polite">{THINKING[line]}</h1>}
           {results && r && (
             <h1>
-              {r.picks.length === 0 ? (/^Nothing close/.test(r.note ?? '') ? 'Nothing close enough.' : /Nothing on /.test(r.note ?? '') ? 'Nothing on just then.' : 'Nothing honest to offer.') : `${COUNT[r.picks.length]} for your ${partOfDay(toLocal(view.req.start, tz).h)}.`}
+              {r.picks.length === 0 ? (/Stay in\./.test(r.note ?? '') ? 'Not just now.' : /^Nothing close/.test(r.note ?? '') ? 'Nothing close enough.' : /Nothing on /.test(r.note ?? '') ? 'Nothing on just then.' : 'Nothing honest to offer.') : `${COUNT[r.picks.length]} for your ${partOfDay(toLocal(view.req.start, tz).h)}.`}
               <em>{view.label}</em>
             </h1>
           )}
@@ -493,6 +514,7 @@ export function App() {
 
       {results && r && (
         <main class="step" key="results" aria-live="polite">
+          {r.alert && <p class="note warn" role="status">{r.alert}</p>}
           {r.note && <p class="note">{r.note}</p>}
           {!r.conditions.known && r.picks.some((p) => p.option.setting === 'out') && (
             <p class="note quiet">I couldn't get the weather just now, so take the outdoor ideas with a look out the window.</p>

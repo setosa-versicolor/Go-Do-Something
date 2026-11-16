@@ -16,7 +16,9 @@ import { sunFor, type Sun } from './sun';
 import { DAY, HOUR, MIN, fmtTime, toLocal } from './time';
 import { GROUP, type Category, type City, type Mood, type Option } from './types';
 import { VIBES, vibeFit } from './vibes';
-import { conditionsFor, type Conditions, type Weather } from './weather';
+import { AIR, airFor, alertLine, warningFor, type Live } from './live';
+import { moonNearFull } from './moon';
+import { conditionsFor, skyLook, type Conditions, type Weather } from './weather';
 
 export interface Request {
   now: number;
@@ -38,6 +40,8 @@ export interface World {
   options: Option[];
   weather: Weather | null;
   memory: Memory;
+  /** Alerts, air and the like. Optional: without it nothing is claimed and nothing is ruled out. */
+  live?: Live | null;
   /** Unvouched places from the map. Only ever used to fill seats the main list couldn't. */
   fallback?: Option[];
 }
@@ -72,6 +76,8 @@ export interface Result {
   picks: Pick[];
   /** Said out loud when there are fewer than three, or we didn't follow. */
   note: string | null;
+  /** Something official about the weather or the air that shaped these picks. Always shown when set. */
+  alert: string | null;
   conditions: Conditions;
   sun: Sun;
   debug: { ranked: Pick[]; rejected: Rejection[] };
@@ -97,6 +103,9 @@ export const TUNING = {
   sameHood: 0.06,
   wildcardFloor: 0.55, // a left turn must still score this share of the top pick
   afterDark: 0.2, // a park or a trail once the light has gone, unless night is when it's best
+  windyMph: 12, // on the water, a steady wind from here up is work
+  tooWindyMph: 20, // …and from here up (or gusts half as strong again) the boats stay in
+  calmMph: 5, // a lake this still is worth saying out loud
   strongMoment: 0.3, // from here up, the moment is the reason; below it, the place's own line comes first
   closeMin: 6, // this near is worth saying out loud
   vouchGem: 0.85, // editorial weight from which "I'd vouch for it" is the reason
@@ -208,6 +217,17 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
     }
     if (opt.needs?.includes('warm') && conditions.feelsF < 66) return reject(id, 'weather', 'too cold for it');
     if (opt.needs?.includes('mild') && conditions.feelsF < 45) return reject(id, 'weather', 'too cold to enjoy');
+    if (opt.category === 'water' && ((conditions.windMph ?? 0) >= TUNING.tooWindyMph || (conditions.gustMph ?? 0) >= TUNING.tooWindyMph * 1.5)) {
+      return reject(id, 'weather', 'too windy for the water');
+    }
+  }
+  // Official warnings and bad air, for the time you'd be there. Anything with a roof is still fine.
+  const there = [begin, begin + Math.max(stayMin, 1) * MIN] as const;
+  const air = airFor(world.live, ...there);
+  if (opt.setting === 'out') {
+    const warn = warningFor(world.live, ...there);
+    if (warn) return reject(id, 'weather', `there's a ${warn.alert.event.toLowerCase()} out`);
+    if (air !== null && air >= AIR.bad) return reject(id, 'weather', 'the air is bad');
   }
 
   // ------------------------------------------------------------ stage 2: score
@@ -221,9 +241,14 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   const daylight = begin > sun.sunrise && begin < sun.sunset;
   const dryEnough = !conditions.known || conditions.sky === 'dry';
 
-  if (opt.best?.includes('sunset') && dryEnough && begin <= sun.sunset - 10 * MIN && end >= sun.sunset - 5 * MIN) {
+  // A sunset behind a solid deck of cloud is not a reason to go anywhere, so ask the forecast first.
+  const look = skyLook(world.weather, sun.sunset);
+  if (opt.best?.includes('sunset') && dryEnough && look !== 'hidden' && begin <= sun.sunset - 10 * MIN && end >= sun.sunset - 5 * MIN) {
     const spare = Math.round((sun.sunset - begin) / MIN);
-    moments.push({ score: 0.5, line: `Sunset is at ${fmtTime(sun.sunset, tz)}. You'd be there ${spare} minutes ahead of it.` });
+    const at = fmtTime(sun.sunset, tz);
+    if (look === 'colour') moments.push({ score: 0.6, line: `Sunset is at ${at}, and the forecast leaves high cloud for it to light up. You'd be there ${spare} minutes ahead.` });
+    else if (look === 'clear') moments.push({ score: 0.5, line: `Sunset is at ${at} under a clear sky. You'd be there ${spare} minutes ahead of it.` });
+    else moments.push({ score: look ? 0.35 : 0.5, line: `Sunset is at ${at}. You'd be there ${spare} minutes ahead of it.` });
   }
   if (opt.best?.includes('sunrise') && dryEnough && begin <= sun.sunrise + 10 * MIN && end >= sun.sunrise) {
     moments.push({ score: 0.5, line: `Sunrise is at ${fmtTime(sun.sunrise, tz)}. Almost nobody sees it from here. You could.` });
@@ -242,9 +267,19 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
       if (conditions.sky !== 'dry') moments.push({ score: 0.35, line: `It's ${conditions.summary.split(' and ')[1]}. This is where you wait it out.` });
       else if (conditions.feelsF < 25) moments.push({ score: 0.3, line: `It feels like ${feels}° out there. In here it doesn't.` });
     }
+    if (opt.category === 'water' && conditions.windMph !== null && conditions.sky === 'dry' && daylight) {
+      if (conditions.windMph <= TUNING.calmMph) moments.push({ score: 0.3, line: 'Hardly any wind right now. The lake will be flat.' });
+      else if (conditions.windMph >= TUNING.windyMph) parts.wind = -0.15;
+    }
+    // After dark, under a clear sky and a bright moon, a view or a shoreline is a different place.
+    const moonlit = !daylight && begin > sun.sunset + 45 * MIN && conditions.sky === 'dry' && moonNearFull(begin) && skyLook(world.weather, begin) === 'clear';
+    if (moonlit && outdoorsy && (opt.category === 'view' || opt.best?.includes('night') || opt.best?.includes('sunset'))) {
+      moments.push({ score: 0.3, line: 'The sky is clear and the moon is close to full. It will be bright out there.' });
+    }
     if (opt.setting === 'out' && conditions.sky === 'damp') parts.drizzle = -0.2;
     if (opt.setting === 'out' && conditions.feelsF < 25 && !opt.best?.includes('snow')) parts.cold = -0.2;
   }
+  if (opt.setting !== 'in' && air !== null && air >= AIR.poor) parts.air = opt.setting === 'out' ? -0.25 : -0.1;
   // A lawn or a trail is a lesser thing once you can't see it. Views, beer gardens and lit hills are not.
   const unlit = begin > sun.sunset + twilight || begin < sun.sunrise - twilight;
   if (unlit && opt.setting === 'out' && GROUP[opt.category] === 'outdoors' && opt.category !== 'view' && !opt.best?.includes('night')) parts.dark = -TUNING.afterDark;
@@ -507,8 +542,11 @@ function explain(c: Candidate, req: Request, world: World, used: Set<string>): s
   lines.push(...rotate(o.kind === 'event' ? EVENT_LINES : GROUP_LINES[GROUP[o.category]]!, o.id));
   lines.push(`It fits the time you have: about ${c.stayMin} minutes there, ${c.travelMin} each way.`);
   // One reason. Never a list.
-  const line = lines.find((l) => !used.has(l)) ?? '';
-  used.add(line);
+  // Two cards saying the same thing with different minutes in it are still saying the same thing.
+  // (Not so for events: the time each one starts is the point.)
+  const key = (l: string) => (o.kind === 'event' ? l : l.replace(/\d+/g, '#'));
+  const line = lines.find((l) => !used.has(key(l))) ?? '';
+  used.add(key(line));
   return c.wildcard ? `The left turn. ${line}` : line;
 }
 
@@ -559,7 +597,26 @@ function noteFor(picks: Candidate[], rejected: Rejection[], req: Request, world:
 
 // ---------------------------------------------------------------- the one entry point
 
+/** What to say above the picks when a warning or the air shaped them. */
+function alertFor(req: Request, world: World): string | null {
+  const from = req.start;
+  const to = req.start + req.durationMin * MIN;
+  const warn = warningFor(world.live, from, to);
+  if (warn) return `${alertLine(warn.alert, world.city.tz)} Nothing here needs you to be outdoors.`;
+  const air = airFor(world.live, from, to);
+  if (air !== null && air >= AIR.bad) return `The air is bad just now (index ${Math.round(air)}). Nothing here needs you to be outdoors.`;
+  if (air !== null && air >= AIR.poor) return `The air is hazy just now (index ${Math.round(air)}), so I've leaned away from outdoor ideas.`;
+  return null;
+}
+
 export function match(req: Request, world: World): Result {
+  const conditions = conditionsFor(world.weather, req.start, req.start + req.durationMin * MIN);
+  const sun = sunFor(req.start, world.city.center.lat, world.city.center.lng, world.city.tz);
+  // A tornado or a blizzard is not something to route around. Say so, and offer nothing.
+  const danger = warningFor(world.live, req.start, req.start + Math.min(req.durationMin, 120) * MIN);
+  if (danger?.level === 'shelter') {
+    return { picks: [], note: `${alertLine(danger.alert, world.city.tz)} Stay in. I'll have ideas when it lifts.`, alert: null, conditions, sun, debug: { ranked: [], rejected: [] } };
+  }
   const ranked: Candidate[] = [];
   const rejected: Rejection[] = [];
   for (const opt of world.options) {
@@ -606,8 +663,9 @@ export function match(req: Request, world: World): Result {
         ? 'Nothing on my own list fits from where you are, so these come from the map: open and nearby, but nobody has vouched for them.'
         : `Only ${own === 1 ? 'one' : 'two'} from my own list ${own === 1 ? 'fits' : 'fit'}, so the rest ${borrowed === 1 ? 'comes' : 'come'} from the map: open and nearby, but not vouched for.`
       : noteFor(picks, rejected, req, world),
-    conditions: conditionsFor(world.weather, req.start, req.start + req.durationMin * MIN),
-    sun: sunFor(req.start, world.city.center.lat, world.city.center.lng, world.city.tz),
+    alert: alertFor(req, world),
+    conditions,
+    sun,
     debug: { ranked: ranked.map(strip), rejected },
   };
 }

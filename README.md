@@ -25,6 +25,7 @@ A static site. No server, no database, no accounts, no API keys.
 | Places | `src/cities/madison/places.ts` | Hand-written. The content is the product. |
 | Events | `public/events.json` | Rebuilt every morning from public calendars. See "The events process". |
 | Weather | Open-Meteo, from the browser | Free, no key. Sunrise and sunset are computed locally. |
+| Live conditions | `src/core/live.ts`, from the browser | Weather Service alerts, air quality (Open-Meteo) and the K index (NOAA). Free, no keys. See "Right now". |
 | Matching | `src/core/match.ts` | One pure function. The only copy of the logic. |
 | Memory | `localStorage` | Stays on the device. Location is used in memory only and never stored. |
 | Deploy | `.github/workflows/deploy.yml` | GitHub Pages, on push to `main` and every morning (to refresh events). Cost: nothing. |
@@ -84,6 +85,25 @@ What the person types, taps or picks all goes through one parser (`src/core/inte
 
 It learns from a small on-device log (`src/core/history.ts`). Tapping Directions prompts a "Did you go?" check-in later; going and liking counts for much more than tapping.
 
+## Right now
+
+Beyond the hourly forecast, the app looks at what is going on outside at this moment. Every source is optional: a feed that fails is treated as unknown, and nothing is claimed or ruled out from it.
+
+| What | Where it comes from | What it does |
+| --- | --- | --- |
+| Cloud by layer | Open-Meteo forecast | A sunset is only given as a reason when the forecast leaves one to see. Low cloud or a solid deck: no mention. A clear horizon with cloud above it: "the forecast leaves high cloud for it to light up". |
+| Wind and gusts | Open-Meteo forecast | Boats and beaches are ruled out from 20 mph steady (or 30 in gusts), lean down the order from 12, and a still lake (5 or under) is said out loud. |
+| Moon | Computed locally (`src/core/moon.ts`) | A clear night within two days of full is a reason for a view or a shoreline. |
+| Weather alerts | api.weather.gov, for the city centre | Under a tornado, blizzard or ice storm warning nothing is offered at all. Under a lesser warning (severe thunderstorm, winter storm, extreme cold or heat, flash flood, high wind) nothing outdoors is, and the page says why above the picks. Watches and advisories change nothing. |
+| Air quality | Open-Meteo air quality | US index 151 and up rules out the outdoors; 101 to 150 leans away from it. Either way the page says so. |
+| K index | NOAA Space Weather Prediction Center | At 7 or more on a clear night, the opening screen says the northern lights may be visible. |
+
+The opening screen shows at most one "Right now" line under the headline (`headline()` in `live.ts`): a warning, bad air, the northern lights, rain or storms due within four hours, a sunset worth going to, snow falling, a fine day, a flat lake, or a moonlit night, in that order. On an ordinary day it shows nothing. Tapping it asks for exactly that, through the same parser as everything else.
+
+The last forecast is kept in local storage (it is the city's weather, not the person's). A reload within fifteen minutes doesn't ask again, a failed request is retried once, and if that fails too a forecast up to six hours old is used.
+
+`npm run explain -- "…" --weather` fetches all of this and prints the "right now" line and any alert alongside the picks.
+
 ## Trust in the data
 
 Past versions were wrong quietly. The rules now:
@@ -99,7 +119,9 @@ Past versions were wrong quietly. The rules now:
 - Coordinates are approximate (good to a few blocks). They're only used for travel estimates; directions search by name.
 - Travel times are straight-line estimates with a detour factor, not routing.
 - The target is 200+ places. Add them slowly.
-- Not built yet: itineraries, group decisions, live conditions (beach closures, ice).
+- Not built yet: itineraries, group decisions.
+- Live conditions cover the sky, the wind, the air and official warnings. Still missing: beach closures (the county's algae reports), lake ice, and whether the Terrace is actually open on a given day. Each needs a source scraped by the morning job, as events are.
+- The lakes' ice on the model is still a guess from the month and the temperature.
 
 ## The events process
 

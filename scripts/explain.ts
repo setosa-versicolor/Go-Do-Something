@@ -13,6 +13,7 @@ import { parseIntent, resolveStart } from '../src/core/intent';
 import { match, statusLine } from '../src/core/match';
 import type { Mode } from '../src/core/geo';
 import { fmtDay, fmtTime, parseLocalInput } from '../src/core/time';
+import { fetchLive, headline } from '../src/core/live';
 import { fetchWeather } from '../src/core/weather';
 
 const args = process.argv.slice(2);
@@ -39,13 +40,17 @@ try {
 }
 const options = [...places, ...events];
 const weather = useWeather ? await fetchWeather(city.center, Date.now()) : null;
+const live = useWeather ? await fetchLive(city.center) : null;
 const result = match(
   { now, start, durationMin: hours ? Number(hours) * 60 : intent.durationMin ?? 120, origin: city.center, mode, intent, seed },
-  { city, options, weather, memory: summarize([], options, now) },
+  { city, options, weather, live, memory: summarize([], options, now) },
 );
 
 console.log(`\n"${say}" — ${fmtDay(start, now, city.tz)} at ${fmtTime(start, city.tz)}, ${mode}, heard: [${intent.heard.join(', ')}]`);
 console.log(`weather: ${result.conditions.known ? result.conditions.summary : 'unknown'} · sunset ${fmtTime(result.sun.sunset, city.tz)}`);
+const head = headline(now, weather, live, result.sun, city.tz);
+if (head) console.log(`right now: ${head.line}${head.say ? ` [asks: ${head.say}]` : ''}`);
+if (result.alert) console.log(`alert: ${result.alert}`);
 if (result.note) console.log(`note: ${result.note}`);
 for (const p of result.picks) {
   console.log(`\n  ${p.wildcard ? '↯' : '•'} ${p.option.name} — ${p.option.what}`);

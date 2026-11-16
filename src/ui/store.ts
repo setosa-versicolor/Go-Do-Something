@@ -2,6 +2,7 @@
 
 import type { Entry } from '../core/history';
 import type { Mode } from '../core/geo';
+import type { Weather } from '../core/weather';
 
 const LOG = 'gds:log';
 const MODE = 'gds:mode';
@@ -9,6 +10,7 @@ const START = 'gds:start';
 const THEME = 'gds:theme';
 const INTRO = 'gds:intro';
 const BEAMS = 'gds:beams';
+const FORECAST = 'gds:forecast';
 
 function read<T>(key: string, fallback: T): T {
   try {
@@ -78,3 +80,15 @@ export function forgetEverything(): void {
     /* see above */
   }
 }
+
+/**
+ * The last forecast we got, kept so a reload doesn't ask again and a failed
+ * request doesn't leave the page blind. It is the city's weather, not the
+ * person's: nothing about them is in it.
+ */
+export function loadForecast(): Weather | null {
+  const w = read<Weather | null>(FORECAST, null);
+  const ok = w && typeof w.fetchedAt === 'number' && Array.isArray(w.hours) && w.hours.every((h) => h && typeof h.t === 'number' && typeof h.tempF === 'number');
+  return ok ? w : null;
+}
+export const saveForecast = (w: Weather) => write(FORECAST, w);
