@@ -78,3 +78,15 @@ describe('intent', () => {
     expect(resolveStart(parseIntent('tomorrow morning').start, late, TZ)).toBe(at(2026, 11, 12, 9));
   });
 });
+
+describe('asking to be outside', () => {
+  it('is heard as its own request, not only as a mood', () => {
+    expect(parseIntent('outside')).toMatchObject({ outside: true, inside: false });
+    expect(parseIntent('somewhere outdoors with friends').outside).toBe(true);
+    expect(parseIntent('a walk by the lake').outside).toBe(false);
+  });
+
+  it('cancels out when both are asked for at once', () => {
+    expect(parseIntent('inside or outside')).toMatchObject({ inside: false, outside: false });
+  });
+});
