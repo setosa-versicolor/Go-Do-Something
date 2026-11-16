@@ -20,6 +20,13 @@ export interface Intent {
   withKids: boolean;
   cheap: boolean;
   inside: boolean;
+  /** Asked to be outdoors, in so many words. A wall, like `inside`: nothing wholly indoors. */
+  outside: boolean;
+  /**
+   * Who's coming along, as moods. A lean only: it shades the order of what was
+   * asked for, and never lets in something that wasn't.
+   */
+  company?: Partial<Record<Mood, number>>;
   surprise: boolean;
   /** Only what is specifically on that day: dated events and markets. A wall, unlike moods. */
   today: boolean;
@@ -37,7 +44,7 @@ interface Entry {
   re: RegExp;
   moods?: Partial<Record<Mood, number>>;
   kinds?: Category[];
-  flag?: 'withKids' | 'cheap' | 'inside' | 'surprise' | 'today';
+  flag?: 'withKids' | 'cheap' | 'inside' | 'outside' | 'surprise' | 'today';
 }
 
 // Order doesn't matter; every entry is tried. Keep phrases human, not clever.
@@ -55,6 +62,7 @@ const LEXICON: Entry[] = [
   { re: /\b(outside|outdoors?|nature|fresh air|trees|woods|lake|water|park|sun(ny|shine)?|sunset|sunrise|birds?|stars)\b/, moods: { nature: 1 } },
   { re: /\b(rain(y|ing)?|cold|freezing|snow(y|ing)?|cozy|warm up|hide|shelter|gloomy|grey|gray)\b/, moods: { cozy: 1 } },
   { re: /\b(inside|indoors?|rain(y|ing)?|storm(y|ing)?)\b/, flag: 'inside' },
+  { re: /\b(outside|outdoors?|fresh air|open air|al fresco)\b/, flag: 'outside' },
   { re: /\b(friends?|group|people|music|live|show|concert|dance|loud|fun|party|social|celebrat\w+|birthday|crowd)\b/, moods: { lively: 1 } },
   { re: /\b(music|concert|band|jazz|show|comedy|theat(er|re)|film|movie|stage)\b/, moods: { lively: 1 }, kinds: ['music', 'show'] },
   { re: /\b(play|games?|arcade|pinball|bowling|mini ?golf|climb(ing)?)\b/, moods: { lively: 0.6, move: 0.5 }, kinds: ['play'] },
@@ -113,7 +121,7 @@ function parseStart(text: string, heard: string[]): StartHint | undefined {
 
 export function parseIntent(raw: string): Intent {
   const text = raw.toLowerCase().replace(/[’]/g, "'").trim();
-  const intent: Intent = { moods: {}, kinds: [], withKids: false, cheap: false, inside: false, surprise: false, today: false, heard: [], lost: false };
+  const intent: Intent = { moods: {}, kinds: [], withKids: false, cheap: false, inside: false, outside: false, surprise: false, today: false, heard: [], lost: false };
   for (const e of LEXICON) {
     const m = e.re.exec(text);
     if (!m) continue;
@@ -131,6 +139,8 @@ export function parseIntent(raw: string): Intent {
     intent.moods = {};
     intent.kinds = [];
   }
+  // Asking for both at once is a contradiction; trust neither as a wall.
+  if (intent.inside && intent.outside) intent.inside = intent.outside = false;
   intent.heard = [...new Set(intent.heard)];
   intent.lost = text.length > 0 && intent.heard.length === 0;
   return intent;

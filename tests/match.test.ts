@@ -374,3 +374,54 @@ describe('when everything that fits is too far', () => {
     expect(r.note).not.toMatch(/don't match what you asked for/);
   });
 });
+
+describe('a stretch: something that departs from the request, knowingly', () => {
+  const evening = at(2026, 11, 13, 18);
+  const lookout = option({ id: 'lookout', category: 'view', setting: 'out', moods: { nature: 1 } });
+  const concert = option({ id: 'concert', category: 'music', setting: 'in', moods: { lively: 1 }, gem: 1 });
+  const office = option({ id: 'office', category: 'museum', setting: 'in', moods: { learn: 1 } });
+  const ask = (company?: Record<string, number>, options = [concert, lookout, office]) => {
+    const req = request(evening, 'outside');
+    if (company) req.intent.company = company;
+    return match(req, world({ options }));
+  };
+
+  it('lets in what suits the company, but never first, and says so', () => {
+    const r = ask({ lively: 1 });
+    expect(ids(r)).toEqual(['lookout', 'concert']);
+    expect(r.picks[0]!.stretch).toBeUndefined();
+    expect(r.picks[1]!.stretch).toBe('indoors');
+    expect(r.picks[1]!.reason).toMatch(/^Not outdoors, I know\. /);
+    expect(r.picks[1]!.parts.stretch).toBeLessThan(0);
+  });
+
+  it('does not let company alone open the door when nobody is coming', () => {
+    expect(ids(ask())).toEqual(['lookout']);
+  });
+
+  it('never admits something that suits neither the ask nor the company', () => {
+    expect(ids(ask({ lively: 1 }))).not.toContain('office');
+  });
+
+  it('says plainly when every pick is a stretch', () => {
+    const r = ask({ lively: 1 }, [concert]);
+    expect(r.picks.map((p) => p.stretch)).toEqual(['indoors']);
+    expect(r.note).toMatch(/Nothing that is quite what you asked for fits right now/);
+  });
+
+  it('flags the same way when the words are typed as one sentence', () => {
+    const r = match(request(evening, 'outside with friends'), world({ options: [concert, lookout] }));
+    expect(ids(r)).toEqual(['lookout', 'concert']);
+    expect(r.picks[1]!.stretch).toBe('indoors');
+  });
+
+  it('marks a mismatch that is not about indoors as off the ask', () => {
+    const cafe = option({ id: 'cafe', category: 'cafe', setting: 'in', moods: { cozy: 1 } });
+    const req = request(evening, 'coffee');
+    req.intent.company = { lively: 1 };
+    const r = match(req, world({ options: [cafe, concert] }));
+    expect(ids(r)).toEqual(['cafe', 'concert']);
+    expect(r.picks[1]!.stretch).toBe('off');
+    expect(r.picks[1]!.reason).toMatch(/^Not quite what you asked for\. /);
+  });
+});
