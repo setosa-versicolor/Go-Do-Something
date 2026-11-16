@@ -65,8 +65,10 @@ const KINDS: { category: Category; label: string; re: RegExp; moods: Partial<Rec
   { category: 'show', label: 'Game', re: /\b(hockey|basketball|football|volleyball|soccer|baseball|roller derby|wrestling)\b/i, moods: { lively: 1, showoff: 0.6, kids: 0.6 } },
   { category: 'show', label: 'Film', re: /\b(film|screening|cinema|movie)\b/i, moods: { date: 0.6, cozy: 0.6, learn: 0.6 } },
   { category: 'show', label: 'Show', re: /\b(comedy|stand-?up|improv|theat(er|re)|dance|ballet|opera|burlesque|drag)\b/i, moods: { lively: 1, date: 0.6 } },
-  { category: 'music', label: 'DJ night', re: /\bdjs?\b/i, moods: { lively: 1, drink: 0.6 } },
-  { category: 'music', label: 'Live music', re: /\b(concert|band|jazz|blues|quartet|trio|symphony|orchestra|songwriter|open mic|recital|choir|bluegrass|folk)\b/i, moods: { lively: 1, date: 0.6 } },
+  // Nobody waits for the first act of an open mic or a jam: you turn up when you like.
+  { category: 'music', label: 'Open mic', re: /\b(open mic|open[- ]mike|open jam|open stage|jam session|bluegrass jam|song circle)\b/i, moods: { lively: 1, date: 0.6 }, dropIn: true },
+  { category: 'music', label: 'DJ night', re: /\bdjs?\b/i, moods: { lively: 1, drink: 0.6 }, dropIn: true },
+  { category: 'music', label: 'Live music', re: /\b(concert|band|jazz|blues|quartet|trio|symphony|orchestra|songwriter|recital|choir|bluegrass|folk)\b/i, moods: { lively: 1, date: 0.6 } },
 ];
 
 export function clean(html: string): string {
@@ -133,7 +135,9 @@ export function judge(raw: RawEvent, venues: Venue[], center: LatLng): Verdict {
       story: description ? blurb(description) : `${kind.label} at ${venueName}.`,
       price: raw.preset?.price ?? priceOf(description), setting: 'in', minutes: [Math.min(45, length), length],
       kids: raw.preset?.kids ?? (venue?.bar ? 0 : 1),
-      moods: kind.moods, gem: 0.4, when: { start: raw.start, end }, dropIn: 'dropIn' in kind ? kind.dropIn ?? false : false,
+      // A band in a bar plays for a couple of hours to whoever walks in; a concert hall wants you in your seat at the start.
+      moods: kind.moods, gem: 0.4, when: { start: raw.start, end },
+      dropIn: ('dropIn' in kind ? kind.dropIn ?? false : false) || (kind.category === 'music' && Boolean(venue?.bar) && length >= 90),
       hoursTrust: 'solid', url: raw.url, source: raw.source, venue: venueName, placeId: venue?.placeId,
     },
   };

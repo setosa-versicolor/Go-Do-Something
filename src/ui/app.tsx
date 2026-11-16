@@ -9,7 +9,7 @@ import { loadNearby } from '../core/nearby';
 import { directionsUrl, miles, offsetMiles, travelLabel, type LatLng, type Mode } from '../core/geo';
 import { append, MAX_SAVED, pendingCheckIn, summarize, type Entry, type Verb } from '../core/history';
 import { parseIntent, resolveStart } from '../core/intent';
-import { match, statusLine, type Pick, type Request, type Result } from '../core/match';
+import { match, statusLine, TUNING, type Pick, type Request, type Result } from '../core/match';
 import { sunFor } from '../core/sun';
 import { DAY, HOUR, MIN, fmtDay, fmtTime, parseLocalInput, toLocal, toLocalInput } from '../core/time';
 import { GROUP, type Option } from '../core/types';
@@ -434,7 +434,9 @@ export function App() {
   // What's on in the next few hours, one light per venue, for the opening scene.
   const live: Live[] = [];
   if (!results && beams && !intro) {
-    const soon = events.current.filter((e) => e.when!.end > skyTime && e.when!.start < skyTime + 6 * HOUR).sort((a, b) => a.when!.start - b.when!.start);
+    // Only what you could still go to: something you turn up for any time until it ends, a show with a start time until just after it.
+    const makeable = (e: Option) => (e.dropIn ? e.when!.end - 30 * MIN : e.when!.start + TUNING.lateGraceMin * MIN) > skyTime;
+    const soon = events.current.filter((e) => makeable(e) && e.when!.start < skyTime + 6 * HOUR).sort((a, b) => a.when!.start - b.when!.start);
     const taken = new Set<string>();
     for (const e of soon) {
       const key = `${e.lat.toFixed(3)},${e.lng.toFixed(3)}`;

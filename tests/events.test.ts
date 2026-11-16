@@ -29,6 +29,17 @@ describe('event listings', () => {
     expect(o.when!.end - o.when!.start).toBe(2 * HOUR); // assumed length when none is given
   });
 
+  it('lets you turn up late to an open mic, a DJ night or a band in a bar, but not a concert', () => {
+    const mic = toOption(raw({ title: 'Open Mic', description: '', venue: "Mickey's Tavern", start: at(2026, 11, 15, 22), end: at(2026, 11, 16, 0) }), venues, city.center)!;
+    expect(mic).toMatchObject({ what: "Open mic at Mickey's Tavern", dropIn: true });
+    expect(toOption(raw({ title: 'DJ Night', description: '', venue: 'Cafe Coda' }), venues, city.center)!.dropIn).toBe(true);
+    // Mickey's is a bar: the trio plays to whoever walks in.
+    expect(toOption(raw({ venue: "Mickey's Tavern" }), venues, city.center)!.dropIn).toBe(true);
+    // Cafe Coda is a listening room; the Sylvee a hall. Be there at the start.
+    expect(toOption(raw({}), venues, city.center)!.dropIn).toBe(false);
+    expect(toOption(raw({ title: 'Big Touring Band', venue: 'The Sylvee' }), venues, city.center)!.dropIn).toBe(false);
+  });
+
   it('drops filler, unknown venues, sold-out shows, and things it cannot classify', () => {
     expect(toOption(raw({ title: 'Intro to Pottery Workshop' }), venues, city.center)).toBeNull();
     expect(toOption(raw({ title: 'Trivia Night', venue: "Mickey's Tavern" }), venues, city.center)).toBeNull();

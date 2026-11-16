@@ -255,6 +255,22 @@ describe('three different things', () => {
   });
 });
 
+describe('an open mic that has already started', () => {
+  // The case that prompted this: 10:07 on a Sunday night, an open mic at Mickey's from 10 to midnight.
+  const now = at(2026, 11, 15, 22, 7);
+  const mic = option({ id: 'mic', kind: 'event', category: 'music', dropIn: true, rules: undefined, minutes: [45, 120], moods: { lively: 1, date: 0.6 }, lat: 43.0843, lng: -89.3615, when: { start: at(2026, 11, 15, 22), end: at(2026, 11, 16, 0) } });
+  it('is still offered for "local today" and for music', () => {
+    for (const say of ['local today', 'music show']) {
+      const r = match(request(now, say), world({ options: [mic] }));
+      expect(r.picks.map((p) => p.option.id), say).toEqual(['mic']);
+    }
+  });
+  it('would not be, if it were a concert you had to be at the start of', () => {
+    const r = match(request(now, 'music show'), world({ options: [{ ...mic, dropIn: false }] }));
+    expect(r.debug.rejected[0]).toMatchObject({ gate: 'missed' });
+  });
+});
+
 describe('dated events', () => {
   const start = at(2026, 11, 11, 18);
   const show = (h: number, mi = 0, len = 120) =>
