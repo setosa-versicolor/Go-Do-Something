@@ -12,6 +12,7 @@ import * as THREE from 'three';
 import { edgeDistance } from '../core/geo';
 import type { CityShape, Landmark } from '../core/types';
 import { addLife } from './scene-life';
+import { createRipples, type Dab } from './scene-water';
 
 export interface SkyInput {
   time: number;
@@ -494,6 +495,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     time: { value: 0 }, frozen: { value: 0 }, snowy: { value: 0 }, chop: { value: 0 }, glint: { value: 1 },
     deep: { value: new THREE.Color('#2a78a8') }, skyTop: { value: new THREE.Color() }, skyHorizon: { value: new THREE.Color() },
     body: { value: new THREE.Vector3(0, 1, 0) }, bodyColor: { value: new THREE.Color('#fff3c4') },
+    // The simulated ripples (scene-water.ts): heights, how far the grid reaches, one cell of it, and how strongly they show.
+    waves: { value: null as THREE.Texture | null }, waveSpan: { value: 1 }, waveCell: { value: 0 }, waveGain: { value: 0 },
   };
   const waterMat = new THREE.ShaderMaterial({
     uniforms: { ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog), ...waterUniforms }, fog: true,
@@ -502,16 +505,26 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       void main(){ vec4 w = modelMatrix * vec4(position, 1.0); wp = w.xyz; vec4 mvPosition = viewMatrix * w; gl_Position = projectionMatrix * mvPosition;
         #include <fog_vertex>
       }`,
-    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float chop; uniform float glint; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; varying vec3 wp;
+    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float chop; uniform float glint; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; uniform sampler2D waves; uniform float waveSpan; uniform float waveCell; uniform float waveGain; varying vec3 wp;
       #include <fog_pars_fragment>
       void main(){ vec2 p = wp.xz; float amp = 0.0034 * (1.0 + chop * 1.6) * (1.0 - frozen) * clamp(3.5 / length(cameraPosition - wp), 0.12, 1.0);
         float a = p.x * 9.0 + time * 1.1; float b = p.y * 11.0 - time * 0.9; float c2 = (p.x + p.y) * 17.0 + time * 1.7; float d2 = (p.x - p.y) * 31.0 - time * 2.3;
-        vec3 n = normalize(vec3((cos(a) * 9.0 + cos(c2) * 8.5 + cos(d2) * 5.0) * amp, 1.0, (cos(b) * 11.0 + cos(c2) * 8.5 - cos(d2) * 5.0) * amp));
+        // Real ripples: the slope of the simulated surface here, from the heights either side.
+        vec2 wuv = p / waveSpan + 0.5;
+        float hE = dot(texture2D(waves, wuv + vec2(waveCell, 0.0)).rb, vec2(1.0));
+        float hW = dot(texture2D(waves, wuv - vec2(waveCell, 0.0)).rb, vec2(1.0));
+        float hS = dot(texture2D(waves, wuv + vec2(0.0, waveCell)).rb, vec2(1.0));
+        float hN = dot(texture2D(waves, wuv - vec2(0.0, waveCell)).rb, vec2(1.0));
+        // Far away a ripple is smaller than a pixel and would only shimmer, so it fades with distance.
+        vec2 slope = vec2(hE - hW, hS - hN) * waveGain * clamp(9.0 / length(cameraPosition - wp), 0.0, 1.0);
+        vec3 n = normalize(vec3((cos(a) * 9.0 + cos(c2) * 8.5 + cos(d2) * 5.0) * amp - slope.x, 1.0, (cos(b) * 11.0 + cos(c2) * 8.5 - cos(d2) * 5.0) * amp - slope.y));
         vec3 v = normalize(cameraPosition - wp);
         float fres = pow(1.0 - max(dot(n, v), 0.0), 3.0);
         vec3 r = reflect(-v, n);
         vec3 sky = mix(skyHorizon, skyTop, smoothstep(0.0, 0.5, r.y));
         vec3 col = mix(deep, sky, 0.16 + fres * 0.5);
+        // The face of a wave that tips toward the sky is lighter, the far side darker: what makes a ripple read at all.
+        col *= 1.0 + clamp(slope.y * 0.9 - slope.x * 0.35, -0.22, 0.3);
         float s = max(dot(r, body), 0.0);
         col += bodyColor * (pow(s, 120.0) * 1.1 + pow(s, 14.0) * 0.09) * glint;
         float crack = smoothstep(0.96, 1.0, sin(p.x * 3.1 + sin(p.y * 2.3) * 2.0) * sin(p.y * 2.7 + sin(p.x * 1.9) * 2.0));
@@ -538,6 +551,22 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     return m;
   });
   scene.add(new THREE.Mesh(ribbons(shape.rivers.map((points) => ({ points, width: 0.045 })), 0.011), waterMat));
+  // The ripple simulation covers the middle twelve miles: a finer grid on a big screen, a coarser one on a phone,
+  // where the lakes are small on screen anyway. With reduced motion it is off, and the water is as it was.
+  const lowMemory = ((navigator as { deviceMemory?: number }).deviceMemory ?? 8) <= 4;
+  let water: ReturnType<typeof createRipples> = null;
+  try {
+    water = calm ? null : createRipples(renderer, shape.lakes.map((l) => l.outline), 12.4, lowMemory || window.innerWidth < 900 ? 512 : 1024);
+  } catch {
+    water = null; // the lakes simply stay as they were
+  }
+  if (water) {
+    waterMat.uniforms.waves!.value = water.texture;
+    waterMat.uniforms.waveSpan!.value = water.span;
+    waterMat.uniforms.waveCell!.value = water.cell;
+  }
+  /** Cells in the grid per mile: a dab the same size on the lake needs more cells on a finer grid. */
+  const cellsPerMile = water ? 1 / (water.cell * water.span) : 0;
 
   // Roads: pale by day, amber threads at night.
   // Round the corners off the simplified road lines (three passes of corner-cutting), so a causeway curves instead of kinking.
@@ -1583,6 +1612,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     lake.userData.tap = (p: THREE.Vector3) => {
       say(lake.userData.name as string, new THREE.Vector3(p.x, 0.3, p.z));
       if (isFrozen) return;
+      if (water) return water.drop(p.x, p.z, 1.6);
       for (let k = 0; k < 2; k++) {
         const m = new THREE.Mesh(new THREE.RingGeometry(0.92, 1, 32), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false }));
         m.rotation.x = -Math.PI / 2;
@@ -1596,7 +1626,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
 
   // The small things: wind, smoke, wakes, a train, market tents, a full stadium, the northern lights.
   const life = addLife({
-    scene, shape, rand: seeded(1848), calm, glowPoints, wet, chimneys, rail, boats,
+    scene, shape, rand: seeded(1848), calm, glowPoints, wet, chimneys, rail,
     lawn: 0.25 * CAP, centerHeight: 0.5 * CAP, fliers: [plane, balloon], stadiumFoot: FOOT.stadium!,
   });
   for (const holiday of shape.holidayLights ?? []) touchable(holiday.name, holiday.east, holiday.north, holiday.radius, 0.1);
@@ -2073,12 +2103,37 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     }
 
     // Boats sail lazy circles; a tapped one spins like it caught a gust.
+    const dabs: Dab[] = [];
     for (const b of boats) {
+      const was = { x: b.g.position.x, z: b.g.position.z, turn: b.g.rotation.y };
       b.angle += b.speed * dt * (1 + b.spin * 5) * (calm ? 0 : 1);
       b.spin = Math.max(0, b.spin - dt * 0.7);
       b.g.position.set(b.cx + Math.cos(b.angle) * b.radius, 0.012, b.cz + Math.sin(b.angle) * b.radius * 0.7);
       b.g.rotation.y = -b.angle + b.spin * 9;
       b.g.rotation.z = Math.sin(clock * 1.7 + b.angle) * 0.07 + b.spin * 0.35 + Math.min(0.32, life.wind.mph * 0.013) * Math.sin(b.angle + Math.atan2(life.wind.z, life.wind.x));
+      // What the hull does to the water: it lifts it at the bow and lets it fall at the stern, in proportion to its
+      // way through the water (the wake), and its two ends sweep round when it spins (the rings).
+      if (water && b.hull.visible && dt > 0 && clock > 0.5) {
+        const way = Math.min(0.6, Math.hypot(b.g.position.x - was.x, b.g.position.z - was.z) / dt);
+        const sweep = Math.min(9, Math.abs(b.g.rotation.y - was.turn) / dt);
+        const fx = Math.sin(b.g.rotation.y);
+        const fz = Math.cos(b.g.rotation.y);
+        const slow = way * 0.5;
+        const fast = sweep * 0.011;
+        dabs.push({ x: b.g.position.x + fx * 0.1, z: b.g.position.z + fz * 0.1, slow, fast, cells: 0.03 * cellsPerMile });
+        dabs.push({ x: b.g.position.x - fx * 0.1, z: b.g.position.z - fz * 0.1, slow: -slow * 0.85, fast: -fast, cells: 0.03 * cellsPerMile });
+      }
+    }
+    if (water && sky) {
+      // Rain: drops land where you're looking, more of them the harder it comes down.
+      const raining = sky.snowing || isFrozen ? 0 : Math.max(0, Math.min(1, (wetNow - 0.3) / 0.5));
+      for (let i = Math.random() < raining * 14 * dt ? Math.ceil(raining * 5) : 0; i > 0; i--) {
+        water.drop(rig.tx + (Math.random() - 0.5) * 2.6, rig.tz + (Math.random() - 0.5) * 2.6, 0.9 + Math.random() * 0.8);
+      }
+      water.step(dt, isFrozen ? [] : dabs);
+      waterUniforms.waves.value = water.texture;
+      // Ice has no ripples. The strength is per mile, not per cell, so a finer grid shows the same wave the same way.
+      waterUniforms.waveGain.value = (0.036 * cellsPerMile) * (1 - waterUniforms.frozen.value);
     }
 
     // Balloon.
@@ -2385,6 +2440,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         for (const x of Array.isArray(mat) ? mat : mat ? [mat] : []) x.dispose();
       });
       target.dispose();
+      water?.dispose();
       renderer.dispose();
     },
   };

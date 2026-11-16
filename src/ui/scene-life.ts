@@ -1,5 +1,5 @@
 // The small things that make the model feel lived in: a flag and chimney
-// smoke that lean with the real wind, wakes behind the boats, shadows under
+// smoke that lean with the real wind, shadows under
 // whatever is flying, a freight train on the causeway, market tents on the
 // square, a full stadium, lights for the holidays, and now and then the
 // northern lights. Each is switched by the day's real conditions, passed in
@@ -28,7 +28,6 @@ export interface LifeContext {
   /** The road that crosses open water, as [east, north, …]: the train runs beside it. */
   rail: number[] | null;
   wet: (east: number, north: number, pad?: number) => boolean;
-  boats: { g: THREE.Group; hull: THREE.Mesh }[];
   /** Things in the air that should throw a shadow. */
   fliers: THREE.Object3D[];
   /** The stadium's footprint, as the diorama scaled it: miles east-west and north-south before its turn. */
@@ -108,41 +107,6 @@ export function addLife(ctx: LifeContext): Life {
   const smoke = ctx.glowPoints(stacks.flatMap((s) => Array.from({ length: PUFFS }, () => ({ x: s.x, y: 0.06, z: s.z, color: '#f3f4f5', size: 0.05 }))), { attenuate: true, twinkle: 0, speed: 0, sharp: 1, blend: 'normal' });
   scene.add(smoke.points);
   points.push(smoke);
-
-  // ---------------------------------------------------------------- wakes behind the boats
-
-  // Painted, not modelled: two soft lines opening behind the stern and fading out.
-  const wakeTex = (() => {
-    const c = document.createElement('canvas');
-    c.width = 64;
-    c.height = 128;
-    const x = c.getContext('2d')!;
-    const fadeOut = x.createLinearGradient(0, 0, 0, 128);
-    fadeOut.addColorStop(0, 'rgba(255,255,255,0.9)');
-    fadeOut.addColorStop(0.35, 'rgba(255,255,255,0.45)');
-    fadeOut.addColorStop(1, 'rgba(255,255,255,0)');
-    x.strokeStyle = fadeOut;
-    x.lineCap = 'round';
-    x.filter = 'blur(2px)';
-    x.lineWidth = 5;
-    for (const side of [-1, 1]) {
-      x.beginPath();
-      x.moveTo(32 + side * 3, 4);
-      x.quadraticCurveTo(32 + side * 14, 50, 32 + side * 27, 124);
-      x.stroke();
-    }
-    return new THREE.CanvasTexture(c);
-  })();
-  const wakeMat = new THREE.MeshBasicMaterial({ map: wakeTex, transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
-  const wakeGeo = new THREE.PlaneGeometry(0.2, 0.42);
-  wakeGeo.rotateX(Math.PI / 2); // flat on the water, the bright end toward +z
-  wakeGeo.translate(0, 0, -0.29); // which sits just behind the stern (the hull points down +z)
-  const wakes = ctx.boats.map((b) => {
-    const m = new THREE.Mesh(wakeGeo, wakeMat);
-    m.position.y = 0.008;
-    b.g.add(m);
-    return { m, hull: b.hull };
-  });
 
   // ---------------------------------------------------------------- shadows under whatever is flying
 
@@ -443,10 +407,6 @@ export function addLife(ctx: LifeContext): Life {
         for (const name of ['position', 'size', 'fade']) smoke.geo.attributes[name]!.needsUpdate = true;
         smoke.uniforms.opacity.value = on.smoke * (0.4 + 0.5 * Math.max(day, 0.25));
       }
-
-      // Wakes follow their boats; gone on ice, faint at night.
-      wakeMat.opacity = 0.08 + 0.42 * day;
-      for (const w of wakes) w.m.visible = w.hull.visible && !calm;
 
       // Shadows: only when there's a sun to throw them.
       shadeMat.opacity = 0.2 * Math.max(0, Math.min(1, e * 3)) * (1 - wetNow);
