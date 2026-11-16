@@ -1,6 +1,7 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { city, places, shape } from '../cities/madison';
+import { COMPANY, TILES } from '../core/asks';
 import { loadEvents, SOURCES } from '../core/events';
 import { inSeasonAt, openIntervals } from '../core/hours';
 import { AURORA_KP, fetchLive, headline, kpFor, warningFor, type Live as LiveNow } from '../core/live';
@@ -23,20 +24,7 @@ import { forgetEverything, loadForecast, loadLog, loadBeams, loadMode, loadStart
 const tz = city.tz;
 
 // Tiles and pills are just canned words: they go through the same parser as typing does.
-// Labels stay broad on purpose. A tile names a kind of outing, never a taste.
-const MOODS: [label: string, line: string, say: string][] = [
-  ['Food', 'a snack to a real dinner', 'food'],
-  ['Drinks', 'dives to cocktail bars', 'drinks'],
-  ['Coffee', 'and somewhere to sit', 'coffee'],
-  ['Outside', 'a walk, a view, water', 'outside'],
-  ['Art & ideas', 'museums, books, talks', 'art museum books'],
-  ['Music & shows', "whatever's on a stage", 'music show'],
-  ['Play', 'games and climbing', 'play games'],
-  ['Something odd', 'off the usual list', 'odd'],
-  // The one tile that is a wall, not a lean: only dated events and markets (intent.today).
-  ['Local today', "markets and what's on", 'local today'],
-];
-const COMPANY: [label: string, say: string][] = [['Just me', ''], ['A date', 'date'], ['Friends', 'friends'], ['Kids', 'kids'], ['A visitor', 'visiting']];
+const MOODS = TILES;
 // The page can't ask again once a phone or browser has said no, so say where the switch is.
 const BLOCKED = /iPhone|iPad|iPod/.test(navigator.userAgent)
   ? 'Your phone isn’t letting this browser share a location. In the Settings app, go to Privacy & Security › Location Services, find this browser in the list, choose “While Using the App”, then come back and reload.'

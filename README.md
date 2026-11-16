@@ -158,6 +158,16 @@ To add a calendar: write a parser in `sources.ts`, test it against a real sample
 
 Looked at and not used: Visit Madison's feed has dates but no times, so we can't honestly say when to turn up; the Wisconsin Union's own feed has titles only; Madtown Life mostly repeats Isthmus.
 
+## The tagging review
+
+How well loaded events are tagged is measured, and the measure may only go up.
+
+- `tagging/golden.json` is the answer key: real listings, each labelled by hand with what it should come out as. A quarter are held out for judging.
+- `npm run tagging` grades the tagger against the key (keep or drop, kind, indoors or out, kids, turn-up, and moods by precision and recall) and profiles the week's listings: coverage, how evenly the moods are spread, which moods no event carries, and what share of events each tile, companion and vibe can reach.
+- `tagging/baseline.json` is the floor. `npm test` fails below it, and it only ratchets up.
+- `tagging/history.jsonl` keeps every recorded run.
+- `tagging/PLAYBOOK.md` is the process: grow the key, find the biggest pattern in the misses, fix it, measure, write it up, open a pull request. A scheduled Claude Code session runs it weekly.
+
 ## Scheduled review (for a reviewing agent)
 
 Some facts can only be settled by reading a place's own website: its real hours, whether it still exists. That work is meant to be done on a schedule by a reviewer (a person, or an agent with repo write access) and has its own file so the reviewer never edits the prose:

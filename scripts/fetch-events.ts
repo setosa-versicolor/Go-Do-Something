@@ -26,6 +26,8 @@ const everything: RawEvent[] = [];
 const dry = process.argv.includes('--dry');
 /** --venues: list the venues we dropped listings for, busiest first, so the next ones to add are obvious. */
 const listVenues = process.argv.includes('--venues');
+/** --raw <file>: also write every listing as the calendars gave it, before any judging, for the tagging report and for labelling. */
+const rawOut = process.argv.includes('--raw') ? process.argv[process.argv.indexOf('--raw') + 1] : undefined;
 const strangers = new Map<string, { n: number; sample: string; url: string }>();
 
 async function get(url: string): Promise<string> {
@@ -170,6 +172,12 @@ if (listVenues) {
     console.log(`${String(n).padStart(4)}  ${v}  |  ${where}  |  e.g. ${sample.slice(0, 50)}`);
   }
   console.log('');
+}
+
+if (rawOut) {
+  const window = everything.filter((r) => r.start > now - DAY && r.start < now + HORIZON);
+  writeFileSync(rawOut, JSON.stringify({ fetchedAt: now, listings: window }, null, 1) + '\n');
+  console.log(`${window.length} raw listings written to ${rawOut}`);
 }
 
 const events = markOneOffs(dedupe(kept), everything).sort((a, b) => a.when!.start - b.when!.start);

@@ -1,0 +1,20 @@
+{
+  "about": "The floor. tests/tagging.test.ts fails if the tagger scores below any of these on the answer key. It is a ratchet: `npm run tagging -- --raise-floor` lifts it to the current scores wherever they are higher, and nothing lowers it. If a change to the answer key itself moves a score down, say so in the pull request and edit the number by hand, with the reason. See PLAYBOOK.md.",
+  "set": "2026-11-16",
+  "dev": {
+    "keep": 0.784,
+    "category": 0.864,
+    "setting": 1,
+    "kids": 0.929,
+    "dropIn": 0.933,
+    "moodF1": 0.636
+  },
+  "holdout": {
+    "keep": 0.938,
+    "category": 0.9,
+    "setting": 1,
+    "kids": 1,
+    "dropIn": 0.75,
+    "moodF1": 0.75
+  }
+}
