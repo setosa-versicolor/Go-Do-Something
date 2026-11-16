@@ -1,0 +1,13 @@
+name = "do-something-say-log"
+main = "say-log.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+# The addresses the site is served from. Only these may write.
+ALLOWED_ORIGINS = "https://dosomethingmadison.com,https://www.dosomethingmadison.com,http://dosomethingmadison.com,https://setosa-versicolor.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "do-something-says"
+# Paste the id that `wrangler d1 create do-something-says` prints.
+database_id = "PASTE-THE-DATABASE-ID-HERE"

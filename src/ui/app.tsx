@@ -18,6 +18,7 @@ import { conditionsFor, fetchWeather, hourAt, skyLook, type Weather } from '../c
 import type { Diorama, Live, Pin, Pose, SkyInput } from './scene';
 import { partOfDay, skyAt } from './sky';
 import { Intro } from './intro';
+import { logSay, sayLogOn } from './say-log';
 import { VibeIcon, vibeLabel, VibeSheet } from './vibe';
 import { forgetEverything, loadForecast, loadLog, loadBeams, loadMode, loadStart, loadTheme, markIntroSeen, saveForecast, saveLog, saveBeams, saveMode, saveStart, saveTheme, seenIntro, type Theme } from './store';
 
@@ -140,6 +141,7 @@ export function App() {
   const nearby = useRef<Option[]>([]);
   const loaded = useRef<Promise<unknown>>(Promise.resolve());
   const logRef = useRef(log);
+  const said = useRef('');
   const deck = useRef<HTMLOListElement>(null);
   const debug = useMemo(() => new URLSearchParams(location.search).has('debug'), []);
   const preview = useMemo(() => new URLSearchParams(location.search).get('weather'), []);
@@ -215,6 +217,11 @@ export function App() {
     setActive(null);
     setView({ req, result, options, label: [q.text ? `“${q.text}”` : [tile ?? 'Anything', along && along[1] ? along[0].toLowerCase() : null, vibe ? vibeLabel(vibe) : null].filter(Boolean).join(', '), hours].join(' · ') });
     setExcluded([]);
+    // What was typed, once per phrase (not again on "deal three more"): the words and what came of them, nothing else.
+    if (q.text && said.current !== q.text) {
+      said.current = q.text;
+      logSay({ text: q.text, heard: intent.heard, lost: intent.lost, picks: result.picks.length, minutes: durationMin });
+    }
     for (const p of result.picks) {
       const last = w.memory.lastShown.get(p.option.id);
       if (!last || now - last > 10 * MIN) record(p.option.id, 'shown');
@@ -619,6 +626,7 @@ export function App() {
           Show key events in Madison
         </label>
         <p>Map shapes and “from the map” places © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors.</p>
+        {sayLogOn() && <p>What you type in the “say it” box is sent to us, with nothing that says who or where you are, so the app can learn to understand more. Taps aren't sent. Nor is anything else.</p>}
         {results && <p>“Usually open” means the hours haven't been checked by hand yet, so confirm before a long trip. Travel times are estimates. Your history stays on this device.</p>}
       </footer>
 

@@ -1,4 +1,5 @@
-// Everything personal stays in this browser's localStorage. Nothing is sent anywhere.
+// Everything personal stays in this browser's localStorage: what you saved, where you went, what you skipped.
+// The one thing that leaves the device is what's typed in the "say it" box, and only when that is switched on (say-log.ts).
 
 import type { Entry } from '../core/history';
 import type { Mode } from '../core/geo';

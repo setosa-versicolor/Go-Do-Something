@@ -18,7 +18,7 @@ npm run explain -- "date night" --at 2026-11-13T19:00 --hours 3 --mode walk --we
 
 ## How it's built
 
-A static site. No server, no database, no accounts, no API keys.
+A static site. No accounts, no API keys, and one optional collector (see "What people type"); without it, no server and no database.
 
 | Piece | Where | Notes |
 | --- | --- | --- |
@@ -28,6 +28,7 @@ A static site. No server, no database, no accounts, no API keys.
 | Live conditions | `src/core/live.ts`, from the browser | Weather Service alerts, air quality (Open-Meteo) and the K index (NOAA). Free, no keys. See "Right now". |
 | Matching | `src/core/match.ts` | One pure function. The only copy of the logic. |
 | Memory | `localStorage` | Stays on the device. Location is used in memory only and never stored. |
+| What people type | `worker/`, a Cloudflare Worker | Optional, and off until set up. The words typed in the "say it" box and what the app made of them. Nothing about who typed. |
 | Deploy | `.github/workflows/deploy.yml` | GitHub Pages, on push to `main` and every morning (to refresh events). Cost: nothing. |
 
 To turn on deploys: repo Settings → Pages → Source: GitHub Actions.
@@ -157,6 +158,16 @@ A calendar that fails is skipped and reported; the others still publish. The qui
 To add a calendar: write a parser in `sources.ts`, test it against a real sample, name it in `SOURCES`, and list it in `scripts/fetch-events.ts`.
 
 Looked at and not used: Visit Madison's feed has dates but no times, so we can't honestly say when to turn up; the Wisconsin Union's own feed has titles only; Madtown Life mostly repeats Isthmus.
+
+## What people type
+
+The "or say it" box is where the app finds out what it doesn't understand, so what's typed there can be collected. It is the only thing the app ever sends anywhere, and it is off until the collector is set up.
+
+- **What is sent:** the words (200 characters at most), the phrases the app understood, whether it understood none, how many picks came back, and the time the person had. **What is kept with it:** the hour it arrived. **What is never sent or kept:** location, IP address, cookies, any identifier, the exact minute, and anything about taps on tiles.
+- **When it is on,** the footer says so in plain words. A browser that asks not to be tracked (Global Privacy Control, or Do Not Track) sends nothing.
+- **The collector** is `worker/say-log.js`, a Cloudflare Worker with one table. It accepts writes only from the site's own addresses, stops writing in a flood, and hands the rows over only to whoever holds the export token. Setting it up takes about ten minutes: `worker/README.md`. The site learns the collector's address from the `SAY_LOG_URL` repository variable at build time; deleting the variable turns logging off.
+- **Reading it:** `npm run says` (with `SAY_EXPORT_URL` and `SAY_EXPORT_TOKEN` set) prints the share of typed requests the app understood none of, understood only in part, or answered with no picks; the phrases it is lost on; and the words it steps over, commonest first. Every phrase is read again with the parser as it is today, so a fix shows up as phrases "lost when typed, understood now".
+- **Improving it:** the words it steps over are the vocabulary `src/core/intent.ts` is missing. Add them to the lexicon with a test in `tests/intent.test.ts`. The phrases are things strangers typed: never copy them into the repository or anywhere public. A test should use a phrase of your own that makes the same point.
 
 ## The tagging review
 

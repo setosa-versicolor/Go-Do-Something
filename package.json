@@ -12,7 +12,8 @@
     "explain": "tsx scripts/explain.ts",
     "review-queue": "tsx scripts/review-queue.ts",
     "nearby": "tsx scripts/fetch-nearby.ts",
-    "tagging": "tsx scripts/tagging-report.ts"
+    "tagging": "tsx scripts/tagging-report.ts",
+    "says": "tsx scripts/says-report.ts"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",
