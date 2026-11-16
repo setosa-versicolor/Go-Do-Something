@@ -34,6 +34,18 @@ async function get(url: string): Promise<string> {
   return res.text();
 }
 
+const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function getPatiently(url: string): Promise<string> {
+  await pause(200);
+  try {
+    return await get(url);
+  } catch {
+    await pause(4000);
+    return get(url);
+  }
+}
+
 // Order matters: when two calendars list the same show, the earlier one is kept.
 const sources: Record<keyof typeof SOURCES, () => Promise<RawEvent[]>> = {
   /** Paged, soonest first; stop once we're past the horizon. */
@@ -41,7 +53,17 @@ const sources: Record<keyof typeof SOURCES, () => Promise<RawEvent[]>> = {
     const out: RawEvent[] = [];
     const seen = new Set<string>();
     for (let page = 1; page <= 36; page++) {
-      const fresh = parseIsthmus(await get(`https://isthmus.com/search/event/calendar-of-events/index.rss?page=${page}`), city.tz).filter((e) => !seen.has(e.url));
+      // Three dozen pages is a lot to ask of one site in one go: ask gently, try a failed page once more,
+      // and if it still fails, keep the days we already have and go without the rest.
+      let xml: string;
+      try {
+        xml = await getPatiently(`https://isthmus.com/search/event/calendar-of-events/index.rss?page=${page}`);
+      } catch (err) {
+        if (page === 1) throw err;
+        console.error(`Isthmus: stopped at page ${page} (${(err as Error).message}); keeping the ${out.length} listings already read`);
+        break;
+      }
+      const fresh = parseIsthmus(xml, city.tz).filter((e) => !seen.has(e.url));
       for (const e of fresh) seen.add(e.url);
       out.push(...fresh);
       if (fresh.length === 0 || Math.max(...fresh.map((e) => e.start)) > now + LOOKAHEAD) break;
