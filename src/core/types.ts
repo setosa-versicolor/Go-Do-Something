@@ -144,6 +144,10 @@ export interface CityShape {
   buildings?: { name: string; east: number; north: number; turn?: number; w: number; d: number; h: number; color: string; style?: 'slab' | 'stepped' | 'glass' | 'stacks' | 'dome' }[];
   /** The airport's real layout, if the city has one worth drawing. Outlines are closed rings. */
   airfield?: { runways: { ref: string; line: number[] }[]; taxiways: number[][]; aprons: number[][]; terminals: number[][] };
+  /** Places hung with coloured lights around the holidays, beyond the central square. */
+  holidayLights?: { name: string; east: number; north: number; radius: number }[];
+  /** The place (by id) whose opening hours say when the market is set up on the central square. */
+  marketPlace?: string;
   /** The street grid's angle downtown, radians. */
   gridTurn: number;
   /** Roughly how far out the houses go. */

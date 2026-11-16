@@ -64,6 +64,18 @@ Three things tie the model to the decision:
 
 By season, weather and hour: leaves turn in October and come down in November; when snow is lying (an inch or more on the ground) or coming down in earnest, the ground, roofs, trees and causeway banks go white and the ploughed roads show grey against them; from December to March, when it is below 33°, the lakes freeze, the boats become ice shanties, and any snow lies on the ice; rain falls as slanting streaks, light or heavy with the forecast, darkening the streets and roughening the lakes; in a thunderstorm the sky goes to slate, the rain drives harder, the sailboats leave the water, and every several seconds a bolt comes down somewhere over town with one soft flash (none with reduced motion); in fog the haze closes in until downtown stands clear and the far shores are gone, the sun is a dim disc, and the header says "foggy"; windows, street lights and headlights come on at dusk, and fireflies come out on dry summer nights.
 
+The small things that follow the real day live in `src/ui/scene-life.ts`. None of them draws a person; a crowd is dots.
+
+- **Wind.** A flag on the square swings to the wind's real bearing, ripples harder the more it blows and hangs when it doesn't. Clouds drift the same way, boats heel, rain slants, the lakes roughen in a blow and go glassy when it's still.
+- **Cold.** At freezing and below, chimneys smoke, and the smoke leans downwind.
+- **The sky.** The moon is drawn at its true phase and lays a path on the water in proportion. On an evening the forecast gives a show to, the horizon burns and the clouds catch it. When the K index says so, the northern lights hang low in the north. Under a thunderstorm or tornado warning a shelf cloud stands in the west.
+- **The city's calendar.** On market mornings (when the place named by `marketPlace` in the shape is open) tents ring the square and a crowd shuffles round counter-clockwise. When the events file has something on at a stadium or an arena, from two hours before until it ends, the stadium's floodlights come on, the stands fill with red and white, a stream of red walks in, and the arena's roof glows. From late November to New Year's Day coloured lights go up round the square and at Olin Park. The dome is lit every night. The Terrace chairs go indoors for the winter.
+- **Always.** A freight train crosses the causeway every minute or so. Boats leave wakes. The plane and the balloon throw shadows when the sun is out.
+
+To look at any of these on a day that isn't having them, add `?scene=` with any of `market`, `gameday`, `arena`, `holiday`, `aurora`, `sunset`, `shelf`, `cold`, `windy`, `calm`, `full`, `new`, separated by commas. With `?debug`, the model is on the window: `model.visit(east, north)` flies the camera to a spot.
+
+The model stops drawing while the tab is hidden or the model is scrolled out of view.
+
 A beacon is only as good as the coordinate behind it. Places in the list were located from memory and are right to within a few blocks, not to the door; events are placed by their venue, or by the coordinates their feed supplies. A test fails if any place or venue lands in a lake, which is how one bad coordinate was already caught. Anything beyond about 12 miles is dropped before it gets here, and the detailed part of the model reaches a little past the edge of town.
 
 The scene knows nothing about Madison: it builds whatever `CityShape` it is handed (`src/core/types.ts`). It's decoration over a working page: everything it does is also a button below. Without WebGL the page keeps its painted sky, and with reduced motion the model holds still.

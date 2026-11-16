@@ -17,6 +17,8 @@ export interface WeatherHour {
   cloudHigh?: number;
   windMph?: number;
   gustMph?: number;
+  /** Compass bearing the wind blows from, degrees. */
+  windFrom?: number;
 }
 
 export interface Weather {
@@ -47,7 +49,7 @@ export function weatherUrl(at: LatLng): string {
   const q = new URLSearchParams({
     latitude: String(at.lat),
     longitude: String(at.lng),
-    hourly: 'temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,snow_depth,cloud_cover_low,cloud_cover_mid,cloud_cover_high,wind_speed_10m,wind_gusts_10m',
+    hourly: 'temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,snow_depth,cloud_cover_low,cloud_cover_mid,cloud_cover_high,wind_speed_10m,wind_gusts_10m,wind_direction_10m',
     temperature_unit: 'fahrenheit',
     wind_speed_unit: 'mph',
     timeformat: 'unixtime', // never parse a zoneless local string
@@ -83,6 +85,7 @@ export function parseOpenMeteo(json: unknown, fetchedAt: number): Weather | null
     cloudHigh: num('cloud_cover_high', i),
     windMph: num('wind_speed_10m', i),
     gustMph: num('wind_gusts_10m', i),
+    windFrom: num('wind_direction_10m', i),
   }));
   return { fetchedAt, hours };
 }

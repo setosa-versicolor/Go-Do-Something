@@ -11,6 +11,7 @@
 import * as THREE from 'three';
 import { edgeDistance } from '../core/geo';
 import type { CityShape, Landmark } from '../core/types';
+import { addLife } from './scene-life';
 
 export interface SkyInput {
   time: number;
@@ -29,7 +30,30 @@ export interface SkyInput {
   frozen: boolean;
   /** 1-12, for the color of the trees. */
   month: number;
+  // Everything below is optional: the small details that follow the real day. See scene-life.ts.
+  /** Steady wind, mph, and the compass bearing it blows from (270 = out of the west). */
+  windMph?: number;
+  windFrom?: number;
+  /** Air temperature: chimneys smoke at freezing and below. */
+  tempF?: number;
+  /** 0 … 1: how much of a show the forecast gives tonight's sunset. */
+  sunsetGlow?: number;
+  /** 0 new … 0.5 full … 1 new. */
+  moonPhase?: number;
+  /** The northern lights may be out. */
+  aurora?: boolean;
+  /** A storm warning is in force: a shelf cloud stands in the west. */
+  shelf?: boolean;
+  /** The weekly market is set up on the square. */
+  market?: boolean;
+  /** Names of stadiums and arenas with something on now. */
+  busy?: string[];
+  /** Coloured lights are up. */
+  holiday?: boolean;
 }
+
+export interface GlowSpot { x: number; y: number; z: number; color: string; size: number }
+export type Glow = ReturnType<typeof glowPoints>;
 
 export interface Pin {
   /** Miles east and north of the city center. */
@@ -61,6 +85,8 @@ export interface Diorama {
   setHome(home: { east: number; north: number } | null): void;
   setLive(spots: Live[]): void;
   focus(index: number | null): void;
+  /** Fly over to a spot (miles east and north of the center) for a few seconds, as tapping a landmark does. */
+  visit(east: number, north: number, seconds?: number): void;
   /** Step the zoom: below 1 moves in, above 1 moves out. */
   zoom(factor: number): void;
   dispose(): void;
@@ -230,12 +256,13 @@ function ribbons(lines: { points: number[]; width: number }[], y: number): THREE
 }
 
 /** Soft round points that can twinkle: stars, street lights, headlights, fireflies. */
-function glowPoints(spots: { x: number; y: number; z: number; color: string; size: number }[], opt: { attenuate: boolean; twinkle: number; speed: number; sharp: number; fog?: boolean }) {
+function glowPoints(spots: GlowSpot[], opt: { attenuate: boolean; twinkle: number; speed: number; sharp: number; blend?: 'add' | 'normal' }) {
   const n = spots.length;
   const pos = new Float32Array(n * 3);
   const tint = new Float32Array(n * 3);
   const size = new Float32Array(n);
   const phase = new Float32Array(n);
+  const fade = new Float32Array(n).fill(1);
   const c = new THREE.Color();
   spots.forEach((s, i) => {
     pos.set([s.x, s.y, s.z], i * 3);
@@ -249,13 +276,14 @@ function glowPoints(spots: { x: number; y: number; z: number; color: string; siz
   geo.setAttribute('tint', new THREE.BufferAttribute(tint, 3));
   geo.setAttribute('size', new THREE.BufferAttribute(size, 1));
   geo.setAttribute('phase', new THREE.BufferAttribute(phase, 1));
+  geo.setAttribute('fade', new THREE.BufferAttribute(fade, 1));
   const uniforms = { time: { value: 0 }, opacity: { value: 0 }, scale: { value: 1 } };
   const mat = new THREE.ShaderMaterial({
-    uniforms, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-    vertexShader: `attribute vec3 tint; attribute float size; attribute float phase; uniform float time; uniform float scale; varying vec3 vTint; varying float vA;
+    uniforms, transparent: true, depthWrite: false, blending: opt.blend === 'normal' ? THREE.NormalBlending : THREE.AdditiveBlending,
+    vertexShader: `attribute vec3 tint; attribute float size; attribute float phase; attribute float fade; uniform float time; uniform float scale; varying vec3 vTint; varying float vA;
       void main(){ vTint = tint;
         float w = 0.5 + 0.5 * sin(time * ${opt.speed.toFixed(2)} + phase * 6.2832);
-        vA = mix(1.0, pow(w, ${opt.sharp.toFixed(1)}), ${opt.twinkle.toFixed(2)});
+        vA = mix(1.0, pow(w, ${opt.sharp.toFixed(1)}), ${opt.twinkle.toFixed(2)}) * fade;
         vec4 mv = modelViewMatrix * vec4(position, 1.0);
         gl_PointSize = ${opt.attenuate ? 'max(1.5, size * scale / -mv.z)' : 'size * scale'};
         gl_Position = projectionMatrix * mv; }`,
@@ -265,7 +293,7 @@ function glowPoints(spots: { x: number; y: number; z: number; color: string; siz
   });
   const points = new THREE.Points(geo, mat);
   points.frustumCulled = false;
-  return { points, uniforms, pos, geo, attenuate: opt.attenuate };
+  return { points, uniforms, pos, size, fade, geo, attenuate: opt.attenuate };
 }
 
 /** A line of text on a pill, as a sprite. */
@@ -418,7 +446,18 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
 
   // Sun and moon. Both tappable: they run the day forward.
   const sunDisc = new THREE.Mesh(new THREE.SphereGeometry(2.6, 24, 14), new THREE.MeshBasicMaterial({ color: '#ffe9a8', fog: false }));
-  const moon = new THREE.Mesh(new THREE.SphereGeometry(1.7, 24, 14), new THREE.MeshBasicMaterial({ color: '#eeeadb', fog: false, transparent: true }));
+  // The moon keeps its real phase: the lit side is worked out from where the sun would be, the rest is left to the sky.
+  const moonUniforms = { phase: { value: 0.5 }, opacity: { value: 0 } };
+  const moon = new THREE.Mesh(new THREE.SphereGeometry(1.7, 24, 14), new THREE.ShaderMaterial({
+    uniforms: moonUniforms, transparent: true, depthWrite: false, fog: false,
+    vertexShader: 'varying vec3 vN; void main(){ vN = normalize(normalMatrix * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform float phase; uniform float opacity; varying vec3 vN;
+      void main(){ float a = phase * 6.2832; vec3 sun = vec3(sin(a), 0.0, -cos(a));
+        float lit = smoothstep(-0.04, 0.08, dot(normalize(vN), sun));
+        gl_FragColor = vec4(vec3(0.933, 0.918, 0.859) * (0.1 + 0.9 * lit), opacity * (0.07 + 0.93 * lit));
+        #include <colorspace_fragment>
+      }`,
+  }));
   moon.position.set(-22, 26, -52);
   scene.add(sunDisc, moon);
 
@@ -553,8 +592,16 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   const bankMat = flat('#cbbf9f', { polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
   const onLand: { points: number[]; width: number }[] = [];
   const onWater: { points: number[]; width: number }[] = [];
+  // The road with the longest run over open water: the freight line follows it.
+  let rail: number[] | null = null;
+  let railWater = 0;
   for (const r of roads) {
     const width = r[0] === 2 ? 0.05 : 0.032;
+    let overWater = 0;
+    // How far along the road its water crossing starts and ends.
+    let travelled = 0;
+    let waterFrom = Infinity;
+    let waterTo = 0;
     // One strip for each unbroken stretch over land or over water, not one for each short step.
     let run: number[] = [];
     let afloat = false;
@@ -570,6 +617,13 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       for (let k = 0; k < steps; k++) {
         const p = [ax + ((bx - ax) * k) / steps, ay + ((by - ay) * k) / steps, ax + ((bx - ax) * (k + 1)) / steps, ay + ((by - ay) * (k + 1)) / steps];
         const over = wet((p[0]! + p[2]!) / 2, (p[1]! + p[3]!) / 2, -0.012);
+        const step = Math.hypot(p[2]! - p[0]!, p[3]! - p[1]!);
+        if (over) {
+          overWater += step;
+          waterFrom = Math.min(waterFrom, travelled);
+          waterTo = travelled + step;
+        }
+        travelled += step;
         if (run.length && over !== afloat) {
           close();
           run = [];
@@ -580,6 +634,19 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       }
     }
     close();
+    if (overWater > railWater) {
+      railWater = overWater;
+      // Keep the crossing and a mile and a bit of the approach on each side: the train comes from somewhere, but not from the next county.
+      const pts = r.slice(1);
+      const keep: number[] = [];
+      let at = 0;
+      for (let i = 0; i + 1 < pts.length; i += 2) {
+        if (i > 0) at += Math.hypot(pts[i]! - pts[i - 2]!, pts[i + 1]! - pts[i - 1]!);
+        // …and not through the middle of downtown either.
+        if (at > waterFrom - 1.3 && at < waterTo + 1.3 && Math.hypot(pts[i]!, pts[i + 1]!) > 0.42) keep.push(pts[i]!, pts[i + 1]!);
+      }
+      rail = keep;
+    }
   }
   scene.add(new THREE.Mesh(ribbons(onLand, 0.02), roadMat));
   scene.add(new THREE.Mesh(ribbons(onWater.map((w) => ({ points: w.points, width: w.width + 0.035 })), 0.026), bankMat));
@@ -835,6 +902,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   roofGeo.scale(1, 0.55, 1);
   const roofs = new THREE.InstancedMesh(roofGeo, roofMat, HOUSES);
   const roofTints: string[] = [];
+  const chimneys: { x: number; z: number }[] = [];
   placed = 0;
   for (let tries = 0; placed < HOUSES && tries < 12000; tries++) {
     const r = Math.sqrt(rand()) * shape.urbanRadius;
@@ -854,6 +922,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     dummy.updateMatrix();
     roofs.setMatrixAt(placed, dummy.matrix);
     roofTints.push(pick(['#7a5a4a', '#5d646b', '#8a4b3a', '#6b6258']));
+    chimneys.push({ x: east, z: -north });
     roofs.setColorAt(placed, tmp.set(roofTints[placed]!));
     if (rand() < 0.55) lamps.push({ x: east, y: 0.03, z: -north, color: pick(WINDOW), size: 0.03 });
     placed++;
@@ -1030,6 +1099,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     return g;
   };
   let airport: Landmark | undefined;
+  const terraceChairs = new THREE.Group();
   const build: Record<Landmark['kind'], (g: THREE.Group, m: Landmark) => number> = {
     stadium(g) {
       const bowl = new THREE.CylinderGeometry(0.17, 0.12, 0.075, 22, 1, true);
@@ -1082,14 +1152,36 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       const pier = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.008, 0.012), flat('#8a6a48'));
       pier.position.set(0.15, 0.028, 0.05);
       g.add(hall, patio, pier);
-      // The sunburst chairs: green, yellow, orange.
-      const chair = new THREE.BoxGeometry(0.012, 0.014, 0.012);
-      const paints = ['#3f9a4a', '#f2c230', '#ee7a2a'].map((c) => flat(c, { emissive: c, emissiveIntensity: 0.25 }));
-      for (let i = 0; i < 21; i++) {
-        const c = new THREE.Mesh(chair, paints[i % 3]!);
-        c.position.set(0.012 + (i % 3) * 0.026 + rand() * 0.008, 0.032, -0.085 + Math.floor(i / 3) * 0.028 + rand() * 0.008);
-        g.add(c);
+      // The sunburst chairs: green, yellow, orange. A round back on a small seat, in loose rings
+      // around tables, all turned more or less toward the water. They go indoors for the winter.
+      const seat = new THREE.BoxGeometry(0.0075, 0.003, 0.0075);
+      const back = new THREE.CylinderGeometry(0.0052, 0.0052, 0.0014, 10);
+      back.rotateZ(Math.PI / 2);
+      const paints = ['#3f9a4a', '#f2c230', '#ee7a2a'].map((c) => flat(c, { emissive: c, emissiveIntensity: 0.3 }));
+      const tableMat = flat('#e9e6dc');
+      const rand = seeded(1907); // its own dice, so the rest of the town stays where it was
+      for (let t = 0; t < 12; t++) {
+        const tx = 0.012 + (t % 3) * 0.03 + rand() * 0.008;
+        const tz = -0.082 + Math.floor(t / 3) * 0.05 + rand() * 0.01;
+        const table = new THREE.Mesh(new THREE.CylinderGeometry(0.0055, 0.0055, 0.006, 8), tableMat);
+        table.position.set(tx, 0.026, tz);
+        terraceChairs.add(table);
+        const around = 3 + Math.floor(rand() * 2);
+        for (let k = 0; k < around; k++) {
+          const a = Math.PI * 0.55 + (k / around) * Math.PI * 1.4 + rand() * 0.3;
+          const paint = paints[Math.floor(rand() * 3)]!;
+          const chair = new THREE.Group();
+          const s = new THREE.Mesh(seat, paint);
+          s.position.y = 0.004;
+          const b = new THREE.Mesh(back, paint);
+          b.position.set(-0.0042, 0.0092, 0);
+          chair.add(s, b);
+          chair.position.set(tx + Math.cos(a) * 0.012, 0.022, tz + Math.sin(a) * 0.012);
+          chair.rotation.y = -a + Math.PI + (rand() - 0.5) * 0.5;
+          terraceChairs.add(chair);
+        }
       }
+      g.add(terraceChairs);
       return 0.2;
     },
     hall(g) {
@@ -1502,6 +1594,13 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     tappable.push(lake);
   }
 
+  // The small things: wind, smoke, wakes, a train, market tents, a full stadium, the northern lights.
+  const life = addLife({
+    scene, shape, rand: seeded(1848), calm, glowPoints, wet, chimneys, rail, boats,
+    lawn: 0.25 * CAP, centerHeight: 0.5 * CAP, fliers: [plane, balloon], stadiumFoot: FOOT.stadium!,
+  });
+  for (const holiday of shape.holidayLights ?? []) touchable(holiday.name, holiday.east, holiday.north, holiday.radius, 0.1);
+
   // The sun runs the day forward when tapped.
   let lapse = 0; // hours still to play
   const lapseTap = () => { if (!calm) lapse = 24; };
@@ -1715,6 +1814,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   let wetNow = 0;
   let stormNow = 0;
   let fogNow = 0;
+  let blazeNow = 0;
+  let elevationNow = 0.6;
   let last = performance.now();
   let clock = 0;
   let raf = 0;
@@ -1736,13 +1837,14 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       camera.fov = w / h < 1 ? 52 : w / h < 1.8 ? 42 : 32;
       camera.updateProjectionMatrix();
       const px = (h * renderer.getPixelRatio()) / (2 * Math.tan((camera.fov * Math.PI) / 360));
-      for (const p of [stars, cityLights, traffic, fireflies]) p.uniforms.scale.value = p.attenuate ? px : renderer.getPixelRatio();
+      for (const p of [stars, cityLights, traffic, fireflies, ...life.points]) p.uniforms.scale.value = p.attenuate ? px : renderer.getPixelRatio();
     }
   };
 
   const frame = (now: number) => {
     raf = requestAnimationFrame(frame);
-    if (document.hidden) return;
+    // Nothing is drawn while the tab is hidden or the model is scrolled out of view.
+    if (document.hidden || !inView) return;
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     clock += dt;
@@ -1757,10 +1859,19 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         t += (24 - lapse) * HOUR;
       }
       const { e, p } = elevation(t, sky.sunrise, sky.sunset);
+      elevationNow = e;
       wetNow += (sky.wet - wetNow) * ease;
       stormNow += ((sky.storm ? 1 : 0) - stormNow) * ease;
       fogNow += ((sky.fog ?? 0) - fogNow) * ease;
       const want = lookAt(e, wetNow, stormNow, fogNow);
+      // An evening the forecast gives a show to: the horizon burns and the sky above it goes to plum.
+      const blaze = p > 0.5 ? (sky.sunsetGlow ?? 0) * Math.max(0, 1 - Math.abs(e - 0.04) / 0.34) * (1 - wetNow) * (1 - fogNow) : 0;
+      if (blaze > 0) {
+        want.horizon.lerp(tmp.set('#ff5d3a'), blaze * 0.62);
+        want.top.lerp(tmp.set('#6b4189'), blaze * 0.5);
+        want.light.lerp(tmp.set('#ff9a6a'), blaze * 0.5);
+      }
+      blazeNow = blaze;
       const k = lapse > 0 ? 1 : ease;
       look.top.lerp(want.top, k);
       look.horizon.lerp(want.horizon, k);
@@ -1778,7 +1889,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       (scene.fog as THREE.Fog).far = 44 - fogNow * 22;
       // Rain, as far as the ground is concerned: wet streets and a roughened lake. Snow is neither.
       const raining = sky.snowing ? 0 : Math.max(0, Math.min(1, (wetNow - 0.3) / 0.5));
-      waterUniforms.chop.value = raining * (0.5 + stormNow * 0.5);
+      waterUniforms.chop.value = Math.max(raining * (0.5 + stormNow * 0.5), Math.min(1, life.wind.mph / 24) * 0.9) - (life.wind.mph < 4 ? 0.55 : 0);
       hemi.intensity = look.ambient * 1.7;
       hemi.color.copy(look.top).lerp(white, 0.55 - look.glow * 0.25);
       hemi.groundColor.set('#9a9c86').lerp(tmp.set('#2a3560'), look.glow * 0.8);
@@ -1790,7 +1901,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       cityLights.uniforms.opacity.value = look.glow * (1 - wetNow * 0.3);
       traffic.uniforms.opacity.value = 0.35 + look.glow * 0.65;
       roadMat.color.set(snowCover ? '#a9afb4' : '#d9d0bd').lerp(tmp.set('#8d8a84'), raining * 0.75).multiplyScalar(0.3 + 0.7 * Math.min(1, look.ambient)).lerp(tmp.set('#6b4a2c'), look.glow * 0.8);
-      cloudMat.color.copy(look.horizon).lerp(white, (e > 0.2 ? 0.75 : 0.25) * (1 - stormNow * 0.8));
+      cloudMat.color.copy(look.horizon).lerp(white, (e > 0.2 ? 0.75 : 0.25) * (1 - stormNow * 0.8)).lerp(tmp.set('#ff8d78'), blazeNow * 0.7);
 
       // The sun crosses the far (north-western) sky so it sets where Madison watches it set: over the big lake.
       const up = e > -0.08;
@@ -1800,7 +1911,10 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       // Stylized: the key light always comes over the viewer's shoulder, so the town is never a silhouette.
       sunLight.position.set(Math.cos(a) * 5 + 3, 6 + Math.sin(a) * 3, 6);
       const sunColor = (sunDisc.material as THREE.MeshBasicMaterial).color.set('#ff9a52').lerp(tmp.set('#fff3c4'), Math.min(1, Math.max(0, e * 2.2)));
-      (moon.material as THREE.MeshBasicMaterial).opacity = Math.min(1, Math.max(0, -e * 3)) * (1 - wetNow * 0.8);
+      moonUniforms.opacity.value = Math.min(1, Math.max(0, -e * 3)) * (1 - wetNow * 0.8);
+      moonUniforms.phase.value = sky.moonPhase ?? 0.5;
+      // How much of it is lit: a new moon lays no path on the water.
+      const moonLit = (1 - Math.cos((sky.moonPhase ?? 0.5) * Math.PI * 2)) / 2;
       moon.visible = e < 0;
 
       // Whichever is up lights the sky around it and lays a path on the water.
@@ -1808,10 +1922,10 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       const dry = 1 - wetNow * 0.85;
       skyUniforms.body.value.copy(body.position).sub(camera.position).normalize();
       skyUniforms.bodyColor.value.copy(up ? sunColor : tmp.set('#aab6e8'));
-      skyUniforms.bodyGlow.value = (up ? 0.55 + (1 - Math.max(0, e)) * 0.6 : 0.3 * (moon.material as THREE.MeshBasicMaterial).opacity) * dry * (1 - fogNow * 0.7);
+      skyUniforms.bodyGlow.value = (up ? 0.55 + (1 - Math.max(0, e)) * 0.6 : 0.3 * moonUniforms.opacity.value * (0.2 + 0.8 * moonLit)) * dry * (1 - fogNow * 0.7);
       waterUniforms.body.value.copy(skyUniforms.body.value);
       waterUniforms.bodyColor.value.copy(skyUniforms.bodyColor.value);
-      waterUniforms.glint.value = (up ? 1 : 0.5) * dry * (1 - fogNow * 0.8) * (1 - waterUniforms.frozen.value * 0.7);
+      waterUniforms.glint.value = (up ? 1 : 0.12 + 0.6 * moonLit) * dry * (1 - fogNow * 0.8) * (1 - waterUniforms.frozen.value * 0.7);
       waterUniforms.skyTop.value.copy(look.top);
       waterUniforms.skyHorizon.value.copy(look.horizon);
       waterUniforms.deep.value.set('#2a78a8').multiplyScalar(Math.min(1, 0.16 + Math.max(0, e + 0.15) * 1.6)).lerp(tmp.set('#5d6f78'), wetNow * 0.5);
@@ -1833,13 +1947,14 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       rain.visible = rainOn;
       if (snowOn || rainOn) {
         const fall = sky.snowing ? 0.9 : 7 + stormNow * 3;
-        const wind = sky.snowing ? 0 : 0.12 + stormNow * 0.3;
+        const wind = sky.snowing ? 0 : (0.06 + Math.min(0.3, life.wind.mph * 0.012) + stormNow * 0.2) * (life.wind.x < 0 ? -1 : 1);
         const len = 0.16 + stormNow * 0.1;
         for (let i = 0; i < live; i++) {
           let x = dropPos[i * 3]! + (sky.snowing ? Math.sin(clock * 1.3 + i) * 0.25 : wind * fall) * dt;
           let y = dropPos[i * 3 + 1]! - fall * dt;
           if (y < 0) y = 6;
           if (x > 7) x -= 14;
+          if (x < -7) x += 14;
           dropPos[i * 3] = x;
           dropPos[i * 3 + 1] = y;
           if (rainOn) {
@@ -1886,10 +2001,16 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
 
     // Clouds drift; more of them show when it's grey.
     clouds.forEach((c, i) => {
-      c.position.x += (c.userData.speed as number) * dt * (calm ? 0 : 1);
+      // They ride the real wind: its bearing, and faster the harder it blows.
+      const push = (c.userData.speed as number) * dt * (calm ? 0 : 1) * (0.35 + life.wind.mph / 9);
+      c.position.x += life.wind.x * push;
+      c.position.z += life.wind.z * push;
       if (c.position.x > 18) c.position.x = -18;
-      // Never fly through one: a cloud close to the camera is just a grey wall.
-      c.visible = i < 4 + Math.round(wetNow * 8) && fogNow < 0.5 && c.position.distanceTo(camera.position) > 6;
+      if (c.position.x < -18) c.position.x = 18;
+      if (c.position.z > 2) c.position.z = -20;
+      if (c.position.z < -20) c.position.z = 2;
+      // Never fly through one: a cloud close to the camera is just a grey wall. A good sunset wants a few to light up.
+      c.visible = i < Math.max(4 + Math.round(wetNow * 8), blazeNow > 0.15 ? 8 : 0) && fogNow < 0.5 && c.position.distanceTo(camera.position) > 6;
     });
     cloudMat.opacity = 0.6 + wetNow * 0.35;
 
@@ -1940,6 +2061,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       (beacon.material as THREE.MeshBasicMaterial).color.set(Math.floor(clock * 1.2) % 2 ? '#58f08a' : '#ffffff');
     }
 
+    life.tick({ dt, clock, glow: look.glow, e: elevationNow, wet: wetNow, camera });
+
     // Names fade.
     nameLife = Math.max(0, nameLife - dt);
     nameTag.sprite.material.opacity = Math.min(1, nameLife * 2.5);
@@ -1955,7 +2078,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       b.spin = Math.max(0, b.spin - dt * 0.7);
       b.g.position.set(b.cx + Math.cos(b.angle) * b.radius, 0.012, b.cz + Math.sin(b.angle) * b.radius * 0.7);
       b.g.rotation.y = -b.angle + b.spin * 9;
-      b.g.rotation.z = Math.sin(clock * 1.7 + b.angle) * 0.07 + b.spin * 0.35;
+      b.g.rotation.z = Math.sin(clock * 1.7 + b.angle) * 0.07 + b.spin * 0.35 + Math.min(0.32, life.wind.mph * 0.013) * Math.sin(b.angle + Math.atan2(life.wind.z, life.wind.x));
     }
 
     // Balloon.
@@ -2115,6 +2238,12 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     if (++drawn === 4) cb.onReady?.();
   };
   let drawn = 0;
+  let inView = true;
+  const watcher = typeof IntersectionObserver === 'undefined' ? null : new IntersectionObserver((entries) => {
+    inView = entries.some((en) => en.isIntersecting);
+    if (inView) last = performance.now();
+  });
+  watcher?.observe(canvas);
   raf = requestAnimationFrame(frame);
 
   // ------------------------------------------------------------ the handle
@@ -2145,6 +2274,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       infieldMat.color.set(snow ? '#e6ecea' : input.month >= 4 && input.month <= 10 ? '#7fa466' : '#9a9a6c');
       shoreMat.color.set(snow ? '#f4f7f9' : '#d8c9a2');
       dress(input.month, snow);
+      life.set(input);
+      terraceChairs.visible = input.month >= 4 && input.month <= 10 && !snow;
       isFrozen = input.frozen;
       for (const b of boats) {
         // Nobody sails on ice, or under lightning.
@@ -2224,6 +2355,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         return { g, cone, hit, i };
       });
     },
+    visit(east, north, seconds = 6.5) {
+      visit = { x: east, z: -north, until: clock + seconds };
+    },
     zoom(factor) {
       user.zoom = clampZoom(user.zoom * factor);
     },
@@ -2237,6 +2371,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     },
     dispose() {
       cancelAnimationFrame(raf);
+      watcher?.disconnect();
       canvas.removeEventListener('pointerdown', onDown);
       canvas.removeEventListener('pointermove', onMove);
       canvas.removeEventListener('pointerup', onUp);

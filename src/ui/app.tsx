@@ -2,7 +2,9 @@ import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { city, places, shape } from '../cities/madison';
 import { loadEvents, SOURCES } from '../core/events';
-import { fetchLive, headline, type Live as LiveNow } from '../core/live';
+import { inSeasonAt, openIntervals } from '../core/hours';
+import { AURORA_KP, fetchLive, headline, kpFor, warningFor, type Live as LiveNow } from '../core/live';
+import { moonPhase } from '../core/moon';
 import { loadNearby } from '../core/nearby';
 import { directionsUrl, miles, offsetMiles, travelLabel, type LatLng, type Mode } from '../core/geo';
 import { append, MAX_SAVED, pendingCheckIn, summarize, type Entry, type Verb } from '../core/history';
@@ -11,7 +13,7 @@ import { match, statusLine, type Pick, type Request, type Result } from '../core
 import { sunFor } from '../core/sun';
 import { DAY, HOUR, MIN, fmtDay, fmtTime, parseLocalInput, toLocal, toLocalInput } from '../core/time';
 import { GROUP, type Option } from '../core/types';
-import { conditionsFor, fetchWeather, type Weather } from '../core/weather';
+import { conditionsFor, fetchWeather, hourAt, skyLook, type Weather } from '../core/weather';
 import type { Diorama, Live, Pin, Pose, SkyInput } from './scene';
 import { partOfDay, skyAt } from './sky';
 import { Intro } from './intro';
@@ -54,6 +56,24 @@ const PREVIEW: Record<string, Partial<SkyInput>> = {
   rain: { wet: 0.85, snowing: false, storm: false, snowIn: 0, frozen: false },
   storm: { wet: 1, snowing: false, storm: true, snowIn: 0, frozen: false },
   clear: { wet: 0, snowing: false, storm: false, snowIn: 0, frozen: false },
+};
+/**
+ * `?scene=market,gameday` (any of: market, gameday, arena, holiday, aurora, sunset, shelf, cold, windy, calm, full, new)
+ * switches on the model's occasional details, to look at them on a day that isn't having them.
+ */
+const DETAILS: Record<string, (landmarks: typeof shape.landmarks) => Partial<SkyInput>> = {
+  market: () => ({ market: true }),
+  gameday: (l) => ({ busy: l.filter((m) => m.kind === 'stadium').map((m) => m.name) }),
+  arena: (l) => ({ busy: l.filter((m) => m.kind === 'arena').map((m) => m.name) }),
+  holiday: () => ({ holiday: true }),
+  aurora: () => ({ aurora: true }),
+  sunset: () => ({ sunsetGlow: 1 }),
+  shelf: () => ({ shelf: true }),
+  cold: () => ({ tempF: 12 }),
+  windy: () => ({ windMph: 24, windFrom: 315 }),
+  calm: () => ({ windMph: 1 }),
+  full: () => ({ moonPhase: 0.5 }),
+  new: () => ({ moonPhase: 0.02 }),
 };
 const PIN_COLOR: Record<string, string> = { outdoors: '#2fa58a', consume: '#e08a3c', mind: '#8a6fd0', lively: '#e0567a' };
 
@@ -135,6 +155,7 @@ export function App() {
   const deck = useRef<HTMLOListElement>(null);
   const debug = useMemo(() => new URLSearchParams(location.search).has('debug'), []);
   const preview = useMemo(() => new URLSearchParams(location.search).get('weather'), []);
+  const details = useMemo(() => (new URLSearchParams(location.search).get('scene') ?? '').split(',').filter((d) => d in DETAILS), []);
 
   const record = (id: string, verb: Verb) => {
     const next = append(logRef.current, id, verb, Date.now());
@@ -375,6 +396,33 @@ export function App() {
     frozen: conditions.known && conditions.tempF < 33 && (local.mo === 12 || local.mo <= 3), month: local.mo,
     ...PREVIEW[preview ?? ''],
   };
+  // The small things on the model that follow the real day.
+  {
+    const hour = hourAt(weather.current, skyTime);
+    const look = skyLook(weather.current, sun.sunset);
+    const kp = kpFor(liveNow.current, skyTime, skyTime + 3 * HOUR);
+    const warned = warningFor(liveNow.current, skyTime, skyTime + HOUR);
+    const stall = shape.marketPlace ? places.find((p) => p.id === shape.marketPlace) : undefined;
+    // A stadium or an arena is busy from two hours before something starts there until it ends.
+    const busy = shape.landmarks
+      .filter((m) => m.kind === 'stadium' || m.kind === 'arena')
+      .filter((m) => events.current.some((e) => e.when!.start - 2 * HOUR < skyTime && e.when!.end > skyTime && Math.hypot(offsetMiles(city.center, e).east - m.east, offsetMiles(city.center, e).north - m.north) < 0.15))
+      .map((m) => m.name);
+    Object.assign(skyInput, {
+      windMph: hour?.windMph, windFrom: hour?.windFrom, tempF: conditions.known ? conditions.tempF : undefined,
+      sunsetGlow: look === 'colour' ? 1 : look === 'clear' ? 0.4 : look === 'plain' ? 0.15 : 0,
+      moonPhase: moonPhase(skyTime),
+      aurora: kp !== null && kp >= AURORA_KP && look !== 'hidden',
+      shelf: Boolean(warned && /thunderstorm|tornado/i.test(warned.alert.event)),
+      market: Boolean(stall && inSeasonAt(stall, skyTime, tz) && openIntervals(stall, skyTime, skyTime + 1, tz).some(([from, to]) => from <= skyTime && to > skyTime)),
+      busy,
+      holiday: (local.mo === 11 && local.d >= 20) || local.mo === 12 || (local.mo === 1 && local.d === 1),
+    } satisfies Partial<SkyInput>);
+    for (const d of details) {
+      const extra = DETAILS[d]!(shape.landmarks);
+      Object.assign(skyInput, extra, extra.busy ? { busy: [...(skyInput.busy ?? []), ...extra.busy] } : {});
+    }
+  }
   const pins: Pin[] = results
     ? view.result.picks.map((p) => ({
         ...offsetMiles(city.center, p.option),
@@ -647,6 +695,8 @@ function Scene(props: { onReady?: () => void; onFail?: () => void; pose: Pose; s
           onReady: () => { setReady(true); latest.current.onReady?.(); },
         }, calm);
         setOn(true);
+        // With ?debug, the model is on the window, to fly it around from the console.
+        if (new URLSearchParams(location.search).has('debug')) (window as unknown as { model?: Diorama }).model = model.current;
       })
       .catch(() => latest.current.onFail?.()); // no WebGL: the painted sky is the fallback
     const t = setTimeout(() => setHint(false), 12_000);
@@ -659,7 +709,8 @@ function Scene(props: { onReady?: () => void; onFail?: () => void; pose: Pose; s
   }, []);
 
   const s = props.sky;
-  useEffect(() => model.current?.setSky(s), [on, Math.round(s.time / 60_000), s.wet, s.fog, s.snowing, s.storm, s.frozen, Math.round(s.snowIn), s.month]);
+  useEffect(() => model.current?.setSky(s), [on, Math.round(s.time / 60_000), s.wet, s.fog, s.snowing, s.storm, s.frozen, Math.round(s.snowIn), s.month,
+    Math.round(s.windMph ?? -1), Math.round((s.windFrom ?? -1) / 10), Math.round(s.tempF ?? 99), s.sunsetGlow, Math.round((s.moonPhase ?? 0) * 50), s.aurora, s.shelf, s.market, s.holiday, s.busy?.join('|')]);
   useEffect(() => model.current?.setPose(props.pose), [on, props.pose]);
   useEffect(() => model.current?.setPins(props.pins), [on, props.pins.map((p) => `${p.east.toFixed(3)},${p.north.toFixed(3)}`).join('|')]);
   useEffect(() => model.current?.setHome(props.home), [on, props.home ? `${props.home.east.toFixed(3)},${props.home.north.toFixed(3)}` : '']);

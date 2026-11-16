@@ -14,6 +14,8 @@ const at = (name: string, kind: Landmark['kind'], lat: number, lng: number, extr
   return { name, kind, east: Math.round(east * 100) / 100, north: Math.round(north * 100) / 100, ...extra };
 };
 
+const lightsAt = (lat: number, lng: number) => offsetMiles(CENTER, { lat, lng });
+
 export const shape: CityShape = {
   centerLabel: 'Wisconsin State Capitol',
   lakes: data.lakes,
@@ -21,6 +23,10 @@ export const shape: CityShape = {
   roads: data.roads,
   airfield: data.airfield,
   gridTurn: Math.PI / 4,
+  // The farmers' market rings the Capitol when this place is open.
+  marketPlace: 'farmers-market',
+  // Holiday Fantasy in Lights, the drive-through display at Olin Park.
+  holidayLights: [{ name: 'Holiday Fantasy in Lights', ...lightsAt(43.053, -89.378), radius: 0.2 }],
   urbanRadius: 5.2,
   // The skyline, as seen from across Lake Monona: broad slabs of nearly even
   // height in cream, brick and grey stone, none taller than the dome's base.
