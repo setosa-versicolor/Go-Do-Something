@@ -147,7 +147,7 @@ Past versions were wrong quietly. The rules now:
 4. **Dedupe**: same start time at the same spot is one event; the earlier calendar wins.
 5. **Write** `public/events.json`. The app re-validates it and ignores it entirely if it's more than four days old.
 
-A calendar that fails is skipped and reported; the others still publish. The quickest way to get more events through is to add venues to `venues.ts`. Run `npm run events -- --dry --venues` to see every venue whose listings were dropped this week, busiest first, with the address and coordinates from its listing page, in a form that pastes straight into the file. About 115 venues are on file; roughly half of a week's Isthmus listings now get through. The rest are at venues left out on purpose (schools, churches, private homes, towns more than 12 miles out) or are filler.
+A calendar that fails is skipped and reported; the others still publish. The quickest way to get more events through is to add venues to `venues.ts`. Run `npm run events -- --dry --venues` to see every venue whose listings were dropped this week, busiest first, with the address and coordinates from its listing page, in a form that pastes straight into the file. About 180 venues are on file. In a week in November 2026, 164 of 322 Isthmus listings got through: most of the rest were filler (trivia, bingo, meetings), and the unknown venues left were mostly past 12 miles, churches or meditation centres. The rest are at venues left out on purpose (schools, churches, private homes, towns more than 12 miles out) or are filler.
 
 To add a calendar: write a parser in `sources.ts`, test it against a real sample, name it in `SOURCES`, and list it in `scripts/fetch-events.ts`.
 
