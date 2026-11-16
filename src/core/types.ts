@@ -67,6 +67,13 @@ export interface Option extends LatLng {
   kids: 0 | 1 | 2;
   /** Mood → strength (1 = this is what it's for, 0.6 = also good for). */
   moods: Partial<Record<Mood, number>>;
+  /**
+   * Why this place, in one sentence, for someone after that mood: the reason
+   * shown on its card. About this place and no other, and claiming nothing the
+   * story and nudge don't back. The first entry is the one used when nothing
+   * in particular was asked for.
+   */
+  why?: Partial<Record<Mood, string>>;
   needs?: Need[];
   best?: Best[];
   /** Editorial weight 0..1: how strongly we'd vouch for it. Default 0.5. */

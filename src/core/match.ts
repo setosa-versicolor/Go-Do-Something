@@ -96,6 +96,8 @@ export const TUNING = {
   sameSetting: 0.08,
   sameHood: 0.06,
   wildcardFloor: 0.55, // a left turn must still score this share of the top pick
+  afterDark: 0.2, // a park or a trail once the light has gone, unless night is when it's best
+  strongMoment: 0.3, // from here up, the moment is the reason; below it, the place's own line comes first
   closeMin: 6, // this near is worth saying out loud
   vouchGem: 0.85, // editorial weight from which "I'd vouch for it" is the reason
   freshCheckDays: 60, // hours checked by hand this recently are worth mentioning
@@ -243,14 +245,20 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
     if (opt.setting === 'out' && conditions.sky === 'damp') parts.drizzle = -0.2;
     if (opt.setting === 'out' && conditions.feelsF < 25 && !opt.best?.includes('snow')) parts.cold = -0.2;
   }
+  // A lawn or a trail is a lesser thing once you can't see it. Views, beer gardens and lit hills are not.
+  const unlit = begin > sun.sunset + twilight || begin < sun.sunrise - twilight;
+  if (unlit && opt.setting === 'out' && GROUP[opt.category] === 'outdoors' && opt.category !== 'view' && !opt.best?.includes('night')) parts.dark = -TUNING.afterDark;
   if (opt.best?.includes('morning') && hour >= 5 && hour < 10.5) moments.push({ score: 0.2, line: "It's at its best in the morning, and it's morning." });
   if (opt.best?.includes('night') && (hour >= 20 || hour < 3)) moments.push({ score: 0.2, line: 'It gets better after dark, and it is.' });
   if (opt.when || intent.today) {
     const today = toLocal(req.now, tz);
     const same = today.y === local.y && today.mo === local.mo && today.d === local.d;
     const day = same ? (hour >= 17 ? 'tonight' : 'today') : 'then';
+    // For something with a start time, the sharpest thing to say is when, and how comfortably you'd make it.
+    const spare = Math.round((begin - arrive) / MIN);
+    const timed = spare >= 10 ? `It starts at ${fmtTime(begin, tz)} ${day}. You'd be there with ${spare} minutes in hand.` : `It starts at ${fmtTime(begin, tz)} ${day}, and you'd just make it.`;
     // A market asked for as "what's on" earns the same credit as an event.
-    moments.push({ score: 0.25, line: opt.when ? `It's on ${day}, and you'd make the start.` : `It's open ${day}, and you can turn up any time.` });
+    moments.push({ score: 0.25, line: opt.when ? (opt.dropIn ? `It's on ${day}, and you can turn up any time.` : timed) : `It's open ${day}, and you can turn up any time.` });
   }
   moments.sort((a, b) => b.score - a.score);
   if (moments.length) parts.moment = W.moment * Math.min(0.6, moments[0]!.score + 0.3 * moments.slice(1).reduce((s, m) => s + m.score, 0));
@@ -321,7 +329,9 @@ function choose(ranked: Candidate[], req: Request, memory: Memory): Candidate[] 
         const weights = turns.map((c) => {
           const fresh = memory.lastShown.has(c.option.id) ? 1 : 1.5;
           const elsewhere = chosen.every((x) => GROUP[x.option.category] !== GROUP[c.option.category]) ? 2 : 1;
-          return Math.max(0.01, c.score) ** 2 * fresh * elsewhere;
+          // A left turn should be worth taking: lean to what we'd vouch for, and to the odd.
+          const worth = (0.6 + (c.option.gem ?? 0.5)) * (1 + 0.5 * (c.option.moods.odd ?? 0));
+          return Math.max(0.01, c.score) ** 2 * fresh * elsewhere * worth;
         });
         let r = rng() * weights.reduce((s, w) => s + w, 0);
         const turn = turns.find((_, i) => (r -= weights[i]!) <= 0) ?? turns[0]!;
@@ -425,7 +435,6 @@ function facts(c: Candidate, req: Request, world: World): string[] {
   const tz = world.city.tz;
   const out: string[] = [];
   if (o.when) {
-    if (!o.dropIn) out.push(`It starts at ${fmtTime(c.begin, tz)}, and you're ${c.travelMin} minutes away.`);
     if (o.venue) out.push(`It's at ${o.venue}, about ${c.travelMin} minutes from where you're starting.`);
     return out;
   }
@@ -458,28 +467,42 @@ function facts(c: Candidate, req: Request, world: World): string[] {
 }
 
 /**
- * One reason per card, the sharpest true one: the moment, then what was asked
- * for, then a fact about this place, and only then a general line.
+ * One reason per card, the sharpest true one. In order: a moment that won't
+ * keep (sunset, a seasonal peak, the weather); their own history with it;
+ * the place's own line for what they asked; a lesser moment; a general line
+ * for what they asked; the place's own line regardless; a fact; a stock line.
  * `used` holds lines already given to earlier picks: three cards never share a reason.
  */
 function explain(c: Candidate, req: Request, world: World, used: Set<string>): string {
   const o = c.option;
   const lines: string[] = [];
   const top = c.moments[0];
-  if (top && top.score >= 0.2) lines.push(top.line);
-  const wanted = (Object.entries(req.intent.moods) as [Mood, number][])
-    .map(([m, w]) => [m, w * (o.moods[m] ?? 0)] as const)
-    .sort((a, b) => b[1] - a[1])[0];
-  const lineFor = (m: Mood) => MOOD_LINE[m][(o.moods[m] ?? 0) >= 1 ? 0 : 1].replace('Madison', world.city.name);
+  if (top && top.score >= TUNING.strongMoment) lines.push(top.line);
+  if (world.memory.saved.includes(o.id)) lines.push("You saved this one. Now's a good time for it.");
+  if (c.parts.been && c.parts.been > 0) lines.push('You liked it last time.');
+
   const vibe = VIBES.find((v) => v.id === req.intent.vibe);
+  // What they asked for, strongest first: the moods in their words, then the feel they picked, then who's along.
+  const byFit = (moods: Partial<Record<Mood, number>>) =>
+    (Object.entries(moods) as [Mood, number][]).map(([m, w]) => [m, w * (o.moods[m] ?? 0)] as const).sort((a, b) => b[1] - a[1]);
+  const wanted = byFit(req.intent.moods)[0];
+  const asked: Mood[] = [...byFit(req.intent.moods), ...byFit(vibe?.moods ?? {})].filter(([, fit]) => fit > 0).map(([m]) => m);
+  if (req.intent.withKids) asked.push('kids');
+  const why = o.why ?? {};
+  const lead = Object.values(why)[0];
+  // The place's own sentence for that. With nothing asked, or for the left turn, its lead sentence.
+  const own = asked.map((m) => why[m]).find(Boolean) ?? (asked.length === 0 || c.wildcard ? lead : undefined);
+  if (own) lines.push(own);
+  if (top && top.score >= 0.2) lines.push(top.line);
+
+  const lineFor = (m: Mood) => MOOD_LINE[m][(o.moods[m] ?? 0) >= 1 ? 0 : 1].replace('Madison', world.city.name);
   if (vibe && vibeFit(vibe, o.moods) >= 0.6) lines.push(vibe.line);
   const kind = req.intent.kinds.includes(o.category) ? KIND_LINE[o.category] : undefined;
   if (kind) lines.push(kind);
   if (wanted && wanted[1] > 0) lines.push(lineFor(wanted[0]));
   if (req.intent.withKids && wanted?.[0] !== 'kids' && (o.moods.kids ?? 0) > 0) lines.push(lineFor('kids'));
   if (req.intent.cheap && o.price === 0) lines.push('And it costs nothing.');
-  if (world.memory.saved.includes(o.id)) lines.push("You saved this one. Now's a good time for it.");
-  if (c.parts.been && c.parts.been > 0) lines.push('You liked it last time.');
+  if (lead) lines.push(lead);
   lines.push(...rotate(facts(c, req, world), o.id));
   lines.push(...rotate(o.kind === 'event' ? EVENT_LINES : GROUP_LINES[GROUP[o.category]]!, o.id));
   lines.push(`It fits the time you have: about ${c.stayMin} minutes there, ${c.travelMin} each way.`);

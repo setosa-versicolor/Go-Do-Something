@@ -69,9 +69,9 @@ describe('matching "local today"', () => {
     const reasons = r.picks.map((p) => p.reason.replace('The left turn. ', ''));
     expect(r.picks).toHaveLength(3);
     expect(new Set(reasons).size).toBe(3);
-    expect(reasons).toContain("It's on tonight, and you'd make the start.");
+    // Each event says when it starts and how comfortably you'd make it; the market says you can turn up.
+    expect(reasons.filter((l) => /^It starts at 7 pm tonight\. You'd be there with \d+ minutes in hand\.$/.test(l))).toHaveLength(2);
     expect(reasons).toContain("It's open tonight, and you can turn up any time.");
-    expect(reasons.some((l) => /^It starts at 7 pm|^It's at A Room/.test(l))).toBe(true);
   });
 
   it('never fills seats from the map', () => {

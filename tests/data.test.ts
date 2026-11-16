@@ -5,6 +5,11 @@ import { CATEGORIES, MOODS } from '../src/core/types';
 import { city, places, shape, venues } from '../src/cities/madison';
 
 describe('the Madison list', () => {
+  it('never gives two places the same reason', () => {
+    const lines = places.flatMap((p) => Object.values(p.why ?? {}));
+    expect(new Set(lines).size).toBe(lines.length);
+  });
+
   it('has unique ids', () => {
     expect(new Set(places.map((p) => p.id)).size).toBe(places.length);
   });
@@ -24,6 +29,15 @@ describe('the Madison list', () => {
     expect(p.nudge!.length).toBeGreaterThan(60);
     expect(p.what.length).toBeLessThanOrEqual(60);
     expect(p.story + p.nudge).not.toMatch(/\b(must-see|hidden gem|iconic|vibrant|nestled|world-class|something for everyone)\b/i);
+    // The reason on its card: one for everything the place is *for*, about this place, a sentence, and short.
+    const why = Object.entries(p.why ?? {});
+    expect(why.length, 'needs a why line').toBeGreaterThan(0);
+    for (const [m, w] of Object.entries(p.moods)) if (w === 1) expect(p.why, `needs a why line for ${m}`).toHaveProperty(m);
+    for (const [m, line] of why) {
+      expect(Object.keys(p.moods), `why.${m} is for a mood the place doesn't have`).toContain(m);
+      expect(line).toMatch(/^[A-Z].{20,118}[.]$/);
+      expect(line).not.toMatch(/\b(must-see|hidden gem|iconic|vibrant|nestled|world-class|something for everyone)\b/i);
+    }
     // Hours and seasons parse; nothing is "open" for zero minutes a week.
     expect(p.rules!.length).toBeGreaterThan(0);
     for (const r of p.rules!) {
