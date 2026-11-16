@@ -1382,9 +1382,13 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     const pts = r.slice(1);
     const cum = [0];
     for (let i = 0; i + 3 < pts.length; i += 2) cum.push(cum[cum.length - 1]! + Math.hypot(pts[i + 2]! - pts[i]!, pts[i + 3]! - pts[i + 1]!));
-    return { pts, cum, len: cum[cum.length - 1]! };
+    return { pts, cum, len: cum[cum.length - 1]!, highway: r[0] === 2 };
   }).filter((r) => r.len > 0.5);
-  const cars = Array.from({ length: routes.length ? 70 : 0 }, () => ({ route: pick(routes), d: rand(), speed: (0.18 + rand() * 0.2) * (rand() < 0.5 ? 1 : -1) }));
+  // Highways move fast; city streets about a third as quick, and slower again in the middle of town.
+  const cars = Array.from({ length: routes.length ? 70 : 0 }, () => {
+    const route = pick(routes);
+    return { route, d: rand(), speed: (route.highway ? 0.18 + rand() * 0.2 : 0.06 + rand() * 0.05) * (rand() < 0.5 ? 1 : -1) };
+  });
   const traffic = glowPoints(cars.map(() => ({ x: 0, y: 0.05, z: 0, color: '#fff6dd', size: 0.03 })), { attenuate: true, twinkle: 0, speed: 0, sharp: 1 });
   scene.add(traffic.points);
 
@@ -2052,12 +2056,15 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     // Traffic.
     cars.forEach((c, i) => {
       const r = c.route;
-      c.d = (((c.d + (c.speed * dt * (calm ? 0 : 1)) / r.len) % 1) + 1) % 1;
+      // Where it is now decides how fast it goes next: within a mile or so of the Capitol, a city car crawls.
       const want = c.d * r.len;
       let k = 1;
       while (k < r.cum.length - 1 && r.cum[k]! < want) k++;
       const f = (want - r.cum[k - 1]!) / Math.max(1e-6, r.cum[k]! - r.cum[k - 1]!);
       const j = (k - 1) * 2;
+      const fromCenter = Math.hypot(r.pts[j]!, r.pts[j + 1]!);
+      const crawl = r.highway ? 1 : 0.45 + 0.55 * Math.min(1, Math.max(0, (fromCenter - 0.8) / 2));
+      c.d = (((c.d + (c.speed * crawl * dt * (calm ? 0 : 1)) / r.len) % 1) + 1) % 1;
       traffic.pos[i * 3] = r.pts[j]! + (r.pts[j + 2]! - r.pts[j]!) * f;
       traffic.pos[i * 3 + 2] = -(r.pts[j + 1]! + (r.pts[j + 3]! - r.pts[j + 1]!) * f);
     });
@@ -2133,7 +2140,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       water.step(dt, isFrozen ? [] : dabs);
       waterUniforms.waves.value = water.texture;
       // Ice has no ripples. The strength is per mile, not per cell, so a finer grid shows the same wave the same way.
-      waterUniforms.waveGain.value = (0.036 * cellsPerMile) * (1 - waterUniforms.frozen.value);
+      waterUniforms.waveGain.value = (0.027 * cellsPerMile) * (1 - waterUniforms.frozen.value);
     }
 
     // Balloon.
