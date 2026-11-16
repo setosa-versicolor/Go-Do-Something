@@ -158,20 +158,20 @@ describe('the line on the opening screen', () => {
 
   it('leads with a warning', () => {
     const l = live({ alerts: [{ event: 'Winter Storm Warning', from: noon - HOUR, until: noon + 9 * HOUR }] });
-    expect(head(noon, sky(noon, { tempF: 72 }, {}), l)).toEqual({ line: 'Winter storm warning until 9 pm. A time for somewhere with a roof.', say: 'inside cozy' });
+    expect(head(noon, sky(noon, { tempF: 72 }, {}), l)).toEqual({ tag: 'Winter storm warning', tone: 'warn', line: 'Winter storm warning until 9 pm. A time for somewhere with a roof.', say: 'inside cozy', act: 'Somewhere with a roof' });
     const t = live({ alerts: [{ event: 'Tornado Warning', from: noon - HOUR, until: noon + 30 * MIN }] });
-    expect(head(noon, null, t)).toEqual({ line: 'Tornado warning until 12:30 pm. Stay in. This will keep.' });
+    expect(head(noon, null, t)).toEqual({ tag: 'Tornado warning', tone: 'warn', line: 'Tornado warning until 12:30 pm. Stay in. This will keep.' });
   });
 
   it('says when the weather is about to turn', () => {
     const w = weatherOf(noon, { tempF: 75 });
     const wet = { ...w, hours: w.hours.map((h) => (h.t >= noon + 2 * HOUR ? { ...h, code: 95 } : h)) };
-    expect(head(noon, wet)!.line).toBe('Storms are due around 2 pm. Go now, or plan for indoors.');
+    expect(head(noon, wet)).toMatchObject({ tag: 'Storms by 2 pm', tone: 'warn', line: 'Storms are due around 2 pm. Go now, or plan for indoors.' });
   });
 
   it('points at a good sunset while there is time to get to one', () => {
     const t = sunOn(noon).sunset - 90 * MIN;
-    expect(head(t, sky(t, { tempF: 50 }, { low: 10, high: 70 }))).toMatchObject({ say: 'sunset outside', line: expect.stringMatching(/high cloud for it to light up/) });
+    expect(head(t, sky(t, { tempF: 50 }, { low: 10, high: 70 }))).toMatchObject({ tag: 'Good sunset', tone: 'good', say: 'sunset outside', act: 'Find me a view west', line: expect.stringMatching(/high cloud for it to light up/) });
     expect(head(t, sky(t, { tempF: 50 }, { low: 95 }))).toBeNull();
   });
 

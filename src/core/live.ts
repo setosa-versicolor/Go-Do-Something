@@ -130,24 +130,30 @@ export function alertLine(a: Alert, tz: string): string {
 
 /**
  * The one thing most worth knowing about right now, for the opening screen,
- * or null on an ordinary day. `say` is what tapping it asks for: canned words
- * that go through the same parser as everything else.
+ * or null on an ordinary day. `tag` is the two or three words on the banner,
+ * `line` the detail it opens to. `say` is what its button asks for (canned
+ * words that go through the same parser as everything else) and `act` is the
+ * button's label. `tone` is 'warn' for anything to be careful of.
  */
 export interface Headline {
+  tag: string;
+  tone: 'good' | 'warn';
   line: string;
   say?: string;
+  act?: string;
 }
 
 export function headline(now: number, weather: Weather | null, live: Live | null, sun: Sun, tz: string): Headline | null {
   const warn = warningFor(live, now, now + 3 * HOUR);
   if (warn) {
     const line = alertLine(warn.alert, tz);
-    if (warn.level === 'shelter') return { line: `${line} Stay in. This will keep.` };
-    return { line: `${line} A time for somewhere with a roof.`, say: 'inside cozy' };
+    const tag = lower(warn.alert.event);
+    if (warn.level === 'shelter') return { tag, tone: 'warn', line: `${line} Stay in. This will keep.` };
+    return { tag, tone: 'warn', line: `${line} A time for somewhere with a roof.`, say: 'inside cozy', act: 'Somewhere with a roof' };
   }
 
   const air = airFor(live, now, now + 3 * HOUR);
-  if (air !== null && air >= AIR.bad) return { line: `The air is bad today (index ${Math.round(air)}). Indoors is the better idea.`, say: 'inside' };
+  if (air !== null && air >= AIR.bad) return { tag: 'Bad air', tone: 'warn', line: `The air is bad today (index ${Math.round(air)}). Indoors is the better idea.`, say: 'inside', act: 'Somewhere indoors' };
 
   const here = conditionsFor(weather, now, now + HOUR);
   const dark = now > sun.sunset + 45 * MIN || now < sun.sunrise - 45 * MIN;
@@ -155,7 +161,7 @@ export function headline(now: number, weather: Weather | null, live: Live | null
   const nightLook = skyLook(weather, tonight);
   const kp = kpFor(live, tonight, tonight + 6 * HOUR);
   if (kp !== null && kp >= AURORA_KP && now > sun.sunset - 6 * HOUR && (nightLook === 'clear' || nightLook === 'colour' || nightLook === 'plain')) {
-    return { line: 'The northern lights may reach this far south tonight. Get away from the streetlights and look north.', say: 'outside tonight' };
+    return { tag: 'Northern lights', tone: 'good', line: 'The northern lights may reach this far south tonight. Get away from the streetlights and look north.', say: 'outside tonight', act: 'Somewhere dark' };
   }
 
   // Weather about to turn: say when, while there's still time to go first.
@@ -164,26 +170,26 @@ export function headline(now: number, weather: Weather | null, live: Live | null
       const then = conditionsFor(weather, t, t + 1);
       if (!then.known || then.sky === 'dry' || then.sky === 'damp') continue;
       const h = hourAt(weather, t)!;
-      const what = then.sky === 'storm' ? 'Storms are' : /snow/.test(then.summary) ? 'Snow is' : 'Rain is';
-      return { line: `${what} due around ${fmtTime(h.t, tz)}. Go now, or plan for indoors.` };
+      const what = then.sky === 'storm' ? 'Storms' : /snow/.test(then.summary) ? 'Snow' : 'Rain';
+      return { tag: `${what} by ${fmtTime(h.t, tz)}`, tone: 'warn', line: `${what} ${what === 'Storms' ? 'are' : 'is'} due around ${fmtTime(h.t, tz)}. Go now, or plan for indoors.` };
     }
   }
 
   const toSunset = (sun.sunset - now) / MIN;
   if (here.known && here.sky === 'dry' && toSunset > 15 && toSunset < 150) {
     const look = skyLook(weather, sun.sunset);
-    if (look === 'colour') return { line: `Sunset is at ${fmtTime(sun.sunset, tz)}, and the forecast leaves high cloud for it to light up. Find a view west.`, say: 'sunset outside' };
-    if (look === 'clear') return { line: `Sunset is at ${fmtTime(sun.sunset, tz)} under a clear sky. Find a view west.`, say: 'sunset outside' };
+    if (look === 'colour') return { tag: 'Good sunset', tone: 'good', line: `Sunset is at ${fmtTime(sun.sunset, tz)}, and the forecast leaves high cloud for it to light up. Find a view west.`, say: 'sunset outside', act: 'Find me a view west' };
+    if (look === 'clear') return { tag: 'Clear sunset', tone: 'good', line: `Sunset is at ${fmtTime(sun.sunset, tz)} under a clear sky. Find a view west.`, say: 'sunset outside', act: 'Find me a view west' };
   }
-  if (here.known && /snowing|flurries/.test(here.summary)) return { line: "It's snowing. Go and look at it, or watch from somewhere warm.", say: 'cozy' };
+  if (here.known && /snowing|flurries/.test(here.summary)) return { tag: 'Snowing', tone: 'good', line: "It's snowing. Go and look at it, or watch from somewhere warm.", say: 'cozy', act: 'Somewhere warm' };
 
   const daylight = now > sun.sunrise && now < sun.sunset - 30 * MIN;
   if (here.known && here.sky === 'dry' && daylight && here.feelsF >= 62 && here.feelsF <= 82 && (here.windMph ?? 0) < 18) {
-    if (here.windMph !== null && here.windMph <= 5) return { line: `${Math.round(here.tempF)}° and hardly a breath of wind. The lakes will be flat.`, say: 'outside water' };
-    return { line: `${Math.round(here.tempF)}° and dry. Days like this are for being outside.`, say: 'outside' };
+    if (here.windMph !== null && here.windMph <= 5) return { tag: 'Flat lakes', tone: 'good', line: `${Math.round(here.tempF)}° and hardly a breath of wind. The lakes will be flat.`, say: 'outside water', act: 'Get me on the water' };
+    return { tag: 'A fine day', tone: 'good', line: `${Math.round(here.tempF)}° and dry. Days like this are for being outside.`, say: 'outside', act: 'Get me outside' };
   }
   if (here.known && here.sky === 'dry' && dark && moonNearFull(now) && nightLook === 'clear') {
-    return { line: 'Clear, and the moon is close to full. The lakes will be lit.', say: 'outside tonight' };
+    return { tag: 'Moonlit night', tone: 'good', line: 'Clear, and the moon is close to full. The lakes will be lit.', say: 'outside tonight', act: 'Take me out under it' };
   }
   return null;
 }

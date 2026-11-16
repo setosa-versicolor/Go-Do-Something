@@ -115,6 +115,10 @@ export function App() {
   }, [shown, sceneReady, sceneFailed, weatherIn]);
   const endIntro = () => { setIntro(false); markIntroSeen(); };
   const [vibe, setVibe] = useState('');
+  const [moodLabel, setMoodLabel] = useState<string | null>(null);
+  // The "right now" banner: folded until tapped. Once it has been opened it stops calling for attention.
+  const [nowOpen, setNowOpen] = useState(false);
+  const [nowSeen, setNowSeen] = useState(false);
   const [vibeOpen, setVibeOpen] = useState(false);
   const [toast, setToast] = useState('');
   const [active, setActive] = useState<number | null>(null); // the card the model is looking at
@@ -197,7 +201,7 @@ export function App() {
     const w = world(options, now);
     const result = match(req, w);
     // "Local today" asked about tomorrow is still what's on, just not today.
-    const tile = intent.today && q.mood && fmtDay(start, now, tz) !== 'today' ? "What's on" : MOODS.find((m) => m[2] === q.mood)?.[0];
+    const tile = intent.today && q.mood && fmtDay(start, now, tz) !== 'today' ? "What's on" : MOODS.find((m) => m[2] === q.mood)?.[0] ?? (q.mood ? moodLabel : null) ?? undefined;
     const hours = durationMin % 60 === 0 ? `${durationMin / 60} hour${durationMin === 60 ? '' : 's'}` : `${durationMin} minutes`;
     setActive(null);
     setView({ req, result, options, label: [q.text ? `“${q.text}”` : [tile ?? 'Anything', along && along[1] ? along[0].toLowerCase() : null, vibe ? vibeLabel(vibe) : null].filter(Boolean).join(', '), hours].join(' · ') });
@@ -222,8 +226,11 @@ export function App() {
     window.scrollTo(0, 0);
   };
 
-  const chooseMood = (words: string) => {
+  /** `label` names a choice that isn't a tile (the "right now" banner), for the heading over the picks. */
+  const chooseMood = (words: string, label: string | null = null) => {
     setMood(words);
+    setMoodLabel(label);
+    setNowOpen(false);
     setText('');
     setStage('time');
   };
@@ -395,11 +402,14 @@ export function App() {
   const r = view?.result;
   // The one thing worth knowing about right now, if there is one. Tapping it asks for exactly that.
   const head = stage === 'mood' && !intro ? headline(now, weather.current, liveNow.current, sun, tz) : null;
-  const moment = [
+  const momentParts = [
     results && view.req.start - view.req.now > 5 * MIN ? `${cap(fmtDay(view.req.start, view.req.now, tz))}, ${fmtTime(view.req.start, tz)}` : fmtTime(now, tz),
     conditions.known ? conditions.summary : null,
     skyTime < sun.sunset && skyTime > sun.sunrise ? `sunset ${fmtTime(sun.sunset, tz)}` : null,
-  ].filter(Boolean).join(' · ');
+  ].filter((x): x is string => Boolean(x));
+  const moment = momentParts.join(' · ');
+  // On the banner the tag takes the sunset's place; the time and the weather stay.
+  const momentShort = momentParts.filter((x) => !x.startsWith('sunset')).join(' · ');
 
   return (
     <div class={`page stage-${stage}${intro ? ' intro-on' : ''}${shown ? ' shown' : ''}`}>
@@ -409,13 +419,28 @@ export function App() {
         <div class="sky-inner">
           <p class="brand">
             <button class="plain" onClick={() => setStage('mood')} aria-label={`Do Something, ${city.name}: start over`}>Do Something · {city.name}</button>
-            <span>{moment}</span>
+            {head ? (
+              <button type="button" class={`moment ${head.tone}${nowSeen ? ' seen' : ''}`} aria-expanded={nowOpen} aria-controls="now-panel"
+                onClick={() => { setNowOpen(!nowOpen); setNowSeen(true); }}>
+                <span class="dot" aria-hidden="true" />
+                <span class="tag">{head.tag}</span>
+                <span class="rest">{momentShort}</span>
+                <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" /></svg>
+              </button>
+            ) : <span>{moment}</span>}
           </p>
+          {head && (
+            <div id="now-panel" class={`now-panel ${head.tone}${nowOpen ? ' open' : ''}`} role="region" aria-label="Right now" {...(nowOpen ? {} : { inert: true, 'aria-hidden': true })}>
+              <div>
+                <div class="now-card">
+                  <p>{head.line}</p>
+                  {head.say && <button type="button" onClick={() => chooseMood(head.say!, head.tag)}>{head.act}<span aria-hidden="true">→</span></button>}
+                </div>
+              </div>
+            </div>
+          )}
           {stage === 'mood' && !intro && <button type="button" class="help" onClick={() => setIntro(true)} aria-label="How this works">?</button>}
           {stage === 'mood' && <h1>You have a free {part}.<em>Make the most of it.</em></h1>}
-          {head && (head.say
-            ? <button type="button" class="now" onClick={() => chooseMood(head.say!)}><b>Right now</b><span>{head.line}{'\u00a0'}<i aria-hidden="true">→</i></span></button>
-            : <p class="now" role="status"><b>Right now</b><span>{head.line}</span></p>)}
           {stage === 'time' && <h1>How long have you got?</h1>}
           {stage === 'thinking' && <h1 class="pulse" aria-live="polite">{THINKING[line]}</h1>}
           {results && r && (

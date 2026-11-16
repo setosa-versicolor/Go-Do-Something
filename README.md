@@ -99,7 +99,7 @@ Beyond the hourly forecast, the app looks at what is going on outside at this mo
 | Air quality | Open-Meteo air quality | US index 151 and up rules out the outdoors; 101 to 150 leans away from it. Either way the page says so. |
 | K index | NOAA Space Weather Prediction Center | At 7 or more on a clear night, the opening screen says the northern lights may be visible. |
 
-The opening screen shows at most one "Right now" line under the headline (`headline()` in `live.ts`): a warning, bad air, the northern lights, rain or storms due within four hours, a sunset worth going to, snow falling, a fine day, a flat lake, or a moonlit night, in that order. On an ordinary day it shows nothing. Tapping it asks for exactly that, through the same parser as everything else.
+On the opening screen, when there is something worth knowing (`headline()` in `live.ts`: a warning, bad air, the northern lights, rain or storms due within four hours, a sunset worth going to, snow falling, a fine day, a flat lake, or a moonlit night, in that order), the weather line under the wordmark becomes a banner: a glowing dot, a two- or three-word tag ("Good sunset", "Winter storm warning"), and the time and temperature. It breathes and catches the light until it has been opened once. Tapping it unfolds the detail and a button that asks for exactly that, through the same parser as everything else; tapping again folds it away. On an ordinary day it is the plain weather line.
 
 The last forecast is kept in local storage (it is the city's weather, not the person's). A reload within fifteen minutes doesn't ask again, a failed request is retried once, and if that fails too a forecast up to six hours old is used.
 
