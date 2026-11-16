@@ -66,6 +66,12 @@ export interface Pick {
   waits: boolean;
   score: number;
   parts: Record<string, number>;
+  /**
+   * A knowing departure from the request: 'indoors' when they asked for outside,
+   * 'off' when it suits who's coming but isn't the thing they asked for.
+   * Never shown first, always flagged, always said out loud in the reason.
+   */
+  stretch?: 'indoors' | 'off';
 }
 
 export interface Result {
@@ -85,7 +91,7 @@ export const TUNING = {
   lateGraceMin: 10, // may arrive this late to a timed event
   overrunMin: 30, // a timed event may run this far past the window
   twilightMin: 20,
-  weight: { mood: 1, vibe: 0.6, kind: 0.4, moment: 1, time: 0.25, near: 0.45, gem: 0.25, kids: 0.35, cheap: 0.3, taste: 0.25, jitter: 0.06 },
+  weight: { mood: 1, vibe: 0.6, company: 0.35, kind: 0.4, moment: 1, time: 0.25, near: 0.45, gem: 0.25, kids: 0.35, cheap: 0.3, taste: 0.25, jitter: 0.06 },
   shownPenalty: 0.3,
   shownQuietHours: 3, // don't reshuffle on every reload
   wentPenalty: 0.5,
@@ -95,6 +101,7 @@ export const TUNING = {
   sameGroup: 0.2,
   sameSetting: 0.08,
   sameHood: 0.06,
+  stretchPenalty: 0.5, // what a pick gives up for not being what was asked
   wildcardFloor: 0.55, // a left turn must still score this share of the top pick
   closeMin: 6, // this near is worth saying out loud
   vouchGem: 0.85, // editorial weight from which "I'd vouch for it" is the reason
@@ -142,14 +149,23 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   if (intent.inside && opt.setting === 'out') return reject(id, 'inside', "it's outdoors");
 
   const wanted = Object.entries(intent.moods) as [Mood, number][];
+  const company = Object.entries(intent.company ?? {}) as [Mood, number][];
+  const suitsCompany = company.some(([m]) => (opt.moods[m] ?? 0) > 0);
+  let stretch: Pick['stretch'];
   let moodFit = 0;
   const kindFit = intent.kinds.includes(opt.category);
   if (wanted.length) {
     const total = wanted.reduce((s, [, w]) => s + w, 0);
     moodFit = wanted.reduce((s, [m, w]) => s + w * (opt.moods[m] ?? 0), 0) / total;
     // Asked for what's on, any event or market counts; other words only lean the order.
-    if (moodFit === 0 && !kindFit && !intent.today) return reject(id, 'mood', "doesn't match what you asked for");
+    if (moodFit === 0 && !kindFit && !intent.today) {
+      // Not what they asked for. It may still earn a seat if it suits who's coming along, as a flagged stretch.
+      if (!suitsCompany) return reject(id, 'mood', "doesn't match what you asked for");
+      stretch = 'off';
+    }
   }
+  // Asked for outdoors and this is indoors: allowed, but as a stretch, never as the answer.
+  if (intent.outside && opt.setting === 'in') stretch = 'indoors';
 
   const travelMin = travelMinutes(req.origin, opt, req.mode);
   if (travelMin > Math.min(TUNING.maxTravelMin, req.durationMin * TUNING.maxTravelShare)) {
@@ -256,6 +272,12 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   if (moments.length) parts.moment = W.moment * Math.min(0.6, moments[0]!.score + 0.3 * moments.slice(1).reduce((s, m) => s + m.score, 0));
 
   if (wanted.length) parts.mood = W.mood * moodFit;
+  // Who's along shades the order; it is never a reason on its own to let something in.
+  if (company.length) {
+    const fit = company.reduce((s, [m, w]) => s + w * (opt.moods[m] ?? 0), 0) / company.reduce((s, [, w]) => s + w, 0);
+    if (fit > 0) parts.company = W.company * fit;
+  }
+  if (stretch) parts.stretch = -TUNING.stretchPenalty;
   // They named this kind of place outright ("coffee", "a bar").
   if (kindFit) parts.kind = W.kind;
   const vibe = VIBES.find((v) => v.id === intent.vibe);
@@ -287,6 +309,7 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
   return {
     option: opt, reason: '', wildcard: false, travelMin, begin, stayMin, until,
     waits: begin > arrive + MIN, score, parts, conditions, moments, moodFit,
+    ...(stretch ? { stretch } : {}),
   };
 }
 
@@ -571,10 +594,15 @@ export function match(req: Request, world: World): Result {
     }
   }
   const borrowed = chosen.length - own;
-  const picks = chosen.map((c, i) => ({
-    ...c,
-    reason: i < own ? explain(c, req, world, used) : `Open, and about ${c.travelMin} minutes away. Beyond that, you'd be finding out for me.`,
-  }));
+  const SAID = { indoors: 'Not outdoors, I know.', off: 'Not quite what you asked for.' };
+  const picks = chosen
+    .map((c, i) => {
+      const why = i < own ? explain(c.stretch ? { ...c, wildcard: false } : c, req, world, used) : `Open, and about ${c.travelMin} minutes away. Beyond that, you'd be finding out for me.`;
+      return { ...c, reason: c.stretch ? `${SAID[c.stretch]} ${why}` : why };
+    })
+    // What was asked for always comes first; a stretch follows it. (Stable, so the rest of the order holds.)
+    .sort((a, b) => Number(Boolean(a.stretch)) - Number(Boolean(b.stretch)));
+  const allStretch = picks.length > 0 && picks.every((p) => p.stretch);
   const strip = ({ conditions: _c, moments: _m, moodFit: _f, ...pick }: Candidate): Pick => pick;
   return {
     picks: picks.map(strip),
@@ -582,7 +610,9 @@ export function match(req: Request, world: World): Result {
       ? own === 0
         ? 'Nothing on my own list fits from where you are, so these come from the map: open and nearby, but nobody has vouched for them.'
         : `Only ${own === 1 ? 'one' : 'two'} from my own list ${own === 1 ? 'fits' : 'fit'}, so the rest ${borrowed === 1 ? 'comes' : 'come'} from the map: open and nearby, but not vouched for.`
-      : noteFor(picks, rejected, req, world),
+      : allStretch
+        ? `Nothing that is quite what you asked for fits right now, so ${picks.length === 1 ? 'this is' : 'these are'} the nearest I have. Each says where it departs.`
+        : noteFor(picks, rejected, req, world),
     conditions: conditionsFor(world.weather, req.start, req.start + req.durationMin * MIN),
     sun: sunFor(req.start, world.city.center.lat, world.city.center.lng, world.city.tz),
     debug: { ranked: ranked.map(strip), rejected },

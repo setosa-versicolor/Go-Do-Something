@@ -162,7 +162,15 @@ export function App() {
   const ask = (q: { mood: string; text: string; duration: number; shuffles: number }) => {
     const now = Date.now();
     const along = COMPANY.find((c) => c[0] === company);
-    const intent = parseIntent(q.text || `${q.mood} ${along?.[1] ?? ''}`);
+    // What they want and who's coming are read separately: the company can shade the picks, but
+    // only the ask decides what qualifies. (Typed words are one sentence and read as one.)
+    const intent = parseIntent(q.text || q.mood);
+    if (!q.text && along?.[1]) {
+      const who = parseIntent(along[1]);
+      intent.withKids ||= who.withKids;
+      if (q.mood) intent.company = who.moods;
+      else Object.assign(intent.moods, who.moods); // "Surprise me" with a date: the company is all we have to go on
+    }
     if (vibe) intent.vibe = vibe;
     const picked = startKey === 'pick' ? custom : null;
     // Words win over the controls: "tomorrow morning" typed beats "now" selected.
@@ -639,6 +647,7 @@ function Card(props: {
         <span class="kicker">{o.kind === 'event' ? 'Happening' : cap(o.category)} · {o.hood}</span>
         <span class="tags">
           {turn && <b>The left turn</b>}
+          {pick.stretch && <b>A stretch</b>}
           {o.source === 'osm' && <b>From the map</b>}
           {o.price === 0 && <b>Free</b>}
         </span>
