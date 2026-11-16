@@ -11,13 +11,18 @@
 
 import { writeFileSync } from 'node:fs';
 import { city, venues } from '../src/cities/madison';
-import { dedupe, judge, SOURCES, type EventFile, type RawEvent } from '../src/core/events';
+import { clean, dedupe, judge, markOneOffs, SOURCES, type EventFile, type RawEvent } from '../src/core/events';
+import { miles } from '../src/core/geo';
 import { parseIsthmus, parseTribe, parseUw } from '../src/core/sources';
 import { DAY } from '../src/core/time';
 import type { Option } from '../src/core/types';
 
 const now = Date.now();
 const HORIZON = 8 * DAY;
+/** How far ahead we read, to tell a one-off from a run or a weekly night. Nothing past HORIZON is published. */
+const LOOKAHEAD = 15 * DAY;
+/** Everything the calendars showed, published or not. */
+const everything: RawEvent[] = [];
 const dry = process.argv.includes('--dry');
 /** --venues: list the venues we dropped listings for, busiest first, so the next ones to add are obvious. */
 const listVenues = process.argv.includes('--venues');
@@ -35,11 +40,11 @@ const sources: Record<keyof typeof SOURCES, () => Promise<RawEvent[]>> = {
   async isthmus() {
     const out: RawEvent[] = [];
     const seen = new Set<string>();
-    for (let page = 1; page <= 12; page++) {
+    for (let page = 1; page <= 36; page++) {
       const fresh = parseIsthmus(await get(`https://isthmus.com/search/event/calendar-of-events/index.rss?page=${page}`), city.tz).filter((e) => !seen.has(e.url));
       for (const e of fresh) seen.add(e.url);
       out.push(...fresh);
-      if (fresh.length === 0 || Math.max(...fresh.map((e) => e.start)) > now + HORIZON) break;
+      if (fresh.length === 0 || Math.max(...fresh.map((e) => e.start)) > now + LOOKAHEAD) break;
     }
     return out;
   },
@@ -61,17 +66,42 @@ const sources: Record<keyof typeof SOURCES, () => Promise<RawEvent[]>> = {
   },
 };
 
+const WORTH_FINDING = /\b(fair|festival|fest|parade|block party|street (party|dance)|market|fireworks|5k|fun run|concerts? (on|in) the)\b/i;
+
+/** Coordinates from an Isthmus listing page, and the neighbourhood of the nearest venue we know. */
+async function whereIs(url: string): Promise<{ lat: number; lng: number; hood: string } | null> {
+  try {
+    const page = await get(url);
+    const lat = Number(/latitude" content="([-\d.]+)"/.exec(page)?.[1]);
+    const lng = Number(/longitude" content="([-\d.]+)"/.exec(page)?.[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) return null;
+    await new Promise((r) => setTimeout(r, 250));
+    const near = venues.map((v) => ({ v, d: miles(v, { lat, lng }) })).sort((a, b) => a.d - b.d)[0];
+    return { lat, lng, hood: near && near.d < 0.6 ? near.v.hood : /"addressLocality">([^<]*)</.exec(page)?.[1] ?? city.name };
+  } catch {
+    return null;
+  }
+}
+
 const counts: Record<string, number> = {};
 const kept: Option[] = [];
 let failures = 0;
 
 for (const [name, fetchSource] of Object.entries(sources)) {
   try {
-    const raw = (await fetchSource()).filter((r) => r.start > now - DAY && r.start < now + HORIZON);
+    const fetched = await fetchSource();
+    everything.push(...fetched);
+    const raw = fetched.filter((r) => r.start > now - DAY && r.start < now + HORIZON);
     const dropped = new Map<string, number>();
     const before = kept.length;
     for (const r of raw) {
-      const verdict = judge(r, venues, city.center);
+      let verdict = judge(r, venues, city.center);
+      // A fair, a parade or a street festival is held on a street or a lot, not at a venue we'd have on file.
+      // Those are exactly the listings worth having, so look up where it is from its own page.
+      if ('dropped' in verdict && verdict.dropped === 'unknown venue' && WORTH_FINDING.test(`${r.title} ${clean(r.description)}`) && r.url.includes('isthmus.com')) {
+        const at = await whereIs(r.url);
+        if (at) verdict = judge({ ...r, ...at }, venues, city.center);
+      }
       if ('option' in verdict) kept.push(verdict.option);
       else {
         dropped.set(verdict.dropped, (dropped.get(verdict.dropped) ?? 0) + 1);
@@ -120,8 +150,8 @@ if (listVenues) {
   console.log('');
 }
 
-const events = dedupe(kept).sort((a, b) => a.when!.start - b.when!.start);
-console.log(`${events.length} events after removing ${kept.length - events.length} duplicates`);
+const events = markOneOffs(dedupe(kept), everything).sort((a, b) => a.when!.start - b.when!.start);
+console.log(`${events.length} events after removing ${kept.length - events.length} duplicates: ${events.filter((e) => e.oneOff).length} one-offs, ${events.filter((e) => e.setting === 'out').length} outdoors, ${events.filter((e) => e.kids === 2).length} for families`);
 if (!dry) {
   const file: EventFile = { generatedAt: now, sources: counts, events };
   writeFileSync(new URL('../public/events.json', import.meta.url), JSON.stringify(file, null, 1) + '\n');

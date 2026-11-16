@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clean, dedupe, findVenue, judge, loadEvents, parseIsthmusTitle, STALE_AFTER, toOption, type RawEvent } from '../src/core/events';
+import { clean, dedupe, findVenue, judge, loadEvents, markOneOffs, parseIsthmusTitle, STALE_AFTER, toOption, type RawEvent } from '../src/core/events';
 import { parseIsthmus, parseTribe, parseUw } from '../src/core/sources';
 import { fmtTime, HOUR } from '../src/core/time';
 import { city, venues } from '../src/cities/madison';
@@ -38,6 +38,56 @@ describe('event listings', () => {
     // Cafe Coda is a listening room; the Sylvee a hall. Be there at the start.
     expect(toOption(raw({}), venues, city.center)!.dropIn).toBe(false);
     expect(toOption(raw({ title: 'Big Touring Band', venue: 'The Sylvee' }), venues, city.center)!.dropIn).toBe(false);
+  });
+
+  it('knows an outdoor event from its venue or its own words, and is not fooled by a title', () => {
+    const july = at(2026, 7, 8, 19);
+    const out = (over: Partial<RawEvent>) => toOption(raw({ start: july, ...over }), venues, city.center)!;
+    // A concert on the square: outdoors because of where it is, and an answer to "outside" as well as to music.
+    expect(out({ title: 'Wisconsin Chamber Orchestra', description: 'Concerts on the Square.', venue: 'Capitol Square' })).toMatchObject({ setting: 'out', category: 'music', moods: { lively: 1, nature: 0.6 } });
+    // Says so itself, at a venue that is otherwise indoors.
+    expect(out({ description: 'Jazz on the patio. Outdoor show, weather permitting.' }).setting).toBe('out');
+    expect(out({ title: 'Willy Street Fair', description: 'Music, food and a parade.', venue: 'James Madison Park' })).toMatchObject({ setting: 'out', category: 'market', gem: 0.6 });
+    // The Terrace is outside in July and inside in November.
+    expect(out({ title: 'Open Mic', description: '', venue: 'UW Memorial Union-Terrace' }).setting).toBe('out');
+    expect(toOption(raw({ title: 'Open Mic', description: '', venue: 'UW Memorial Union-Terrace' }), venues, city.center)!.setting).toBe('in');
+    // In November a park's listing is as likely in the pavilion: it has to say it's outside. The winter farmers' market says the opposite.
+    expect(toOption(raw({ title: 'Tenney Winter Art Market', description: '20 artists.', venue: 'Tenney Park' }), venues, city.center)!.setting).toBe('in');
+    expect(toOption(raw({ title: 'Candlelight Ski', description: 'Snowshoe or ski the lit trail.', venue: 'Elver Park' }), venues, city.center)!.setting).toBe('out');
+    expect(out({ title: "Dane County Farmers' Market", description: 'Indoor market.', venue: 'Capitol Square' }).setting).toBe('in');
+    expect(out({ title: 'The Bird and the Worm', description: 'Art reception.', venue: 'Cafe Coda' }).setting).toBe('in');
+    // An outing or a parade is a kind of event in its own right, and outdoors by nature.
+    expect(out({ title: 'Nature Walk', description: 'Meet at the shelter.', venue: 'Hoyt Park' })).toMatchObject({ what: 'Outing at Hoyt Park', category: 'trail', setting: 'out', moods: { nature: 1 } });
+    // As the feed really lists it, with no mention of film: the Cinematheque shows films, so it's a film.
+    expect(out({ title: 'Paramount on Parade', description: '1930, 102 min.', venue: 'UW Cinematheque' })).toMatchObject({ setting: 'in', category: 'show' });
+    // A film called "Paramount on Parade" is a film, indoors.
+    expect(out({ title: 'Paramount on Parade', description: 'A 1930 film revue.', venue: 'UW Cinematheque' })).toMatchObject({ setting: 'in', category: 'show' });
+    // Nothing said, an indoor venue: indoors.
+    expect(out({})).toMatchObject({ setting: 'in', moods: { lively: 1, date: 0.6 } });
+  });
+
+  it('knows a family event when the listing says so, and not when it is only about children', () => {
+    const o = (over: Partial<RawEvent>) => toOption(raw(over), venues, city.center)!;
+    // A children's musician playing a family show in a bar: for kids, bar or not.
+    expect(o({ title: 'David Landau', description: 'Family concert for kids of all ages.', venue: 'Harmony Bar and Grill' })).toMatchObject({ kids: 2, moods: { kids: 1 } });
+    expect(o({ description: 'Jazz. All ages welcome.', venue: "Mickey's Tavern" }).kids).toBe(2);
+    expect(o({ description: 'Jazz. All ages.', venue: "Mickey's Tavern" }).kids).toBe(1);
+    // A bar that says nothing is not for kids; a listening room is fine with them.
+    expect(o({ venue: "Mickey's Tavern" }).kids).toBe(0);
+    expect(o({}).kids).toBe(1);
+    // A film about street kids is not a kids' film. Nor is anything that says 21+.
+    expect(o({ title: 'City of God', description: 'Film. Two kids grow up in the favelas of Rio.', venue: 'Union South' })).toMatchObject({ kids: 1 });
+    expect(o({ title: 'City of God', description: 'Film. Two kids grow up in the favelas of Rio.', venue: 'Union South' }).moods.kids).toBeUndefined();
+    expect(o({ description: 'Jazz and burlesque. 21+.' }).kids).toBe(0);
+    expect(o({ description: 'Family show early; 21 and over after 8 pm.' }).kids).toBe(0);
+  });
+
+  it('marks what is on once and only once', () => {
+    const day = (d: number, title = 'Jake Blount', venue = 'Cafe Coda') => raw({ title, venue, description: 'Folk.', start: at(2026, 11, d, 19) });
+    // Published: the 17th. The calendars also show a play running three nights and a jam that comes round again next week.
+    const listings = [day(17), day(17, 'Newsies'), day(18, 'Newsies'), day(19, 'Newsies'), day(17, 'Bluegrass Jam'), day(24, 'Bluegrass Jam')];
+    const options = [day(17), day(17, 'Newsies'), day(17, 'Bluegrass Jam')].map((r) => toOption(r, venues, city.center)!);
+    expect(markOneOffs(options, listings).map((o) => [o.name, Boolean(o.oneOff)])).toEqual([['Jake Blount', true], ['Newsies', false], ['Bluegrass Jam', false]]);
   });
 
   it('drops filler, unknown venues, sold-out shows, and things it cannot classify', () => {

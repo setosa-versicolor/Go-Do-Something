@@ -271,6 +271,59 @@ describe('an open mic that has already started', () => {
   });
 });
 
+describe('events tagged outdoors, for families, or as one-offs', () => {
+  const sat = at(2026, 7, 11, 17);
+  const ev = (id: string, over: Partial<Parameters<typeof option>[0]> = {}) =>
+    option({ id, kind: 'event', category: 'music', dropIn: false, rules: undefined, minutes: [45, 120], moods: { lively: 1 }, setting: 'in', when: { start: at(2026, 7, 11, 18), end: at(2026, 7, 11, 20) }, ...over });
+  const lawn = ev('lawn', { setting: 'out', moods: { lively: 1, nature: 0.6 } });
+  const club = ev('club', { lat: 43.08 });
+  const park = option({ id: 'park', category: 'park', setting: 'out', moods: { nature: 1 } });
+  const ids = (say: string, options: ReturnType<typeof option>[], w: Partial<Parameters<typeof world>[0]> = {}) =>
+    match(request(sat, say, { durationMin: 240 }), world({ options, ...w })).picks.map((p) => p.option.id);
+
+  it('offers an outdoor concert for "outside", and an indoor one never as the answer', () => {
+    const r = match(request(sat, 'outside', { durationMin: 240 }), world({ options: [lawn, club, park] }));
+    expect(r.picks.map((p) => p.option.id).sort()).toEqual(['lawn', 'park']);
+    expect(r.picks.every((p) => !p.stretch)).toBe(true);
+  });
+
+  it('does not offer the outdoor concert in the rain', () => {
+    expect(ids('outside', [lawn, park], { weather: weatherOf(sat, { tempF: 70, code: 63, precipMm: 3 }) })).toEqual([]);
+    expect(ids('music show', [lawn, club], { weather: weatherOf(sat, { tempF: 70, code: 63, precipMm: 3 }) })).toEqual(['club']);
+  });
+
+  it('offers a family event when kids are along, and a bar gig never', () => {
+    const fam = ev('fam', { kids: 2, moods: { lively: 1, kids: 1 } });
+    const bar = ev('bar', { kids: 0, lat: 43.08 });
+    expect(ids('kids', [fam, bar])).toEqual(['fam']);
+  });
+
+  it('leans toward a one-off that fits, and not toward one that does not', () => {
+    const once = ev('once', { oneOff: true, lat: 43.08, kids: 2 }); // a family concert, this once
+    const weekly = ev('weekly');
+    const r = match(request(sat, 'music show', { durationMin: 240 }), world({ options: [weekly, once] }));
+    expect(r.picks[0]!.option.id).toBe('once');
+    expect(r.picks[0]!.parts.once).toBeGreaterThan(0);
+    expect(r.picks[0]!.reason).toMatch(/^It starts at 6 pm tonight, its only date in the next two weeks\. You'd be there with 5\d minutes in hand\.$/);
+    // Asked for the outdoors: an indoor one-off gets no credit for being rare.
+    // An ordinary gig that happens to be on once gets none either.
+    const gig = match(request(sat, 'music show', { durationMin: 240 }), world({ options: [ev('gig', { oneOff: true })] }));
+    expect(gig.picks[0]!.parts.once).toBeUndefined();
+    const off = match(request(sat, 'outside', { durationMin: 240 }), world({ options: [once, park] }));
+    expect(off.picks.find((p) => p.option.id === 'once')?.parts.once).toBeUndefined();
+  });
+
+  it('gives events no more than two of the three seats, unless what is on was the question', () => {
+    const cafe = option({ id: 'cafe', moods: { lively: 0.6 } });
+    const shows = [ev('a', { oneOff: true, kids: 2 }), ev('b', { oneOff: true, kids: 2, lat: 43.08 }), ev('c', { oneOff: true, kids: 2, lat: 43.07 })];
+    const kinds = (say: string) => match(request(sat, say, { durationMin: 240 }), world({ options: [...shows, cafe] })).picks.map((p) => p.option.kind);
+    expect(kinds('friends').filter((k) => k === 'event')).toHaveLength(2);
+    expect(kinds('friends')).toContain('place');
+    expect(kinds('local today').filter((k) => k === 'event')).toHaveLength(3);
+    expect(kinds('music show').filter((k) => k === 'event')).toHaveLength(3);
+  });
+});
+
 describe('dated events', () => {
   const start = at(2026, 11, 11, 18);
   const show = (h: number, mi = 0, len = 120) =>

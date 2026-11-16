@@ -96,6 +96,8 @@ export interface Option extends LatLng {
   checked?: string;
   url?: string;
   source?: string;
+  /** Feed events: this is its only date in the two weeks the calendars show. Not a run, not a weekly night. */
+  oneOff?: boolean;
   /** Feed events: where it is, and the curated place it's held at, if we know one. */
   venue?: string;
   placeId?: string;

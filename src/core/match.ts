@@ -108,6 +108,8 @@ export const TUNING = {
   sameSetting: 0.08,
   sameHood: 0.06,
   stretchPenalty: 0.5, // what a pick gives up for not being what was asked
+  oneOff: 0.18, // a one-off occasion (a fair, something outdoors, something for families) that fits what was asked
+  maxEvents: 2, // of the three seats, unless they asked for what's on or for a stage
   wildcardFloor: 0.55, // a left turn must still score this share of the top pick
   afterDark: 0.2, // a park or a trail once the light has gone, unless night is when it's best
   windyMph: 12, // on the water, a steady wind from here up is work
@@ -307,14 +309,22 @@ function assess(opt: Option, req: Request, world: World): Candidate | Rejection 
     const day = same ? (hour >= 17 ? 'tonight' : 'today') : 'then';
     // For something with a start time, the sharpest thing to say is when, and how comfortably you'd make it.
     const spare = Math.round((begin - arrive) / MIN);
-    const timed = spare >= 10 ? `It starts at ${fmtTime(begin, tz)} ${day}. You'd be there with ${spare} minutes in hand.` : `It starts at ${fmtTime(begin, tz)} ${day}, and you'd just make it.`;
+    // Its only date in the two weeks the calendars show is worth saying: miss it and it's gone.
+    const only = opt.oneOff ? ', its only date in the next two weeks' : '';
+    const timed = spare >= 10 ? `It starts at ${fmtTime(begin, tz)} ${day}${only}. You'd be there with ${spare} minutes in hand.` : `It starts at ${fmtTime(begin, tz)} ${day}${only}, and you'd just make it.`;
     // A market asked for as "what's on" earns the same credit as an event.
-    moments.push({ score: 0.25, line: opt.when ? (opt.dropIn ? `It's on ${day}, and you can turn up any time.` : timed) : `It's open ${day}, and you can turn up any time.` });
+    const open = opt.oneOff ? `It's on ${day} and not again for at least two weeks. Turn up any time.` : `It's on ${day}, and you can turn up any time.`;
+    moments.push({ score: opt.oneOff && (opt.category === 'market' || opt.setting === 'out' || opt.kids === 2) ? 0.3 : 0.25, line: opt.when ? (opt.dropIn ? open : timed) : `It's open ${day}, and you can turn up any time.` });
   }
   moments.sort((a, b) => b.score - a.score);
   if (moments.length) parts.moment = W.moment * Math.min(0.6, moments[0]!.score + 0.3 * moments.slice(1).reduce((s, m) => s + m.score, 0));
 
   if (wanted.length) parts.mood = W.mood * moodFit;
+  // An occasion leans up the order: a one-off that is also a fair or a festival, out of doors, or put on for
+  // families. (A Tuesday gig in a bar is also on only once, and gets no such credit: there's one every night.)
+  // Only as an answer to what was asked. It never makes a poor fit a good one.
+  const occasion = opt.oneOff && (opt.category === 'market' || opt.setting === 'out' || opt.kids === 2);
+  if (occasion && !stretch && (wanted.length === 0 || moodFit > 0 || kindFit)) parts.once = TUNING.oneOff;
   // Who's along shades the order; it is never a reason on its own to let something in.
   if (company.length) {
     const fit = company.reduce((s, [m, w]) => s + w * (opt.moods[m] ?? 0), 0) / company.reduce((s, [, w]) => s + w, 0);
@@ -373,8 +383,12 @@ function choose(ranked: Candidate[], req: Request, memory: Memory): Candidate[] 
   const chosen = ranked.filter((c) => req.keep?.includes(c.option.id));
   const replacing = (req.keep?.length ?? 0) > 0;
   const rng = random(req.seed);
+  const allEvents = req.intent.today || req.intent.kinds.includes('music') || req.intent.kinds.includes('show');
   while (chosen.length < 3) {
-    const pool = ranked.filter((c) => !chosen.includes(c));
+    // Dated events are the spice, not the meal: the list of places is the product. No more than two of the
+    // three seats go to them, unless what's on (or a stage) is exactly what was asked for.
+    const eventsFull = !allEvents && chosen.filter((x) => x.option.kind === 'event').length >= TUNING.maxEvents;
+    const pool = ranked.filter((c) => !chosen.includes(c) && !(eventsFull && c.option.kind === 'event'));
     if (pool.length === 0) break;
     const top = ranked[0]!.score;
 
