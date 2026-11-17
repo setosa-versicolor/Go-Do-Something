@@ -9,6 +9,7 @@
 // the page simply keeps its painted sky.
 
 import * as THREE from 'three';
+import { createDrift, createFish, type Drift } from './scene-ice';
 import { edgeDistance } from '../core/geo';
 import type { CityShape, Landmark } from '../core/types';
 import { addLife } from './scene-life';
@@ -539,7 +540,10 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   // Lakes, on their real shorelines. The water is its own small shader: it
   // mirrors the sky, ripples, and catches the sun.
   const waterUniforms = {
-    time: { value: 0 }, frozen: { value: 0 }, snowy: { value: 0 }, buried: { value: 0 }, chop: { value: 0 }, glint: { value: 1 }, sheen: { value: 0 }, iceLight: { value: 1 },
+    time: { value: 0 }, frozen: { value: 0 }, snowy: { value: 0 }, buried: { value: 0 }, chop: { value: 0 }, glint: { value: 1 }, sheen: { value: 0 }, iceLight: { value: 1 }, deepSnow: { value: 0 },
+    // The snow on the ice, as pushed about (scene-ice.ts): depths, where the grid lies, one cell of it, and whether there is one.
+    drift: { value: null as THREE.Texture | null }, driftBox: { value: new THREE.Vector4(0, 0, 1, 1) }, driftPx: { value: new THREE.Vector2(1, 1) }, driftOn: { value: 0 },
+    keyLight: { value: new THREE.Vector3(0, 1, 0) },
     deep: { value: new THREE.Color('#2a78a8') }, skyTop: { value: new THREE.Color() }, skyHorizon: { value: new THREE.Color() },
     body: { value: new THREE.Vector3(0, 1, 0) }, bodyColor: { value: new THREE.Color('#fff3c4') },
     // The simulated ripples (scene-water.ts): heights, how far the grid reaches, one cell of it, and how strongly they show.
@@ -554,7 +558,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       void main(){ vec4 w = modelMatrix * vec4(position, 1.0); wp = w.xyz; vec4 mvPosition = viewMatrix * w; gl_Position = projectionMatrix * mvPosition;
         #include <fog_vertex>
       }`,
-    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float buried; uniform float chop; uniform float glint; uniform float sheen; uniform float iceLight; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; uniform sampler2D waves; uniform float waveSpan; uniform float waveCell; uniform float waveGain; uniform sampler2D chart; uniform float chartSpan; uniform float night; varying vec3 wp;
+    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float buried; uniform float chop; uniform float glint; uniform float sheen; uniform float iceLight; uniform float deepSnow; uniform sampler2D drift; uniform vec4 driftBox; uniform vec2 driftPx; uniform float driftOn; uniform vec3 keyLight; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; uniform sampler2D waves; uniform float waveSpan; uniform float waveCell; uniform float waveGain; uniform sampler2D chart; uniform float chartSpan; uniform float night; varying vec3 wp;
       #include <fog_pars_fragment>
       void main(){ vec2 p = wp.xz; float amp = 0.0034 * (1.0 + chop * 1.6) * (1.0 - frozen) * clamp(3.5 / length(cameraPosition - wp), 0.12, 1.0);
         float a = p.x * 9.0 + time * 1.1; float b = p.y * 11.0 - time * 0.9; float c2 = (p.x + p.y) * 17.0 + time * 1.7; float d2 = (p.x - p.y) * 31.0 - time * 2.3;
@@ -610,16 +614,25 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         }
         float crack = smoothstep(0.96, 1.0, sin(p.x * 3.1 + sin(p.y * 2.3) * 2.0) * sin(p.y * 2.7 + sin(p.x * 1.9) * 2.0));
         vec3 ice = mix(vec3(0.78, 0.86, 0.9), sky, 0.3) + crack * 0.08;
+        // How much snow is here, as it lies (1) or as someone has pushed it about: 0 where it was cleared, more on a heap.
+        vec2 duv = (wp.xz - driftBox.xy) * driftBox.zw;
+        float inDrift = driftOn * step(0.0, duv.x) * step(duv.x, 1.0) * step(0.0, duv.y) * step(duv.y, 1.0);
+        float here = mix(1.0, texture2D(drift, duv).r * 3.0, inDrift);
+        vec2 heap = vec2(texture2D(drift, duv + vec2(driftPx.x, 0.0)).r - texture2D(drift, duv - vec2(driftPx.x, 0.0)).r,
+                         texture2D(drift, duv + vec2(0.0, driftPx.y)).r - texture2D(drift, duv - vec2(0.0, driftPx.y)).r) * 3.0 * inDrift;
+        float lying = clamp(snowy * here, 0.0, 1.0);
         // Snow lies on ice: whiter, with the wind-swept cracks still showing through.
         // Under deep snow even the cracks are gone.
-        ice = mix(ice, mix(vec3(0.85, 0.91, 0.96), sky, 0.12) - crack * 0.05 * (1.0 - buried), snowy);
+        ice = mix(ice, mix(vec3(0.85, 0.91, 0.96), sky, 0.12) - crack * 0.05 * (1.0 - buried * min(here, 1.0)), lying);
+        // A heap is lit on the side toward the light and shaded on the other.
+        ice *= 1.0 + clamp(-dot(heap, normalize(keyLight.xz + vec2(1e-4))) * 0.55 * snowy, -0.3, 0.18) + clamp(here - 1.0, 0.0, 1.0) * 0.04 * snowy;
         // Ice has no light of its own: after dark it goes as grey-blue as the snow on the land.
         ice *= iceLight * mix(vec3(1.0), vec3(0.76, 0.84, 1.3), clamp((1.0 - iceLight) / 0.75, 0.0, 1.0));
         // Bare ice shines, a little. It is flat but not polished, so it doesn't sparkle the way open water does:
         // the sun or the moon lies on it as one soft glare, drawn out toward whoever is looking, and seen from
         // low down it takes on the sky. Snow dulls it, and snow on a lake is blown into patches with bare ice between.
         float blown = 0.5 + 0.5 * sin(p.x * 1.7 + sin(p.y * 1.3) * 1.8) * sin(p.y * 2.1 + sin(p.x * 0.9) * 1.6);
-        float bare = clamp(1.0 - snowy * (0.7 + 0.6 * blown), 0.0, 1.0) * sheen;
+        float bare = clamp(1.0 - snowy * here * (0.7 + 0.6 * blown), 0.0, 1.0) * (1.0 - deepSnow * min(here, 1.0)) * sheen;
         // Its surface heaves gently, so the glare is mottled rather than a clean disc.
         vec2 heave = vec2(sin(p.x * 5.3 + p.y * 2.1) + sin(p.x * 11.7 - p.y * 7.9) * 0.5, sin(p.y * 6.1 - p.x * 1.7) + sin(p.y * 13.3 + p.x * 8.3) * 0.5);
         vec3 rough = normalize(vec3(heave.x * 0.006, 1.0, heave.y * 0.006));
@@ -1623,6 +1636,30 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     scene.add(g);
   }
 
+  // On the ice: fish out of the shanties, and snow that can be pushed about (scene-ice.ts). The snow's grid is
+  // only made the first time the lakes freeze.
+  const fish = createFish(scene);
+  let snowField: Drift | null = null;
+  const ensureDrift = () => {
+    if (snowField) return snowField;
+    try {
+      snowField = createDrift(shape.lakes.map((l) => l.outline), 6.6, lowMemory);
+    } catch {
+      snowField = null;
+    }
+    if (snowField) {
+      waterUniforms.drift.value = snowField.texture;
+      waterUniforms.driftBox.value.copy(snowField.box);
+      waterUniforms.driftPx.value.copy(snowField.px);
+      waterUniforms.driftOn.value = 1;
+    }
+    return snowField;
+  };
+  /** Is there snow enough on the ice to push about? */
+  const plowable = () => isFrozen && snowNow > 0.2 && snowField !== null;
+  /** A brush about a fingertip across, wherever on the ice it is. */
+  const brushAt = (p: THREE.Vector3) => Math.max(0.025, Math.min(0.16, camera.position.distanceTo(p) * 0.018));
+
   // Sailboats on the lakes (ice shanties when they freeze).
   const hullMat = flat('#f4efe4');
   const shantyMat = flat('#b5543a');
@@ -1655,7 +1692,13 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       g.add(hull, sail, shanty, hit);
       const boat: Boat = { g, sail, shanty, hull, angle: rand() * 6, radius: 0.18 + rand() * 0.2, speed: 0.12 + rand() * 0.1, spin: 0, cx: east, cz: -north,
         roll: 0, rollV: 0, pitch: 0, pitchV: 0, heave: 0, heaveV: 0, pushX: 0, pushZ: 0, pushVX: 0, pushVZ: 0 };
-      hit.userData.tap = () => { boat.spin = 1; boat.heaveV += 0.16; };
+      hit.userData.tap = () => {
+        if (!isFrozen) { boat.spin = 1; boat.heaveV += 0.16; return; }
+        // A shanty rocks on its runners and lets out a few fish.
+        boat.rollV += (Math.random() < 0.5 ? -1 : 1) * 2.4;
+        boat.heaveV += 0.1;
+        fish.launch(boat.g.position.x, boat.g.position.z);
+      };
       tappable.push(hit);
       boats.push(boat);
       scene.add(g);
@@ -1833,7 +1876,11 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   for (const lake of lakes) {
     lake.userData.tap = (p: THREE.Vector3) => {
       say(lake.userData.name as string, new THREE.Vector3(p.x, 0.3, p.z));
-      if (isFrozen) return;
+      if (isFrozen) {
+        // On snow, a tap leaves a dent with its snow heaped round it: a hint that it can be pushed about.
+        if (plowable()) snowField!.plow(p.x, p.z, p.x, p.z, brushAt(p) * 0.7);
+        return;
+      }
       if (!calm) rings.push({ x: p.x, z: p.z, born: clock, strength: 1, met: new Set() });
       if (water) return water.drop(p.x, p.z, 1.6);
       for (let k = 0; k < 2; k++) {
@@ -1997,19 +2044,76 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     const [a, b] = [...fingers.values()];
     return a && b ? Math.hypot(a.x - b.x, a.y - b.y) : 0;
   };
+  // Snow on the ice is pushed about by pressing on it, holding still a moment, then dragging. A quick drag still
+  // turns the view (or, up and down on a phone, scrolls the page), so the hold is what tells them apart.
+  const HOLD_MS = 260;
+  const tmpV = new THREE.Vector3();
+  let plowing: { x: number; z: number; r: number; since: number; fromX: number; fromY: number; pushed: boolean } | null = null;
+  let holding = 0;
+  const iceFlat = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.012);
+  const aim = (x: number, y: number) => {
+    const box = canvas.getBoundingClientRect();
+    ray.setFromCamera(new THREE.Vector2(((x - box.left) / box.width) * 2 - 1, -((y - box.top) / box.height) * 2 + 1), camera);
+  };
+  const stopPlow = () => {
+    clearTimeout(holding);
+    holding = 0;
+    plowing = null;
+    canvas.style.cursor = '';
+  };
   const onDown = (e: PointerEvent) => {
     fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (fingers.size === 2) {
+      stopPlow();
       pinch = { gap: gap(), zoom: user.zoom };
       down = null;
       cb.onTouch();
     } else {
       down = { x: e.clientX, y: e.clientY, moved: false, at: e.timeStamp };
       fling.theta = fling.phi = 0; // a finger down catches it
+      if (plowable()) {
+        aim(e.clientX, e.clientY);
+        const ice = ray.intersectObjects(lakes, false)[0];
+        const first = ray.intersectObjects(pinHits, false)[0] ?? ray.intersectObjects(tappable, false)[0];
+        // Things on the ice have tap targets bigger than they are; only a press right on one is for it.
+        const onSomething = first && !lakes.includes(first.object as THREE.Mesh) &&
+          (pinHits.includes(first.object) || !ice || Math.hypot(first.object.getWorldPosition(tmpV).x - ice.point.x, tmpV.z - ice.point.z) < 0.09);
+        if (ice && !onSomething) {
+          const at = ice.point.clone();
+          const held = down;
+          holding = window.setTimeout(() => {
+            holding = 0;
+            if (down !== held || held.moved || !plowable()) return;
+            // Taken: from here this finger is a plough, not a drag or a tap.
+            held.moved = true;
+            plowing = { x: at.x, z: at.z, r: brushAt(at), since: performance.now(), fromX: held.x, fromY: held.y, pushed: false };
+            canvas.style.cursor = 'grabbing';
+            navigator.vibrate?.(8);
+            cb.onTouch();
+          }, HOLD_MS);
+        }
+      }
     }
   };
   const onMove = (e: PointerEvent) => {
     if (fingers.has(e.pointerId)) fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (plowing && e.timeStamp < plowing.since && Math.hypot(e.clientX - plowing.fromX, e.clientY - plowing.fromY) >= 6) {
+      // A busy page can run the hold's timer before it gets to moves that came first: the finger never held still.
+      // It was a drag all along.
+      plowing = null;
+      canvas.style.cursor = '';
+    }
+    if (plowing) {
+      plowing.pushed = true;
+      aim(e.clientX, e.clientY);
+      const p = ray.ray.intersectPlane(iceFlat, new THREE.Vector3());
+      if (p && snowField) {
+        snowField.plow(plowing.x, plowing.z, p.x, p.z, plowing.r);
+        plowing.x = p.x;
+        plowing.z = p.z;
+      }
+      return;
+    }
     if (pinch && fingers.size === 2) {
       const now = gap();
       if (now > 0 && pinch.gap > 0) user.zoom = clampZoom((pinch.zoom * pinch.gap) / now);
@@ -2019,6 +2123,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     const dx = e.clientX - down.x;
     const dy = e.clientY - down.y;
     if (!down.moved && Math.hypot(dx, dy) < 6) return;
+    clearTimeout(holding); // moved before the hold: an ordinary drag
     if (!down.moved) cb.onTouch();
     down.moved = true;
     user.theta -= dx * 0.006;
@@ -2033,6 +2138,15 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   };
   const onUp = (e: PointerEvent) => {
     fingers.delete(e.pointerId);
+    if (plowing) {
+      // Held and let go without moving: a dent, as a tap makes.
+      if (!plowing.pushed) snowField?.plow(plowing.x, plowing.z, plowing.x, plowing.z, plowing.r * 0.7);
+      stopPlow();
+      down = null;
+      fling.theta = fling.phi = 0;
+      return;
+    }
+    stopPlow();
     if (pinch) {
       // Lifting one finger of a pinch is not a tap, and the other finger doesn't start a drag.
       if (fingers.size === 0) pinch = null;
@@ -2046,8 +2160,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     fling.phi = Math.max(-2, Math.min(2, fling.phi));
     down = null;
     if (!wasTap) return;
-    const box = canvas.getBoundingClientRect();
-    ray.setFromCamera(new THREE.Vector2(((e.clientX - box.left) / box.width) * 2 - 1, -((e.clientY - box.top) / box.height) * 2 + 1), camera);
+    aim(e.clientX, e.clientY);
     const hit = ray.intersectObjects(pinHits, false)[0] ?? ray.intersectObjects(tappable, false)[0];
     if (!hit) return;
     cb.onTouch();
@@ -2055,6 +2168,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   };
   const onLeave = (e: PointerEvent) => {
     fingers.delete(e.pointerId);
+    stopPlow();
     if (fingers.size === 0) pinch = null;
     down = null;
     fling.theta = fling.phi = 0;
@@ -2068,6 +2182,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   };
   canvas.addEventListener('wheel', onWheel, { passive: false });
   canvas.addEventListener('pointerdown', onDown);
+  // The page scrolls under a finger dragged up or down; while it is pushing snow, it mustn't.
+  const onTouchMove = (e: TouchEvent) => { if (plowing) e.preventDefault(); };
+  canvas.addEventListener('touchmove', onTouchMove, { passive: false });
   canvas.addEventListener('pointermove', onMove);
   canvas.addEventListener('pointerup', onUp);
   canvas.addEventListener('pointercancel', onLeave);
@@ -2337,7 +2454,10 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       waterUniforms.bodyColor.value.copy(skyUniforms.bodyColor.value);
       waterUniforms.glint.value = (up ? 1 : 0.12 + 0.6 * moonLit) * dry * (1 - fogNow * 0.8) * (1 - waterUniforms.frozen.value * 0.7);
       // The same light on ice, while the ice is bare enough to show it: gone by about three inches of snow.
-      waterUniforms.sheen.value = (up ? 1 : 0.12 + 0.6 * moonLit) * dry * (1 - fogNow * 0.8) * (1 - Math.min(1, Math.max(0, (snowNow - 0.75) / 2.5)));
+      waterUniforms.sheen.value = (up ? 1 : 0.12 + 0.6 * moonLit) * dry * (1 - fogNow * 0.8);
+      // (Except where someone has cleared it.)
+      waterUniforms.deepSnow.value = Math.min(1, Math.max(0, (snowNow - 0.75) / 2.5));
+      waterUniforms.keyLight.value.copy(lightDir);
       waterUniforms.iceLight.value = Math.min(1, 0.25 + Math.max(0, e + 0.1) * 2.4);
       waterUniforms.skyTop.value.copy(look.top);
       waterUniforms.skyHorizon.value.copy(look.horizon);
@@ -2562,6 +2682,17 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       waterUniforms.waveGain.value = (0.027 * cellsPerMile) * (1 - waterUniforms.frozen.value);
     }
 
+    // On the ice: the snow settles after a push, and the fish skid, flop and go home.
+    if (isFrozen && sky) {
+      snowField?.step(dt, sky.snowing);
+      fish.step(dt, {
+        onIce: (x, z) => wet(x, -z, -0.025),
+        snowAt: (x, z) => (snowNow > 0.2 ? waterUniforms.snowy.value * (snowField ? snowField.at(x, z) : 1) : 0),
+        plow: (ax, az, bx, bz, r) => { if (snowField && snowNow > 0.2) snowField.plow(ax, az, bx, bz, r); },
+        shanties: boats.map((b) => ({ x: b.g.position.x, z: b.g.position.z })),
+      });
+    }
+
     // Balloon.
     lift = Math.max(0, lift - dt * 0.5);
     const ba = clock * 0.07 + 1.2;
@@ -2771,6 +2902,12 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       // The snow itself is laid in the frame loop, where it can build and melt (see `laySnow`).
       life.set(input);
       isFrozen = input.frozen;
+      if (isFrozen) ensureDrift();
+      else {
+        // A thaw takes the fish and the pushed-about snow with it; the next freeze starts smooth.
+        fish.clear();
+        snowField?.reset();
+      }
       for (const b of boats) {
         // Nobody sails on ice, or under lightning.
         b.sail.visible = b.hull.visible = !input.frozen && !input.storm;
@@ -2868,6 +3005,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       cancelAnimationFrame(raf);
       watcher?.disconnect();
       canvas.removeEventListener('pointerdown', onDown);
+      canvas.removeEventListener('touchmove', onTouchMove);
+      stopPlow();
+      fish.clear();
       canvas.removeEventListener('pointermove', onMove);
       canvas.removeEventListener('pointerup', onUp);
       canvas.removeEventListener('pointercancel', onLeave);
