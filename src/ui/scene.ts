@@ -539,7 +539,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   // Lakes, on their real shorelines. The water is its own small shader: it
   // mirrors the sky, ripples, and catches the sun.
   const waterUniforms = {
-    time: { value: 0 }, frozen: { value: 0 }, snowy: { value: 0 }, buried: { value: 0 }, chop: { value: 0 }, glint: { value: 1 },
+    time: { value: 0 }, frozen: { value: 0 }, snowy: { value: 0 }, buried: { value: 0 }, chop: { value: 0 }, glint: { value: 1 }, sheen: { value: 0 }, iceLight: { value: 1 },
     deep: { value: new THREE.Color('#2a78a8') }, skyTop: { value: new THREE.Color() }, skyHorizon: { value: new THREE.Color() },
     body: { value: new THREE.Vector3(0, 1, 0) }, bodyColor: { value: new THREE.Color('#fff3c4') },
     // The simulated ripples (scene-water.ts): heights, how far the grid reaches, one cell of it, and how strongly they show.
@@ -554,7 +554,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       void main(){ vec4 w = modelMatrix * vec4(position, 1.0); wp = w.xyz; vec4 mvPosition = viewMatrix * w; gl_Position = projectionMatrix * mvPosition;
         #include <fog_vertex>
       }`,
-    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float buried; uniform float chop; uniform float glint; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; uniform sampler2D waves; uniform float waveSpan; uniform float waveCell; uniform float waveGain; uniform sampler2D chart; uniform float chartSpan; uniform float night; varying vec3 wp;
+    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float buried; uniform float chop; uniform float glint; uniform float sheen; uniform float iceLight; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; uniform sampler2D waves; uniform float waveSpan; uniform float waveCell; uniform float waveGain; uniform sampler2D chart; uniform float chartSpan; uniform float night; varying vec3 wp;
       #include <fog_pars_fragment>
       void main(){ vec2 p = wp.xz; float amp = 0.0034 * (1.0 + chop * 1.6) * (1.0 - frozen) * clamp(3.5 / length(cameraPosition - wp), 0.12, 1.0);
         float a = p.x * 9.0 + time * 1.1; float b = p.y * 11.0 - time * 0.9; float c2 = (p.x + p.y) * 17.0 + time * 1.7; float d2 = (p.x - p.y) * 31.0 - time * 2.3;
@@ -613,6 +613,19 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         // Snow lies on ice: whiter, with the wind-swept cracks still showing through.
         // Under deep snow even the cracks are gone.
         ice = mix(ice, mix(vec3(0.85, 0.91, 0.96), sky, 0.12) - crack * 0.05 * (1.0 - buried), snowy);
+        // Ice has no light of its own: after dark it goes as grey-blue as the snow on the land.
+        ice *= iceLight * mix(vec3(1.0), vec3(0.76, 0.84, 1.3), clamp((1.0 - iceLight) / 0.75, 0.0, 1.0));
+        // Bare ice shines, a little. It is flat but not polished, so it doesn't sparkle the way open water does:
+        // the sun or the moon lies on it as one soft glare, drawn out toward whoever is looking, and seen from
+        // low down it takes on the sky. Snow dulls it, and snow on a lake is blown into patches with bare ice between.
+        float blown = 0.5 + 0.5 * sin(p.x * 1.7 + sin(p.y * 1.3) * 1.8) * sin(p.y * 2.1 + sin(p.x * 0.9) * 1.6);
+        float bare = clamp(1.0 - snowy * (0.7 + 0.6 * blown), 0.0, 1.0) * sheen;
+        // Its surface heaves gently, so the glare is mottled rather than a clean disc.
+        vec2 heave = vec2(sin(p.x * 5.3 + p.y * 2.1) + sin(p.x * 11.7 - p.y * 7.9) * 0.5, sin(p.y * 6.1 - p.x * 1.7) + sin(p.y * 13.3 + p.x * 8.3) * 0.5);
+        vec3 rough = normalize(vec3(heave.x * 0.006, 1.0, heave.y * 0.006));
+        float shine = max(dot(rough, normalize(v + body)), 0.0);
+        ice = mix(ice, sky, fres * 0.45 * min(bare, 1.0));
+        ice += bodyColor * (pow(shine, 700.0) * 0.4 + pow(shine, 60.0) * 0.14) * bare * (1.0 - crack * 0.5);
         col = mix(col, ice, frozen);
         gl_FragColor = vec4(col, 1.0);
         #include <colorspace_fragment>
@@ -2323,6 +2336,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       waterUniforms.body.value.copy(skyUniforms.body.value);
       waterUniforms.bodyColor.value.copy(skyUniforms.bodyColor.value);
       waterUniforms.glint.value = (up ? 1 : 0.12 + 0.6 * moonLit) * dry * (1 - fogNow * 0.8) * (1 - waterUniforms.frozen.value * 0.7);
+      // The same light on ice, while the ice is bare enough to show it: gone by about three inches of snow.
+      waterUniforms.sheen.value = (up ? 1 : 0.12 + 0.6 * moonLit) * dry * (1 - fogNow * 0.8) * (1 - Math.min(1, Math.max(0, (snowNow - 0.75) / 2.5)));
+      waterUniforms.iceLight.value = Math.min(1, 0.25 + Math.max(0, e + 0.1) * 2.4);
       waterUniforms.skyTop.value.copy(look.top);
       waterUniforms.skyHorizon.value.copy(look.horizon);
       waterUniforms.deep.value.set('#2a78a8').multiplyScalar(Math.min(1, 0.16 + Math.max(0, e + 0.15) * 1.6)).lerp(tmp.set('#5d6f78'), wetNow * 0.5);

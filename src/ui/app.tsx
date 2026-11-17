@@ -38,9 +38,10 @@ const STARTS: [string, string][] = [['now', 'now'], ['tonight', 'tonight'], ['to
 const MODES: [Mode, string][] = [['walk', 'on foot'], ['bike', 'by bike'], ['drive', 'by car']];
 const THINKING = ["Checking what's open…", 'Looking at the sky…', 'Leaving out the obvious…'];
 const COUNT = ['Nothing', 'One', 'Two', 'Three'];
-/** `?weather=snow` (or rain, storm, fog, clear) dresses the model for weather we aren't having, to look at it. The picks still use the real forecast. */
+/** `?weather=snow` (or ice, rain, storm, fog, clear) dresses the model for weather we aren't having, to look at it. The picks still use the real forecast. */
 const PREVIEW: Record<string, Partial<SkyInput>> = {
   fog: { wet: 0, fog: 1, snowing: false, storm: false, snowIn: 0, frozen: false },
+  ice: { wet: 0, snowing: false, storm: false, snowIn: 0, frozen: true },
   snow: { wet: 0.85, snowing: true, storm: false, snowIn: 4, frozen: true },
   rain: { wet: 0.85, snowing: false, storm: false, snowIn: 0, frozen: false },
   storm: { wet: 1, snowing: false, storm: true, snowIn: 0, frozen: false },

@@ -55,7 +55,7 @@ The page holds back on first load: a quiet wordmark shows (straight from `index.
 
 The first visit opens with a short introduction (`src/ui/intro.tsx`): the idea of the app, one sentence at a time, over a scripted 27-second flight across the model. A tap anywhere skips it, the "?" button on the opening screen replays it, and a flag in local storage keeps it from playing twice. With reduced motion the camera holds still and the sentences simply change.
 
-To look at the model in weather you aren't having, add `?weather=snow` (or `rain`, `storm`, `fog`, `clear`) to the URL. It changes only how the model is dressed: the header and the picks still use the real forecast. To lay any depth of snow on it, add `?snow=6` (inches). To look at it at an hour that isn't now, add `?at=16:10` (24-hour, today, by the browser's clock): the sky and the header move to that time, the picks do not.
+To look at the model in weather you aren't having, add `?weather=snow` (or `ice`, `rain`, `storm`, `fog`, `clear`) to the URL. It changes only how the model is dressed: the header and the picks still use the real forecast. To lay any depth of snow on it, add `?snow=6` (inches). To look at it at an hour that isn't now, add `?at=16:10` (24-hour, today, by the browser's clock): the sky and the header move to that time, the picks do not.
 
 Three things tie the model to the decision:
 
