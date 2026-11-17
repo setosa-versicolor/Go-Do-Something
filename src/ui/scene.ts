@@ -1657,8 +1657,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   };
   /** Is there snow enough on the ice to push about? */
   const plowable = () => isFrozen && snowNow > 0.2 && snowField !== null;
-  /** A brush about a fingertip across, wherever on the ice it is. */
-  const brushAt = (p: THREE.Vector3) => Math.max(0.025, Math.min(0.16, camera.position.distanceTo(p) * 0.018));
+  /** A narrow brush, a bit under a fingertip across, wherever on the ice it is. */
+  const brushAt = (p: THREE.Vector3) => Math.max(0.02, Math.min(0.1, camera.position.distanceTo(p) * 0.011));
 
   // Sailboats on the lakes (ice shanties when they freeze).
   const hullMat = flat('#f4efe4');
