@@ -490,7 +490,27 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   scene.add(sunDisc, moon);
 
   // Land: a patchwork. Lawn in town, fields beyond it, all tinted by one seasonal color.
-  const landMat = new THREE.MeshLambertMaterial({ color: '#6f9a5b', vertexColors: true });
+  // Snow on the ground, by depth. A dusting settles in patches with the grass showing between them; an inch or
+  // two closes the gaps; from there the fields are one white, edge to edge. The patches come from a little noise
+  // over the land, so they are finer than the fields and the same from one frame to the next.
+  const snowUniforms = { snowCover: { value: 0 }, snowTint: { value: new THREE.Color('#e9eef1') } };
+  const snowable = <M extends THREE.Material>(mat: M): M => {
+    mat.onBeforeCompile = (shader) => {
+      Object.assign(shader.uniforms, snowUniforms);
+      shader.vertexShader = 'varying vec2 vSnowAt;\n' + shader.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n  vSnowAt = (modelMatrix * vec4(transformed, 1.0)).xz;');
+      shader.fragmentShader = `uniform float snowCover; uniform vec3 snowTint; varying vec2 vSnowAt;
+        float snowHash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        float snowNoise(vec2 p){ vec2 i = floor(p); vec2 f = fract(p); f = f * f * (3.0 - 2.0 * f);
+          return mix(mix(snowHash(i), snowHash(i + vec2(1.0, 0.0)), f.x), mix(snowHash(i + vec2(0.0, 1.0)), snowHash(i + vec2(1.0, 1.0)), f.x), f.y); }
+        ` + shader.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+        if (snowCover > 0.001) {
+          float snowLie = 0.5 * snowNoise(vSnowAt * 5.0) + 0.3 * snowNoise(vSnowAt * 17.0) + 0.2 * snowNoise(vSnowAt * 61.0);
+          diffuseColor.rgb = mix(diffuseColor.rgb, snowTint, clamp((snowCover * 1.5 - snowLie * 0.95) / 0.3, 0.0, 1.0));
+        }`);
+    };
+    return mat;
+  };
+  const landMat = snowable(new THREE.MeshLambertMaterial({ color: '#6f9a5b', vertexColors: true }));
   const landGeo = new THREE.PlaneGeometry(48, 48, 60, 60).toNonIndexed();
   landGeo.rotateX(-Math.PI / 2);
   {
@@ -510,7 +530,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     landGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
   }
   scene.add(new THREE.Mesh(landGeo, landMat));
-  const rimMat = flat('#6f9a5b');
+  const rimMat = snowable(flat('#6f9a5b'));
   const rim = new THREE.Mesh(new THREE.CircleGeometry(90, 40), rimMat);
   rim.rotation.x = -Math.PI / 2;
   rim.position.y = -0.02;
@@ -519,7 +539,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   // Lakes, on their real shorelines. The water is its own small shader: it
   // mirrors the sky, ripples, and catches the sun.
   const waterUniforms = {
-    time: { value: 0 }, frozen: { value: 0 }, snowy: { value: 0 }, chop: { value: 0 }, glint: { value: 1 },
+    time: { value: 0 }, frozen: { value: 0 }, snowy: { value: 0 }, buried: { value: 0 }, chop: { value: 0 }, glint: { value: 1 },
     deep: { value: new THREE.Color('#2a78a8') }, skyTop: { value: new THREE.Color() }, skyHorizon: { value: new THREE.Color() },
     body: { value: new THREE.Vector3(0, 1, 0) }, bodyColor: { value: new THREE.Color('#fff3c4') },
     // The simulated ripples (scene-water.ts): heights, how far the grid reaches, one cell of it, and how strongly they show.
@@ -534,7 +554,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       void main(){ vec4 w = modelMatrix * vec4(position, 1.0); wp = w.xyz; vec4 mvPosition = viewMatrix * w; gl_Position = projectionMatrix * mvPosition;
         #include <fog_vertex>
       }`,
-    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float chop; uniform float glint; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; uniform sampler2D waves; uniform float waveSpan; uniform float waveCell; uniform float waveGain; uniform sampler2D chart; uniform float chartSpan; uniform float night; varying vec3 wp;
+    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float buried; uniform float chop; uniform float glint; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; uniform sampler2D waves; uniform float waveSpan; uniform float waveCell; uniform float waveGain; uniform sampler2D chart; uniform float chartSpan; uniform float night; varying vec3 wp;
       #include <fog_pars_fragment>
       void main(){ vec2 p = wp.xz; float amp = 0.0034 * (1.0 + chop * 1.6) * (1.0 - frozen) * clamp(3.5 / length(cameraPosition - wp), 0.12, 1.0);
         float a = p.x * 9.0 + time * 1.1; float b = p.y * 11.0 - time * 0.9; float c2 = (p.x + p.y) * 17.0 + time * 1.7; float d2 = (p.x - p.y) * 31.0 - time * 2.3;
@@ -591,7 +611,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         float crack = smoothstep(0.96, 1.0, sin(p.x * 3.1 + sin(p.y * 2.3) * 2.0) * sin(p.y * 2.7 + sin(p.x * 1.9) * 2.0));
         vec3 ice = mix(vec3(0.78, 0.86, 0.9), sky, 0.3) + crack * 0.08;
         // Snow lies on ice: whiter, with the wind-swept cracks still showing through.
-        ice = mix(ice, mix(vec3(0.85, 0.91, 0.96), sky, 0.12) - crack * 0.05, snowy);
+        // Under deep snow even the cracks are gone.
+        ice = mix(ice, mix(vec3(0.85, 0.91, 0.96), sky, 0.12) - crack * 0.05 * (1.0 - buried), snowy);
         col = mix(col, ice, frozen);
         gl_FragColor = vec4(col, 1.0);
         #include <colorspace_fragment>
@@ -738,6 +759,11 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     }
   }
   scene.add(new THREE.Mesh(ribbons(onLand, 0.02), roadMat));
+  // What the ploughs leave: a grey-white bank down each side of every road, once there is enough snow to push.
+  const ploughMat = new THREE.MeshLambertMaterial({ color: '#c2ccd6', transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
+  const ploughed = new THREE.Mesh(ribbons(onLand.map((w) => ({ points: w.points, width: w.width + 0.03 })), 0.014), ploughMat);
+  ploughed.visible = false;
+  scene.add(ploughed);
   scene.add(new THREE.Mesh(ribbons(onWater.map((w) => ({ points: w.points, width: w.width + 0.035 })), 0.026), bankMat));
   scene.add(new THREE.Mesh(ribbons(onWater, 0.034), roadMat));
 
@@ -822,6 +848,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   const roofTopMat = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });
   const wall = { pos: [] as number[], uv: [] as number[], col: [] as number[], nor: [] as number[] };
   const top = { pos: [] as number[], col: [] as number[], nor: [] as number[] };
+  /** The snow that lies on each flat roof: its top and its four edges, with which corners rise as it deepens. */
+  const roofCap = { pos: [] as number[], rise: [] as number[] };
   /** One box: walls with windows (or plain), and a flat roof a shade darker. */
   const box = (east: number, north: number, w: number, d: number, h: number, turn: number, color: string, y0 = 0, plain = false) => {
     const c = Math.cos(turn);
@@ -857,6 +885,18 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       top.pos.push(cs[i]![0], y0 + h, cs[i]![1]);
       top.col.push(tmp.r * 0.72, tmp.g * 0.72, tmp.b * 0.74);
       top.nor.push(0, 1, 0);
+    }
+    for (const i of [0, 2, 1, 0, 3, 2]) {
+      roofCap.pos.push(cs[i]![0], y0 + h, cs[i]![1]);
+      roofCap.rise.push(1);
+    }
+    for (let i = 0; i < 4; i++) {
+      const [ax, az] = cs[i]!;
+      const [bx, bz] = cs[(i + 1) % 4]!;
+      for (const [x, z, up] of [[ax, az, 0], [bx, bz, 0], [bx, bz, 1], [ax, az, 0], [bx, bz, 1], [ax, az, 1]]) {
+        roofCap.pos.push(x!, y0 + h, z!);
+        roofCap.rise.push(up!);
+      }
     }
   };
   /** A building: the main slab, usually with something on the roof. */
@@ -974,7 +1014,16 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   topGeo.setAttribute('normal', new THREE.Float32BufferAttribute(top.nor, 3));
   scene.add(new THREE.Mesh(wallGeo, towerMat), new THREE.Mesh(topGeo, roofTopMat));
   // The same roofs again, a hair higher and white: shown when there is snow on them.
-  const snowCaps = new THREE.Mesh(topGeo, flat('#f1f4f6', { side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+  const capGeo = new THREE.BufferGeometry();
+  capGeo.setAttribute('position', new THREE.Float32BufferAttribute(roofCap.pos.slice(), 3));
+  {
+    // The top is the brightest part of a slab of snow and its edges a shade under it. Left to the light alone, a low
+    // sun makes the sunward edge brighter than the top, and the roof reads as a bowl with a rim.
+    const tone = new Float32Array(roofCap.rise.length * 3);
+    for (let v = 0; v < roofCap.rise.length; v += 6) tone.fill(v % 30 === 0 ? 1 : 0.7, v * 3, (v + 6) * 3);
+    capGeo.setAttribute('color', new THREE.BufferAttribute(tone, 3));
+  }
+  const snowCaps = new THREE.Mesh(capGeo, flat('#ffffff', { vertexColors: true, emissive: '#aab4c0', emissiveIntensity: 0.22, side: THREE.DoubleSide, transparent: true, opacity: 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
   snowCaps.position.y = 0.0015;
   snowCaps.visible = false;
   scene.add(snowCaps);
@@ -1018,6 +1067,19 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   }
   houses.count = roofs.count = placed;
   scene.add(houses, roofs);
+  // Snow on the roofs, as a thing with thickness: the same roof again in white, a little wider so it overhangs the
+  // eaves, and lifted by however much has fallen, so the roof's own colour shows as a band beneath it.
+  const roofSnow = new THREE.InstancedMesh(roofGeo, flat('#f1f4f6'), placed);
+  {
+    const wider = new THREE.Matrix4().makeScale(1.07, 1, 1.14);
+    const at = new THREE.Matrix4();
+    for (let i = 0; i < placed; i++) {
+      roofs.getMatrixAt(i, at);
+      roofSnow.setMatrixAt(i, at.multiply(wider));
+    }
+  }
+  roofSnow.visible = false;
+  scene.add(roofSnow);
 
   // Out past the edge of town: red barns and silos. It is Wisconsin.
   const barnMat = flat('#a63a2e');
@@ -1134,8 +1196,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   crowns.customDepthMaterial = firs.customDepthMaterial = swayDepth;
   scene.add(crowns, firs);
   let dressedFor = '';
-  const dress = (month: number, snow: boolean) => {
-    const key = `${month}${snow}`;
+  /** `snow` is inches on the ground: a little whitens the crowns a little, a lot loads the conifers. */
+  const dress = (month: number, snow: number) => {
+    const key = `${month}/${snow}`;
     if (key === dressedFor) return;
     dressedFor = key;
     // Bare branches: thinner, see-through crowns from November to March.
@@ -1148,18 +1211,18 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     const white = new THREE.Color('#f2f5f6');
     broad.forEach((t, i) => {
       tmp.set(palette[Math.floor(t.roll * palette.length)]!);
-      if (snow) tmp.lerp(white, 0.45);
+      tmp.lerp(white, 0.6 * (1 - Math.exp(-snow / 3.5)));
       crowns.setColorAt(i, tmp);
     });
     pines.forEach((t, i) => {
       tmp.set(t.roll < 0.5 ? '#2f5d3f' : '#356848');
-      if (snow) tmp.lerp(white, 0.35);
+      tmp.lerp(white, 0.72 * (1 - Math.exp(-snow / 4.5)));
       firs.setColorAt(i, tmp);
     });
     if (crowns.instanceColor) crowns.instanceColor.needsUpdate = true;
     if (firs.instanceColor) firs.instanceColor.needsUpdate = true;
   };
-  dress(7, false);
+  dress(7, 0);
 
   // ------------------------------------------------------------ things you can touch
 
@@ -1749,7 +1812,11 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   // Ripples where you touch the water, and the lake's name.
   const ripples: { m: THREE.Mesh; life: number }[] = [];
   let isFrozen = false;
-  let snowCover = false;
+  // Snow, as drawn: inches on the ground, eased toward what the forecast says so it builds and melts rather than
+  // snapping, and the last depth everything was coloured for.
+  let snowNow = -1;
+  let snowDrawn = -1;
+  let monthNow = 7;
   for (const lake of lakes) {
     lake.userData.tap = (p: THREE.Vector3) => {
       say(lake.userData.name as string, new THREE.Vector3(p.x, 0.3, p.z));
@@ -1993,6 +2060,108 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   canvas.addEventListener('pointercancel', onLeave);
   canvas.addEventListener('pointerleave', onLeave);
 
+  // ------------------------------------------------------------ snow, by the inch
+  // Everything that snow changes, for a given depth on the ground. Roofs whiten before the grass is covered, the
+  // ground goes from patches to one white by about two inches, trees take longer and conifers hold the most, and
+  // from four inches the ploughs have left banks along the roads.
+  const snowWhite = new THREE.Color('#f3f5f7');
+  // Drifts: low mounds scattered over the open ground, which is how deep snow shows from the air. They are there
+  // from a couple of inches and grow with the depth, wider and taller, and they take the light and the shadows
+  // like everything else. None on the water, the airfield or a road (the ploughs have been).
+  const driftSpots: { x: number; z: number; r: number; turn: number }[] = [];
+  {
+    const cell = (east: number, north: number) => `${Math.round(east / 0.09)},${Math.round(north / 0.09)}`;
+    const paved = new Set<string>();
+    for (const w of onLand) {
+      for (let i = 0; i + 3 < w.points.length; i += 2) {
+        const len = Math.hypot(w.points[i + 2]! - w.points[i]!, w.points[i + 3]! - w.points[i + 1]!);
+        for (let d = 0; d <= len; d += 0.045) {
+          const k = len ? d / len : 0;
+          paved.add(cell(w.points[i]! + (w.points[i + 2]! - w.points[i]!) * k, w.points[i + 1]! + (w.points[i + 3]! - w.points[i + 1]!) * k));
+        }
+      }
+    }
+    const scatter = seeded(1906);
+    for (let i = 0; i < 2600 && driftSpots.length < (lowMemory ? 500 : 1100); i++) {
+      // Thick near town, where there is something to see them against, thinning out over the fields.
+      const far = 0.5 + scatter() ** 1.6 * 11;
+      const a = scatter() * Math.PI * 2;
+      const east = Math.cos(a) * far;
+      const north = Math.sin(a) * far;
+      const r = 0.05 + scatter() * 0.09 + (far > shape.urbanRadius ? 0.06 : 0);
+      const turn = scatter() * Math.PI;
+      if (wet(east, north, 0.12) || inField(east, north) || taken(east, north, 0.2)) continue;
+      let clear = true;
+      for (let dx = -1; dx <= 1 && clear; dx++) for (let dy = -1; dy <= 1; dy++) if (paved.has(cell(east + dx * 0.09, north + dy * 0.09))) { clear = false; break; }
+      if (clear) driftSpots.push({ x: east, z: -north, r, turn });
+    }
+  }
+  const driftMat = new THREE.MeshLambertMaterial({ color: '#e9eef1' });
+  const drifts = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 2), driftMat, driftSpots.length);
+  drifts.visible = false;
+  drifts.frustumCulled = false;
+  scene.add(drifts);
+  const laySnow = (inches: number, month: number) => {
+    const ground = 1 - Math.exp(-inches * 1.3);
+    const roof = 1 - Math.exp(-inches * 1.8);
+    const green = month >= 4 && month <= 10;
+    snowUniforms.snowCover.value = ground;
+    // Up to an inch the roofs are only frosted. Beyond that the snow lies on them as a layer, thicker by the inch
+    // (and thicker than life, or it couldn't be seen), and the roof beneath goes back toward its own colour.
+    const lying = Math.min(1, Math.max(0, (inches - 0.75) / 13));
+    const loft = lying > 0 ? 0.0014 + 0.0085 * Math.sqrt(lying) : 0;
+    roofSnow.visible = lying > 0;
+    roofSnow.position.y = loft;
+    {
+      // Downtown's flat roofs carry it as a slab: the top rises and the edges stand under it.
+      const at = capGeo.attributes.position!;
+      const deep = loft * 1.25;
+      for (let i = 0; i < roofCap.rise.length; i++) at.setY(i, roofCap.pos[i * 3 + 1]! + roofCap.rise[i]! * deep);
+      at.needsUpdate = true;
+      capGeo.computeBoundingSphere();
+    }
+    roofTints.forEach((c, i) => roofs.setColorAt(i, tmp.set(c).lerp(snowWhite, 0.82 * roof * (1 - 0.6 * Math.min(1, lying * 5)))));
+    if (roofs.instanceColor) roofs.instanceColor.needsUpdate = true;
+    snowCaps.visible = roof > 0.02;
+    // A frost fades in; a slab is solid. (Solid also means it is drawn in depth order: see-through, its far edges
+    // were painted over its own top, and every roof was a bowl.)
+    const capMat = snowCaps.material as THREE.Material;
+    const frost = inches <= 0.75;
+    if (capMat.transparent !== frost) {
+      capMat.transparent = frost;
+      capMat.depthWrite = !frost;
+      capMat.needsUpdate = true;
+    }
+    capMat.opacity = frost ? roof : 1;
+    barnRoofMat.color.set('#5b5f66').lerp(tmp.set('#eef1f3'), roof);
+    domeMat.color.set('#cfcac0').lerp(tmp.set('#f1f4f6'), roof);
+    bankMat.color.set('#cbbf9f').lerp(tmp.set('#eef2f4'), ground);
+    landMat.color.set(GROUND[month] ?? '#6f9a5b');
+    rimMat.color.copy(landMat.color);
+    lawnMat.color.set(green ? '#5c9153' : '#8a8f62').lerp(tmp.set('#eef2f4'), ground);
+    pitchMat.color.set('#4f9a4a').lerp(tmp.set('#e3ebe6'), ground);
+    infieldMat.color.set(green ? '#7fa466' : '#9a9a6c').lerp(tmp.set('#e6ecea'), ground);
+    shoreMat.color.set('#d8c9a2').lerp(tmp.set('#f4f7f9'), ground);
+    dress(month, Math.round(inches * 2) / 2);
+    terraceChairs.visible = green && inches < 1;
+    ploughMat.opacity = Math.min(1, Math.max(0, (inches - 3) / 4)) * 0.9;
+    ploughed.visible = ploughMat.opacity > 0.02;
+    const piled = Math.min(1, Math.max(0, (inches - 1.5) / 12));
+    drifts.visible = piled > 0;
+    if (drifts.visible) {
+      driftSpots.forEach((d, i) => {
+        const r = d.r * (0.4 + 0.6 * Math.sqrt(piled));
+        dummy.position.set(d.x, 0, d.z);
+        dummy.rotation.set(0, d.turn, 0);
+        // Long across the wind, short along it, and never more than a low swell.
+        dummy.scale.set(r * 1.6, r * (0.07 + 0.14 * piled), r * 0.85);
+        dummy.updateMatrix();
+        drifts.setMatrixAt(i, dummy.matrix);
+      });
+      drifts.instanceMatrix.needsUpdate = true;
+    }
+  };
+
   // ------------------------------------------------------------ who throws a shadow
   // Everything solid and lit does, and everything lit can be fallen on. What lies flat on the
   // ground (lawns, roads, runways, the land itself) only receives; clouds are too high and too soft.
@@ -2009,6 +2178,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       bounds.setFromObject(m).getSize(size);
       m.castShadow = size.y > 0.012 && mat.blending === THREE.NormalBlending;
     });
+    drifts.receiveShadow = true;
+    drifts.castShadow = false;
   }
 
   // ------------------------------------------------------------ frame loop
@@ -2067,6 +2238,18 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       wetNow += (sky.wet - wetNow) * ease;
       stormNow += ((sky.storm ? 1 : 0) - stormNow) * ease;
       fogNow += ((sky.fog ?? 0) - fogNow) * ease;
+      // Snow: what is lying, plus what a fall in progress adds. Flurries leave a dusting; snow in earnest whitens the
+      // ground within a quarter of a minute even if the forecast's depth hasn't caught up. It starts at the
+      // real depth and builds from there, and melts the same way when the picture changes.
+      const snowWant = Math.max(sky.snowIn, sky.snowing ? (sky.wet > 0.6 ? 1.6 : 0.25) : 0);
+      snowNow = snowNow < 0 ? (calm ? snowWant : sky.snowIn) : calm ? snowWant : snowNow + (snowWant - snowNow) * (1 - Math.exp(-dt * 0.14));
+      const snowStep = Math.min(16, Math.round(snowNow * 8) / 8);
+      if (snowStep !== snowDrawn || sky.month !== monthNow) {
+        snowDrawn = snowStep;
+        monthNow = sky.month;
+        laySnow(snowStep, sky.month);
+      }
+      const snowGround = snowUniforms.snowCover.value;
       const want = lookAt(e, wetNow, stormNow, fogNow);
       // An evening the forecast gives a show to: the horizon burns and the sky above it goes to plum.
       const blaze = p > 0.5 ? (sky.sunsetGlow ?? 0) * Math.max(0, 1 - Math.abs(e - 0.04) / 0.34) * (1 - wetNow) * (1 - fogNow) : 0;
@@ -2103,7 +2286,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       marble.emissiveIntensity = look.glow * 0.55 + capitolPulse * 1.2;
       cityLights.uniforms.opacity.value = look.glow * (1 - wetNow * 0.3);
       traffic.uniforms.opacity.value = 0.35 + look.glow * 0.65;
-      roadMat.color.set(snowCover ? '#a9afb4' : '#d9d0bd').lerp(tmp.set('#8d8a84'), raining * 0.75).multiplyScalar(0.3 + 0.7 * Math.min(1, look.ambient)).lerp(tmp.set('#6b4a2c'), look.glow * 0.8);
+      roadMat.color.set('#d9d0bd').lerp(tmp.set('#a9afb4'), snowGround).lerp(tmp.set('#d3d9df'), Math.min(1, Math.max(0, (snowNow - 9) / 7)) * 0.7).lerp(tmp.set('#8d8a84'), raining * 0.75).multiplyScalar(0.3 + 0.7 * Math.min(1, look.ambient)).lerp(tmp.set('#6b4a2c'), look.glow * 0.8);
       cloudMat.color.copy(look.horizon).lerp(white, (e > 0.2 ? 0.75 : 0.25) * (1 - stormNow * 0.8)).lerp(tmp.set('#ff8d78'), blazeNow * 0.7);
 
       // The sun crosses the far (north-western) sky so it sets where Madison watches it set: over the big lake.
@@ -2144,7 +2327,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       waterUniforms.skyHorizon.value.copy(look.horizon);
       waterUniforms.deep.value.set('#2a78a8').multiplyScalar(Math.min(1, 0.16 + Math.max(0, e + 0.15) * 1.6)).lerp(tmp.set('#5d6f78'), wetNow * 0.5);
       waterUniforms.frozen.value += ((sky.frozen ? 1 : 0) - waterUniforms.frozen.value) * ease;
-      waterUniforms.snowy.value += ((snowCover ? 1 : 0) - waterUniforms.snowy.value) * ease;
+      waterUniforms.snowy.value = snowGround;
+      waterUniforms.buried.value = Math.min(1, Math.max(0, (snowNow - 4) / 6));
 
       // Fireflies: June to August, after dark, when it isn't raining.
       const summer = sky.month >= 6 && sky.month <= 8 && lapse === 0;
@@ -2154,7 +2338,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       const falling = sky.wet > 0.3;
       dropMat.opacity += ((falling && sky.snowing ? 0.75 : 0) - dropMat.opacity) * ease;
       streakMat.opacity += ((falling && !sky.snowing ? 0.3 + sky.wet * 0.25 : 0) - streakMat.opacity) * ease;
-      const live = sky.snowing ? 700 : Math.round(drops * (sky.storm ? 1 : sky.wet > 0.6 ? 0.65 : 0.3));
+      // Flurries are a few flakes; snow in earnest fills the air.
+      const live = sky.snowing ? (sky.wet > 0.6 ? 1250 : 380) : Math.round(drops * (sky.storm ? 1 : sky.wet > 0.6 ? 0.65 : 0.3));
       const snowOn = dropMat.opacity > 0.02;
       const rainOn = streakMat.opacity > 0.02;
       weather.visible = snowOn;
@@ -2567,31 +2752,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   return {
     setSky(input) {
       sky = input;
-      // White when snow is lying, or coming down in earnest. Flurries don't settle.
-      const snow = input.snowIn >= 1 || (input.snowing && input.wet > 0.6);
-      if (snow !== snowCover) {
-        snowCover = snow;
-        const white = new THREE.Color('#f3f5f7');
-        roofTints.forEach((c, i) => roofs.setColorAt(i, snow ? tmp.set(c).lerp(white, 0.82) : tmp.set(c)));
-        if (roofs.instanceColor) roofs.instanceColor.needsUpdate = true;
-        snowCaps.visible = snow;
-        barnRoofMat.color.set(snow ? '#eef1f3' : '#5b5f66');
-        domeMat.color.set(snow ? '#f1f4f6' : '#cfcac0');
-        bankMat.color.set(snow ? '#eef2f4' : '#cbbf9f');
-        // Under snow the fields lose their patchwork: one white, edge to edge.
-        landMat.vertexColors = !snow;
-        landMat.needsUpdate = true;
-      }
-      const ground = snow ? '#e9eef1' : GROUND[input.month] ?? '#6f9a5b';
-      landMat.color.set(ground);
-      rimMat.color.set(ground);
-      lawnMat.color.set(snow ? '#eef2f4' : input.month >= 4 && input.month <= 10 ? '#5c9153' : '#8a8f62');
-      pitchMat.color.set(snow ? '#e3ebe6' : '#4f9a4a');
-      infieldMat.color.set(snow ? '#e6ecea' : input.month >= 4 && input.month <= 10 ? '#7fa466' : '#9a9a6c');
-      shoreMat.color.set(snow ? '#f4f7f9' : '#d8c9a2');
-      dress(input.month, snow);
+      // The snow itself is laid in the frame loop, where it can build and melt (see `laySnow`).
       life.set(input);
-      terraceChairs.visible = input.month >= 4 && input.month <= 10 && !snow;
       isFrozen = input.frozen;
       for (const b of boats) {
         // Nobody sails on ice, or under lightning.

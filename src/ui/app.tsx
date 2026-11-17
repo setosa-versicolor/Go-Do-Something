@@ -152,6 +152,11 @@ export function App() {
     then.setHours(Number(at[1]), Number(at[2] ?? 0), 0, 0);
     return then.getTime() - Date.now();
   }, []);
+  const snowPreview = useMemo(() => {
+    const raw = new URLSearchParams(location.search).get('snow');
+    const inches = raw === null || raw === '' ? NaN : Number(raw);
+    return Number.isFinite(inches) ? Math.max(0, Math.min(40, inches)) : null;
+  }, []);
   const details = useMemo(() => (new URLSearchParams(location.search).get('scene') ?? '').split(',').filter((d) => d in DETAILS), []);
 
   const record = (id: string, verb: Verb) => {
@@ -399,6 +404,8 @@ export function App() {
     // The lakes hold ice from about the turn of the year into March; a November snow falls on open water.
     frozen: conditions.known && conditions.tempF < 33 && (local.mo === 12 || local.mo <= 3), month: local.mo,
     ...PREVIEW[preview ?? ''],
+    // `?snow=6` lays that many inches on the ground, to look at any depth of it.
+    ...(snowPreview === null ? {} : { snowIn: snowPreview }),
   };
   // The small things on the model that follow the real day.
   {
@@ -716,7 +723,7 @@ function Scene(props: { onReady?: () => void; onFail?: () => void; pose: Pose; s
   }, []);
 
   const s = props.sky;
-  useEffect(() => model.current?.setSky(s), [on, Math.round(s.time / 60_000), s.wet, s.fog, s.snowing, s.storm, s.frozen, Math.round(s.snowIn), s.month,
+  useEffect(() => model.current?.setSky(s), [on, Math.round(s.time / 60_000), s.wet, s.fog, s.snowing, s.storm, s.frozen, Math.round(s.snowIn * 4), s.month,
     Math.round(s.windMph ?? -1), Math.round((s.windFrom ?? -1) / 10), Math.round(s.tempF ?? 99), s.sunsetGlow, Math.round((s.moonPhase ?? 0) * 50), s.aurora, s.shelf, s.market, s.holiday, s.busy?.join('|')]);
   useEffect(() => model.current?.setPose(props.pose), [on, props.pose]);
   useEffect(() => model.current?.setPins(props.pins), [on, props.pins.map((p) => `${p.east.toFixed(3)},${p.north.toFixed(3)}`).join('|')]);
