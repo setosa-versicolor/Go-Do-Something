@@ -124,6 +124,15 @@ At first every combination counts the same, with the five event-heavy tiles repo
 
 Each layer catches what the one below it misses. The daily job is cheap and dumb and never sleeps. The weekly session changes things, but only inside the locks. The monthly session watches for the weekly one drifting: grading itself kindly, labelling to fit its rules, or chasing combinations nobody asks for.
 
+### Where each part runs, and how it gets to push
+
+A scheduled task that starts a fresh session each time can't have the repository attached, so it can't push or open a pull request. Nothing here relies on one.
+
+- **The daily job runs in GitHub Actions**, with the workflow's own token: `contents: write` on the job that appends to `tagging-data`, nothing more. No Claude session is involved, so the problem doesn't arise.
+- **The weekly review fires into a standing session.** It was created once with the repository attached, and each firing wakes that same session instead of starting a new one. Its setup check on 2026-11-17 showed it can push branches and open pull requests. It can't delete remote branches (HTTP 403), so finished review branches stay behind unless GitHub's "automatically delete head branches" setting is on.
+- **The monthly check fires into the same standing session**, with a different message, rather than starting a session of its own.
+- Each firing begins by pushing its new branch and stops at once, quoting the error, if that is refused. A broken permission then costs one failed run, not a week of work that can't be saved.
+
 ### What stops it from fooling itself
 
 - Random labels are drawn by the script and measured apart from targeted ones, so the trend line can't be bent by choosing easy listings.
