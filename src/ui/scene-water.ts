@@ -43,6 +43,8 @@ const STEPS_PER_SECOND = 60;
 /** Miles a second. The slow field must be slower than a sailboat (about 0.04) or no wake forms behind it. */
 const SLOW = 0.013;
 const FAST = 0.1;
+/** How fast a ring from a tap spreads, in miles a second: what it reaches, it reaches at this pace. */
+export const RING_SPEED = FAST;
 
 /** Null if this device can't render to a floating-point texture: the lakes then simply stay as they were. */
 export function createRipples(renderer: THREE.WebGLRenderer, lakes: number[][], span: number, size: number): Ripples | null {

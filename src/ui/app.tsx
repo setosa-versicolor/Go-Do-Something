@@ -145,6 +145,13 @@ export function App() {
   const deck = useRef<HTMLOListElement>(null);
   const debug = useMemo(() => new URLSearchParams(location.search).has('debug'), []);
   const preview = useMemo(() => new URLSearchParams(location.search).get('weather'), []);
+  const atShift = useMemo(() => {
+    const at = /^(\d{1,2})(?::(\d{2}))?$/.exec(new URLSearchParams(location.search).get('at') ?? '');
+    if (!at) return 0;
+    const then = new Date();
+    then.setHours(Number(at[1]), Number(at[2] ?? 0), 0, 0);
+    return then.getTime() - Date.now();
+  }, []);
   const details = useMemo(() => (new URLSearchParams(location.search).get('scene') ?? '').split(',').filter((d) => d in DETAILS), []);
 
   const record = (id: string, verb: Verb) => {
@@ -375,7 +382,9 @@ export function App() {
 
   // The backdrop is the sky over the city at the moment in question.
   const results = stage === 'results' && view;
-  const skyTime = results ? view.req.start : Date.now();
+  // `?at=17:40` moves the sky (and the header's read of it) to that time today, to look at the model at an hour
+  // that isn't now. The picks are still dealt for the real time.
+  const skyTime = (results ? view.req.start : Date.now()) + atShift;
   const sun = sunFor(skyTime, city.center.lat, city.center.lng, tz);
   const sky = skyAt(skyTime, sun);
   // The header describes the sky at that moment, not the worst of the whole window.

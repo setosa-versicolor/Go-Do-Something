@@ -12,7 +12,7 @@ import * as THREE from 'three';
 import { edgeDistance } from '../core/geo';
 import type { CityShape, Landmark } from '../core/types';
 import { addLife } from './scene-life';
-import { createRipples, type Dab } from './scene-water';
+import { createRipples, RING_SPEED, type Dab } from './scene-water';
 
 export interface SkyInput {
   time: number;
@@ -382,7 +382,34 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
 
   const hemi = new THREE.HemisphereLight('#ffffff', '#9a9c86', 1);
   const sunLight = new THREE.DirectionalLight('#ffffff', 2);
-  scene.add(hemi, sunLight);
+  scene.add(hemi, sunLight, sunLight.target);
+
+  // Shadows. The sun (or the moon) throws real ones: long at either end of the day, short at noon.
+  // One shadow map follows the camera and covers only what is in view, so a house is still a
+  // dozen texels across. A device short on memory goes without and keeps the old soft discs.
+  const lowMemory = ((navigator as { deviceMemory?: number }).deviceMemory ?? 8) <= 4;
+  const shadowed = !lowMemory;
+  const SHADOW_MAP = window.innerWidth < 900 ? 1024 : 2048;
+  if (shadowed) {
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
+    // Drawn once a frame, by hand: the scene is rendered twice (the town, then its labels).
+    renderer.shadowMap.autoUpdate = false;
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.set(SHADOW_MAP, SHADOW_MAP);
+    sunLight.shadow.bias = -0.00012;
+    sunLight.shadow.normalBias = 0.004;
+    sunLight.shadow.intensity = 0.92;
+    sunLight.shadow.camera.near = 4;
+    sunLight.shadow.camera.far = 36;
+  }
+  let shadowSpan = 0;
+  /** How much of the old sky light is kept when the sun throws shadows; the rest goes to the sun. */
+  const SKY_SHARE = 0.95;
+  const lightDir = new THREE.Vector3(3, 6, 6).normalize();
+  const lightRight = new THREE.Vector3();
+  const lightUp = new THREE.Vector3();
+  const lightAt = new THREE.Vector3();
 
   const rand = seeded(608);
   const pick = <T,>(list: T[]): T => list[Math.floor(rand() * list.length)]!;
@@ -497,6 +524,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     body: { value: new THREE.Vector3(0, 1, 0) }, bodyColor: { value: new THREE.Color('#fff3c4') },
     // The simulated ripples (scene-water.ts): heights, how far the grid reaches, one cell of it, and how strongly they show.
     waves: { value: null as THREE.Texture | null }, waveSpan: { value: 1 }, waveCell: { value: 0 }, waveGain: { value: 0 },
+    // The chart (see below): how deep the water is here, and how much lamplight stands on the shore nearby.
+    chart: { value: null as THREE.Texture | null }, chartSpan: { value: 1 }, night: { value: 0 },
   };
   const waterMat = new THREE.ShaderMaterial({
     uniforms: { ...THREE.UniformsUtils.clone(THREE.UniformsLib.fog), ...waterUniforms }, fog: true,
@@ -505,7 +534,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       void main(){ vec4 w = modelMatrix * vec4(position, 1.0); wp = w.xyz; vec4 mvPosition = viewMatrix * w; gl_Position = projectionMatrix * mvPosition;
         #include <fog_vertex>
       }`,
-    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float chop; uniform float glint; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; uniform sampler2D waves; uniform float waveSpan; uniform float waveCell; uniform float waveGain; varying vec3 wp;
+    fragmentShader: `uniform float time; uniform float frozen; uniform float snowy; uniform float chop; uniform float glint; uniform vec3 deep; uniform vec3 skyTop; uniform vec3 skyHorizon; uniform vec3 body; uniform vec3 bodyColor; uniform sampler2D waves; uniform float waveSpan; uniform float waveCell; uniform float waveGain; uniform sampler2D chart; uniform float chartSpan; uniform float night; varying vec3 wp;
       #include <fog_pars_fragment>
       void main(){ vec2 p = wp.xz; float amp = 0.0034 * (1.0 + chop * 1.6) * (1.0 - frozen) * clamp(3.5 / length(cameraPosition - wp), 0.12, 1.0);
         float a = p.x * 9.0 + time * 1.1; float b = p.y * 11.0 - time * 0.9; float c2 = (p.x + p.y) * 17.0 + time * 1.7; float d2 = (p.x - p.y) * 31.0 - time * 2.3;
@@ -522,11 +551,43 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         float fres = pow(1.0 - max(dot(n, v), 0.0), 3.0);
         vec3 r = reflect(-v, n);
         vec3 sky = mix(skyHorizon, skyTop, smoothstep(0.0, 0.5, r.y));
-        vec3 col = mix(deep, sky, 0.16 + fres * 0.5);
+        // Shallows: toward the shore the bottom shows through, paler and greener, and a thin line of foam laps at the edge.
+        vec2 cuv = p / chartSpan + 0.5;
+        float depth = (texture2D(chart, cuv).r - 0.2) / 0.8;
+        float shallow = 1.0 - smoothstep(0.0, 0.5, depth);
+        vec3 bed = deep * vec3(1.35, 1.9, 1.6) + vec3(0.02, 0.07, 0.06) * dot(deep, vec3(1.6));
+        // (By day. At night the bottom is as dark as the rest.)
+        vec3 col = mix(mix(deep, bed, shallow * 0.62 * (1.0 - night * 0.85)), sky, 0.16 + fres * 0.5);
+        float lap = depth + sin(time * 0.9 + p.x * 9.0 + p.y * 7.0) * 0.012 + sin(time * 0.6 - p.x * 4.0 + p.y * 11.0) * 0.008;
+        col += vec3(0.55, 0.6, 0.6) * dot(skyHorizon, vec3(0.34)) * smoothstep(0.075, 0.02, lap) * smoothstep(-0.03, 0.01, lap) * (0.5 + chop * 0.5) * (1.0 - night * 0.6);
         // The face of a wave that tips toward the sky is lighter, the far side darker: what makes a ripple read at all.
         col *= 1.0 + clamp(slope.y * 0.9 - slope.x * 0.35, -0.22, 0.3);
         float s = max(dot(r, body), 0.0);
         col += bodyColor * (pow(s, 120.0) * 1.1 + pow(s, 14.0) * 0.09) * glint;
+        // After dark the town's lights lie on the water: each one drawn out toward whoever is looking,
+        // and broken up by whatever waves are passing.
+        if (night > 0.01) {
+          vec2 away = normalize(wp.xz - cameraPosition.xz) / chartSpan;
+          vec2 wob = (n.xz * 2.2 + slope * 0.5) / chartSpan;
+          float lampLight = 0.0;
+          for (int i = 1; i <= 7; i++) {
+            float fi = float(i);
+            lampLight += texture2D(chart, cuv + away * fi * 0.055 + wob * (0.35 + fi * 0.2)).g * (1.0 - fi / 8.5);
+          }
+          // A lamp on rippled water is a column of dashes, not a smear: columns across the line of sight, dashes along it.
+          vec2 aw = away * chartSpan;
+          float along = dot(p, aw);
+          float across = dot(p, vec2(-aw.y, aw.x));
+          // No two columns alike: each has its own brightness, and its dashes their own spacing and pace.
+          // No two streaks alike: each has its own brightness, and shivers at its own pace.
+          float lane = across * 19.0 + sin(along * 7.0 + time * 0.5) * 0.3 + n.x * 6.0;
+          float own = fract(sin(floor(lane) * 127.1) * 43758.5453);
+          float next = fract(sin((floor(lane) + 1.0) * 127.1) * 43758.5453);
+          float streak = mix(own, next, smoothstep(0.25, 0.75, fract(lane)));
+          float shiver = 0.72 + 0.28 * sin(along * (46.0 + own * 30.0) - time * (1.2 + own) + own * 40.0);
+          float grain = mix((0.2 + 0.8 * streak * streak) * shiver, 0.4, smoothstep(5.0, 13.0, length(cameraPosition - wp)));
+          col += vec3(1.0, 0.4, 0.09) * min(lampLight, 1.6) * grain * night * 1.25 * (0.5 + fres);
+        }
         float crack = smoothstep(0.96, 1.0, sin(p.x * 3.1 + sin(p.y * 2.3) * 2.0) * sin(p.y * 2.7 + sin(p.x * 1.9) * 2.0));
         vec3 ice = mix(vec3(0.78, 0.86, 0.9), sky, 0.3) + crack * 0.08;
         // Snow lies on ice: whiter, with the wind-swept cracks still showing through.
@@ -553,7 +614,6 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   scene.add(new THREE.Mesh(ribbons(shape.rivers.map((points) => ({ points, width: 0.045 })), 0.011), waterMat));
   // The ripple simulation covers the middle twelve miles: a finer grid on a big screen, a coarser one on a phone,
   // where the lakes are small on screen anyway. With reduced motion it is off, and the water is as it was.
-  const lowMemory = ((navigator as { deviceMemory?: number }).deviceMemory ?? 8) <= 4;
   let water: ReturnType<typeof createRipples> = null;
   try {
     water = calm ? null : createRipples(renderer, shape.lakes.map((l) => l.outline), 12.4, lowMemory || window.innerWidth < 900 ? 512 : 1024);
@@ -1027,6 +1087,30 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   }
   const leafMat = new THREE.MeshLambertMaterial({ color: '#ffffff', flatShading: true, emissive: '#1f3a24', emissiveIntensity: 0.25 });
   const pineMat = new THREE.MeshLambertMaterial({ color: '#ffffff', flatShading: true, emissive: '#16301f', emissiveIntensity: 0.3 });
+  // Trees lean with the real wind, and gusts cross the woods as bands, the way they cross a field of wheat.
+  // The bend is applied after each tree is set in its place, so it is the same wind for every one of them;
+  // the shadow pass gets the same bend, so a tree and its shadow move together.
+  const swayUniforms = { swayTime: { value: 0 }, swayWind: { value: new THREE.Vector3(1, 0, 0) } };
+  const sway = <M extends THREE.Material>(mat: M): M => {
+    mat.onBeforeCompile = (shader) => {
+      Object.assign(shader.uniforms, swayUniforms);
+      shader.vertexShader = 'uniform float swayTime; uniform vec3 swayWind;\n' + shader.vertexShader.replace('#include <project_vertex>', `
+        vec4 mvPosition = vec4(transformed, 1.0);
+        #ifdef USE_INSTANCING
+          mvPosition = instanceMatrix * mvPosition;
+          float swayGust = sin(dot(mvPosition.xz, swayWind.xy) * 2.1 - swayTime * 1.7 + sin(mvPosition.x * 0.7 + mvPosition.z * 0.9) * 2.0) * 0.5 + 0.5;
+          float swayFlutter = sin(swayTime * 3.3 + instanceMatrix[3].x * 23.0 + instanceMatrix[3].z * 17.0);
+          float swayBend = mvPosition.y * mvPosition.y * 6.0 * swayWind.z * (0.3 + 0.7 * swayGust + 0.22 * swayFlutter);
+          mvPosition.xz += swayWind.xy * swayBend;
+        #endif
+        mvPosition = modelViewMatrix * mvPosition;
+        gl_Position = projectionMatrix * mvPosition;`);
+    };
+    return mat;
+  };
+  sway(leafMat);
+  sway(pineMat);
+  const swayDepth = sway(new THREE.MeshDepthMaterial());
   const broad = forest.filter((t) => !t.conifer);
   const pines = forest.filter((t) => t.conifer);
   const crownGeo = new THREE.IcosahedronGeometry(0.075, 0);
@@ -1047,6 +1131,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     dummy.updateMatrix();
     firs.setMatrixAt(i, dummy.matrix);
   });
+  crowns.customDepthMaterial = firs.customDepthMaterial = swayDepth;
   scene.add(crowns, firs);
   let dressedFor = '';
   const dress = (month: number, snow: boolean) => {
@@ -1377,6 +1462,54 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   const cityLights = glowPoints(lamps, { attenuate: true, twinkle: 0.25, speed: 1.1, sharp: 1 });
   scene.add(cityLights.points);
 
+  // The chart: the lakes seen from straight above, worked out once. Red is how far each spot of
+  // water is from its shore (0.2 at the waterline, 1 half a mile out), which the water's shader
+  // reads as depth. Green is lamplight: every window and street lamp, spread a little, so the
+  // water can find the lights that stand along its shore and reflect them.
+  {
+    const N = lowMemory ? 192 : 320;
+    const SPAN = 12.4;
+    const data = new Uint8Array(N * N * 4);
+    const cellMiles = SPAN / N;
+    for (const b of lakeBox) {
+      const i0 = Math.max(0, Math.floor((b.x0 / SPAN + 0.5) * N) - 2);
+      const i1 = Math.min(N - 1, Math.ceil((b.x1 / SPAN + 0.5) * N) + 2);
+      const j0 = Math.max(0, Math.floor((-b.y1 / SPAN + 0.5) * N) - 2);
+      const j1 = Math.min(N - 1, Math.ceil((-b.y0 / SPAN + 0.5) * N) + 2);
+      for (let j = j0; j <= j1; j++) {
+        for (let i = i0; i <= i1; i++) {
+          const d = -edgeDistance(b.l.outline, ((i + 0.5) / N - 0.5) * SPAN, -((j + 0.5) / N - 0.5) * SPAN);
+          const v = Math.round(Math.max(0, Math.min(1, 0.2 + d * 1.6)) * 255);
+          if (v > data[(j * N + i) * 4]!) data[(j * N + i) * 4] = v;
+        }
+      }
+    }
+    const light = new Float32Array(N * N);
+    const R = Math.ceil(0.21 / cellMiles);
+    for (const l of lamps) {
+      const fx = (l.x / SPAN + 0.5) * N - 0.5;
+      const fy = (l.z / SPAN + 0.5) * N - 0.5;
+      const ci = Math.round(fx);
+      const cj = Math.round(fy);
+      if (ci < R || cj < R || ci >= N - R || cj >= N - R) continue;
+      for (let j = cj - R; j <= cj + R; j++) {
+        for (let i = ci - R; i <= ci + R; i++) {
+          const q = ((i - fx) ** 2 + (j - fy) ** 2) * cellMiles * cellMiles;
+          light[j * N + i] = light[j * N + i]! + Math.exp(-q / 0.011) * l.size * 12;
+        }
+      }
+    }
+    // Packed downtown would otherwise burn out: a soft shoulder keeps a single porch light and the whole Square both readable.
+    for (let k = 0; k < N * N; k++) data[k * 4 + 1] = Math.round(255 * (1 - Math.exp(-light[k]! * 0.6)));
+    const chart = new THREE.DataTexture(data, N, N, THREE.RGBAFormat);
+    chart.minFilter = chart.magFilter = THREE.LinearFilter;
+    chart.needsUpdate = true;
+    waterUniforms.chart.value = chart;
+    waterUniforms.chartSpan.value = SPAN;
+    waterMat.uniforms.chart!.value = chart;
+    waterMat.uniforms.chartSpan!.value = SPAN;
+  }
+
   // Traffic: a few dozen headlights that follow the real roads.
   const routes = roads.filter((r) => r.length >= 7).map((r) => {
     const pts = r.slice(1);
@@ -1417,7 +1550,11 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   // Sailboats on the lakes (ice shanties when they freeze).
   const hullMat = flat('#f4efe4');
   const shantyMat = flat('#b5543a');
-  interface Boat { g: THREE.Group; sail: THREE.Mesh; shanty: THREE.Mesh; hull: THREE.Mesh; angle: number; radius: number; speed: number; spin: number; cx: number; cz: number }
+  // A boat is a small weight on springs: it rolls, pitches and heaves when a wave gets to it, and settles again.
+  interface Boat { g: THREE.Group; sail: THREE.Mesh; shanty: THREE.Mesh; hull: THREE.Mesh; angle: number; radius: number; speed: number; spin: number; cx: number; cz: number;
+    roll: number; rollV: number; pitch: number; pitchV: number; heave: number; heaveV: number; pushX: number; pushZ: number; pushVX: number; pushVZ: number }
+  /** Rings on their way out from a tap: where, when, how hard, and which boats they have already reached. */
+  const rings: { x: number; z: number; born: number; strength: number; met: Set<Boat> }[] = [];
   const boats: Boat[] = [];
   const SAILS = ['#ffffff', '#ffffff', '#f6d15a', '#e2574c', '#ffffff', '#7fc4e8'];
   lakeBox.forEach((b, li) => {
@@ -1440,8 +1577,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       shanty.position.y = 0.05;
       const hit = new THREE.Mesh(new THREE.SphereGeometry(0.3, 6, 4), unseen());
       g.add(hull, sail, shanty, hit);
-      const boat: Boat = { g, sail, shanty, hull, angle: rand() * 6, radius: 0.18 + rand() * 0.2, speed: 0.12 + rand() * 0.1, spin: 0, cx: east, cz: -north };
-      hit.userData.tap = () => { boat.spin = 1; };
+      const boat: Boat = { g, sail, shanty, hull, angle: rand() * 6, radius: 0.18 + rand() * 0.2, speed: 0.12 + rand() * 0.1, spin: 0, cx: east, cz: -north,
+        roll: 0, rollV: 0, pitch: 0, pitchV: 0, heave: 0, heaveV: 0, pushX: 0, pushZ: 0, pushVX: 0, pushVZ: 0 };
+      hit.userData.tap = () => { boat.spin = 1; boat.heaveV += 0.16; };
       tappable.push(hit);
       boats.push(boat);
       scene.add(g);
@@ -1616,6 +1754,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     lake.userData.tap = (p: THREE.Vector3) => {
       say(lake.userData.name as string, new THREE.Vector3(p.x, 0.3, p.z));
       if (isFrozen) return;
+      if (!calm) rings.push({ x: p.x, z: p.z, born: clock, strength: 1, met: new Set() });
       if (water) return water.drop(p.x, p.z, 1.6);
       for (let k = 0; k < 2; k++) {
         const m = new THREE.Mesh(new THREE.RingGeometry(0.92, 1, 32), new THREE.MeshBasicMaterial({ color: '#ffffff', transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false }));
@@ -1631,7 +1770,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   // The small things: wind, smoke, wakes, a train, market tents, a full stadium, the northern lights.
   const life = addLife({
     scene, shape, rand: seeded(1848), calm, glowPoints, wet, chimneys, rail,
-    lawn: 0.25 * CAP, centerHeight: 0.5 * CAP, fliers: [plane, balloon], stadiumFoot: FOOT.stadium!,
+    lawn: 0.25 * CAP, centerHeight: 0.5 * CAP, fliers: shadowed ? [] : [plane, balloon], stadiumFoot: FOOT.stadium!,
   });
   for (const holiday of shape.holidayLights ?? []) touchable(holiday.name, holiday.east, holiday.north, holiday.radius, 0.1);
 
@@ -1768,7 +1907,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   // ------------------------------------------------------------ pointer
 
   const ray = new THREE.Raycaster();
-  let down: { x: number; y: number; moved: boolean } | null = null;
+  let down: { x: number; y: number; moved: boolean; at: number } | null = null;
+  // A flick keeps the camera turning after the finger lifts, and friction brings it to rest.
+  const fling = { theta: 0, phi: 0 };
   // Two fingers pinch to zoom; one drags to look around.
   const fingers = new Map<number, { x: number; y: number }>();
   let pinch: { gap: number; zoom: number } | null = null;
@@ -1783,7 +1924,8 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       down = null;
       cb.onTouch();
     } else {
-      down = { x: e.clientX, y: e.clientY, moved: false };
+      down = { x: e.clientX, y: e.clientY, moved: false, at: e.timeStamp };
+      fling.theta = fling.phi = 0; // a finger down catches it
     }
   };
   const onMove = (e: PointerEvent) => {
@@ -1801,8 +1943,13 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     down.moved = true;
     user.theta -= dx * 0.006;
     user.phi = Math.max(-0.45, Math.min(0.2, user.phi - dy * 0.004));
+    // The speed of the drag, smoothed over the last few moves, in radians a second.
+    const took = Math.max(4, e.timeStamp - down.at) / 1000;
+    fling.theta += ((-dx * 0.006) / took - fling.theta) * 0.45;
+    fling.phi += ((-dy * 0.004) / took - fling.phi) * 0.45;
     down.x = e.clientX;
     down.y = e.clientY;
+    down.at = e.timeStamp;
   };
   const onUp = (e: PointerEvent) => {
     fingers.delete(e.pointerId);
@@ -1813,6 +1960,10 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       return;
     }
     const wasTap = down && !down.moved;
+    // Held still before letting go: no throw.
+    if (calm || !down || !down.moved || e.timeStamp - down.at > 90) fling.theta = fling.phi = 0;
+    fling.theta = Math.max(-5, Math.min(5, fling.theta));
+    fling.phi = Math.max(-2, Math.min(2, fling.phi));
     down = null;
     if (!wasTap) return;
     const box = canvas.getBoundingClientRect();
@@ -1826,6 +1977,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     fingers.delete(e.pointerId);
     if (fingers.size === 0) pinch = null;
     down = null;
+    fling.theta = fling.phi = 0;
   };
   // A trackpad pinch arrives as a wheel with ctrl held; so does ctrl or ⌘ + scroll. A plain scroll still scrolls the page.
   const onWheel = (e: WheelEvent) => {
@@ -1840,6 +1992,24 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
   canvas.addEventListener('pointerup', onUp);
   canvas.addEventListener('pointercancel', onLeave);
   canvas.addEventListener('pointerleave', onLeave);
+
+  // ------------------------------------------------------------ who throws a shadow
+  // Everything solid and lit does, and everything lit can be fallen on. What lies flat on the
+  // ground (lawns, roads, runways, the land itself) only receives; clouds are too high and too soft.
+  if (shadowed) {
+    const size = new THREE.Vector3();
+    const bounds = new THREE.Box3();
+    scene.updateMatrixWorld(true);
+    scene.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      const mat = m.material as THREE.Material;
+      if (Array.isArray(mat) || !(mat as THREE.MeshLambertMaterial).isMeshLambertMaterial || mat === cloudMat || !mat.visible) return;
+      m.receiveShadow = true;
+      bounds.setFromObject(m).getSize(size);
+      m.castShadow = size.y > 0.012 && mat.blending === THREE.NormalBlending;
+    });
+  }
 
   // ------------------------------------------------------------ frame loop
 
@@ -1924,10 +2094,9 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       // Rain, as far as the ground is concerned: wet streets and a roughened lake. Snow is neither.
       const raining = sky.snowing ? 0 : Math.max(0, Math.min(1, (wetNow - 0.3) / 0.5));
       waterUniforms.chop.value = Math.max(raining * (0.5 + stormNow * 0.5), Math.min(1, life.wind.mph / 24) * 0.9) - (life.wind.mph < 4 ? 0.55 : 0);
-      hemi.intensity = look.ambient * 1.7;
+      hemi.intensity = look.ambient * (shadowed ? SKY_SHARE : 1.7);
       hemi.color.copy(look.top).lerp(white, 0.55 - look.glow * 0.25);
       hemi.groundColor.set('#9a9c86').lerp(tmp.set('#2a3560'), look.glow * 0.8);
-      sunLight.intensity = look.sun;
       sunLight.color.copy(look.light);
       stars.uniforms.opacity.value = look.stars;
       for (const l of lit) l.m.emissiveIntensity = look.glow * l.k;
@@ -1942,8 +2111,19 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       sunDisc.visible = up;
       const a = Math.PI * p;
       sunDisc.position.set(Math.cos(a) * 46 - 8, Math.sin(a) * 30 + 0.5, -52 + Math.sin(a) * 6);
-      // Stylized: the key light always comes over the viewer's shoulder, so the town is never a silhouette.
-      sunLight.position.set(Math.cos(a) * 5 + 3, 6 + Math.sin(a) * 3, 6);
+      // Stylized: the key light never comes from in front, so the town is never a silhouette. It rises in the
+      // east behind the viewer's right shoulder, swings round through the south, and by evening rakes in low
+      // from the west, the viewer's left, which is what draws the shadows out across the streets. After dark
+      // it becomes the moon: higher, from the same side, and still, so the night's faint shadows hold.
+      const dark = Math.min(1, Math.max(0, -e * 3));
+      const day = 1 - dark;
+      lightDir.set((Math.cos(a) * 8 - Math.sin(a) * 3) * day - 5 * dark, 3 + Math.max(0, e) * 6 + dark * 2.6, 2 + Math.sin(a) * 3 * day + dark).normalize();
+      // With real shadows, light is moved from the sky to the sun, or a shadow is only a hint: open ground stays
+      // exactly as bright as it was, and what the sky gave up is what a shadow now takes away.
+      sunLight.intensity = shadowed ? Math.min(look.sun * 2.6, (look.sun * 0.51 + look.ambient * (1.7 - SKY_SHARE)) / Math.max(0.2, lightDir.y)) : look.sun;
+      // Under cloud or in fog the light comes from everywhere, and shadows all but go.
+      sunLight.shadow.intensity = 0.92 * (1 - wetNow * 0.85) * (1 - fogNow * 0.9);
+      waterUniforms.night.value = look.glow * (1 - wetNow * 0.3) * (1 - fogNow * 0.6) * (1 - waterUniforms.frozen.value * 0.75);
       const sunColor = (sunDisc.material as THREE.MeshBasicMaterial).color.set('#ff9a52').lerp(tmp.set('#fff3c4'), Math.min(1, Math.max(0, e * 2.2)));
       moonUniforms.opacity.value = Math.min(1, Math.max(0, -e * 3)) * (1 - wetNow * 0.8);
       moonUniforms.phase.value = sky.moonPhase ?? 0.5;
@@ -2115,9 +2295,46 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       const was = { x: b.g.position.x, z: b.g.position.z, turn: b.g.rotation.y };
       b.angle += b.speed * dt * (1 + b.spin * 5) * (calm ? 0 : 1);
       b.spin = Math.max(0, b.spin - dt * 0.7);
-      b.g.position.set(b.cx + Math.cos(b.angle) * b.radius, 0.012, b.cz + Math.sin(b.angle) * b.radius * 0.7);
-      b.g.rotation.y = -b.angle + b.spin * 9;
-      b.g.rotation.z = Math.sin(clock * 1.7 + b.angle) * 0.07 + b.spin * 0.35 + Math.min(0.32, life.wind.mph * 0.013) * Math.sin(b.angle + Math.atan2(life.wind.z, life.wind.x));
+      const heading = -b.angle + b.spin * 9;
+      // A ring from a tap, when it arrives: a shove away from where it came from, a lift, and a roll or a
+      // pitch depending on whether it took the boat on the beam or the bow. Weaker the farther it has come.
+      for (const ring of rings) {
+        if (ring.met.has(b) || !b.hull.visible) continue;
+        const dx = b.g.position.x - ring.x;
+        const dz = b.g.position.z - ring.z;
+        const far = Math.hypot(dx, dz);
+        if (far > (clock - ring.born) * RING_SPEED) continue;
+        ring.met.add(b);
+        const hit = ring.strength / (1 + far * far * 1.6);
+        const ux = dx / (far || 1);
+        const uz = dz / (far || 1);
+        // The boat's own axes on the water: forward, and to starboard.
+        const fx = Math.sin(heading);
+        const fz = Math.cos(heading);
+        b.rollV += (ux * fz - uz * fx) * hit * 3.4;
+        b.pitchV -= (ux * fx + uz * fz) * hit * 2.2;
+        b.heaveV += hit * 0.2;
+        b.pushVX += ux * hit * 0.1;
+        b.pushVZ += uz * hit * 0.1;
+      }
+      // The springs, stepped small enough to stay stable on a slow frame.
+      for (let left = dt; left > 1e-5; left -= 1 / 120) {
+        const h = Math.min(left, 1 / 120);
+        b.rollV += (-b.roll * 46 - b.rollV * 1.5) * h;
+        b.roll += b.rollV * h;
+        b.pitchV += (-b.pitch * 60 - b.pitchV * 2.4) * h;
+        b.pitch += b.pitchV * h;
+        b.heaveV += (-b.heave * 90 - b.heaveV * 3.2) * h;
+        b.heave += b.heaveV * h;
+        b.pushVX += (-b.pushX * 1.6 - b.pushVX * 1.9) * h;
+        b.pushVZ += (-b.pushZ * 1.6 - b.pushVZ * 1.9) * h;
+        b.pushX += b.pushVX * h;
+        b.pushZ += b.pushVZ * h;
+      }
+      b.g.position.set(b.cx + Math.cos(b.angle) * b.radius + b.pushX, 0.012 + Math.max(-0.012, b.heave), b.cz + Math.sin(b.angle) * b.radius * 0.7 + b.pushZ);
+      b.g.rotation.y = heading;
+      b.g.rotation.x = Math.max(-0.5, Math.min(0.5, b.pitch));
+      b.g.rotation.z = Math.sin(clock * 1.7 + b.angle) * 0.07 + b.spin * 0.35 + Math.min(0.32, life.wind.mph * 0.013) * Math.sin(b.angle + Math.atan2(life.wind.z, life.wind.x)) + Math.max(-0.7, Math.min(0.7, b.roll));
       // What the hull does to the water: it lifts it at the bow and lets it fall at the stern, in proportion to its
       // way through the water (the wake), and its two ends sweep round when it spins (the rings).
       if (water && b.hull.visible && dt > 0 && clock > 0.5) {
@@ -2131,6 +2348,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
         dabs.push({ x: b.g.position.x - fx * 0.1, z: b.g.position.z - fz * 0.1, slow: -slow * 0.85, fast: -fast, cells: 0.03 * cellsPerMile });
       }
     }
+    for (let i = rings.length - 1; i >= 0; i--) if (clock - rings[i]!.born > 14) rings.splice(i, 1);
     if (water && sky) {
       // Rain: drops land where you're looking, more of them the harder it comes down.
       const raining = sky.snowing || isFrozen ? 0 : Math.max(0, Math.min(1, (wetNow - 0.3) / 0.5));
@@ -2254,6 +2472,13 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     rig.r += (g.r - rig.r) * glide;
     rig.phi += (g.phi - rig.phi) * glide;
     rig.theta += (g.theta + (pose === 'thinking' ? spinning : 0) - rig.theta) * glide;
+    if (!down && (fling.theta !== 0 || fling.phi !== 0)) {
+      user.theta += fling.theta * dt;
+      user.phi = Math.max(-0.45, Math.min(0.2, user.phi + fling.phi * dt));
+      const rub = Math.exp(-dt * 2.6);
+      fling.theta = Math.abs(fling.theta) < 0.01 ? 0 : fling.theta * rub;
+      fling.phi = Math.abs(fling.phi) < 0.01 ? 0 : fling.phi * rub;
+    }
     const drift = calm ? 0 : Math.sin(clock * 0.12) * 0.07;
     const th = rig.theta + user.theta + drift;
     const ph = Math.max(0.35, Math.min(1.5, rig.phi + user.phi));
@@ -2265,6 +2490,35 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
     camera.lookAt(rig.tx, ty, rig.tz);
     dome.position.copy(camera.position);
     stars.points.position.copy(camera.position);
+
+    swayUniforms.swayTime.value = calm ? 0 : clock;
+    swayUniforms.swayWind.value.set(life.wind.x, life.wind.z, calm ? 0 : 0.0016 + Math.min(1, life.wind.mph / 26) * 0.011);
+
+    // The light, and the square of ground its shadow map covers: centred a little beyond what the camera
+    // is looking at, sized to the view, and moved only in whole texels so the shadows' edges don't crawl.
+    {
+      const want = Math.min(16, Math.max(3.2, far * 1.25));
+      // Resize in steps, not continuously: every change of size re-cuts every edge.
+      if (shadowSpan === 0 || want > shadowSpan * 1.02 || want < shadowSpan * 0.7) shadowSpan = want * 1.18;
+      lightRight.crossVectors(lightUp.set(0, 1, 0), lightDir).normalize();
+      lightUp.crossVectors(lightDir, lightRight);
+      lightAt.set(rig.tx - Math.sin(th) * shadowSpan * 0.16, 0, rig.tz - Math.cos(th) * shadowSpan * 0.16);
+      const texel = shadowSpan / SHADOW_MAP;
+      const rx = lightAt.dot(lightRight);
+      const ry = lightAt.dot(lightUp);
+      lightAt.addScaledVector(lightRight, Math.round(rx / texel) * texel - rx).addScaledVector(lightUp, Math.round(ry / texel) * texel - ry);
+      sunLight.target.position.copy(lightAt);
+      sunLight.position.copy(lightAt).addScaledVector(lightDir, 20);
+      if (shadowed) {
+        const cam = sunLight.shadow.camera;
+        if (cam.right !== shadowSpan / 2) {
+          cam.left = cam.bottom = -shadowSpan / 2;
+          cam.right = cam.top = shadowSpan / 2;
+          cam.updateProjectionMatrix();
+        }
+        renderer.shadowMap.needsUpdate = true;
+      }
+    }
 
     if (useLens) {
       lens.focus.value = probe.set(rig.tx, 0.15, rig.tz).project(camera).y * 0.5 + 0.5;
@@ -2353,6 +2607,7 @@ export function createDiorama(canvas: HTMLCanvasElement, shape: CityShape, cb: C
       user.theta = 0;
       user.phi = 0;
       user.zoom = 1;
+      fling.theta = fling.phi = 0;
       visit = null;
       if (next !== 'thinking') {
         // Don't unwind the spin: carry on from wherever the camera ended up.
