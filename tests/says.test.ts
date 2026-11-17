@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { sayReport, unheardWords, type SayRow } from '../src/core/says';
+import { collectorUrl } from '../src/ui/say-log';
 // The collector is plain JavaScript, as Cloudflare runs it.
 // @ts-expect-error no types for the worker module
 import { handle, tidy } from '../worker/say-log.js';
@@ -28,6 +29,15 @@ describe('what people type', () => {
     expect(r.unheard.map(([w]) => w)).toEqual(expect.arrayContaining(['axe', 'throwing', 'fireplace']));
     expect(r.common[0]).toEqual(['axe throwing', 2]);
     expect(sayReport([])).toMatchObject({ typed: 0, lost: 0 });
+  });
+});
+
+describe("the collector's address", () => {
+  it('works however it was written in the repository variable', () => {
+    const want = 'https://do-something-say-log.example.workers.dev/say';
+    for (const raw of ['do-something-say-log.example.workers.dev', 'https://do-something-say-log.example.workers.dev', 'https://do-something-say-log.example.workers.dev/', ` ${want} `, want]) expect(collectorUrl(raw)).toBe(want);
+    expect(collectorUrl('')).toBe('');
+    expect(collectorUrl(undefined)).toBe('');
   });
 });
 

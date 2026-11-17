@@ -13,7 +13,7 @@ You need a free Cloudflare account. Run these from the `worker/` folder.
 4. Choose an export token (any long random string, for example from `openssl rand -hex 24`) and store it: `npx wrangler secret put EXPORT_TOKEN`
 5. Deploy: `npx wrangler deploy`
    It prints the Worker's address, like `https://do-something-say-log.<your-name>.workers.dev`.
-6. Tell the site where to send. In the GitHub repository: Settings → Secrets and variables → Actions → Variables → New repository variable. Name `SAY_LOG_URL`, value the address from step 5 with `/say` on the end. The next deploy turns logging on. Deleting the variable turns it off.
+6. Tell the site where to send. In the GitHub repository: Settings → Secrets and variables → Actions → Variables → New repository variable. Name `SAY_LOG_URL`, value the address from step 5 (the site adds `https://` and `/say` if they're missing). The next deploy turns logging on. Deleting the variable turns it off.
 
 If the site moves to another address, add it to `ALLOWED_ORIGINS` in `wrangler.toml` and deploy again.
 

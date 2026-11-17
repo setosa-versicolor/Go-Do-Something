@@ -6,7 +6,24 @@
 // Off unless the site was built with an address to send to (the SAY_LOG_URL
 // repository variable). Off for anyone whose browser says not to track them.
 
-const URL_TO = (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.VITE_SAY_LOG_URL ?? '';
+/**
+ * The collector's address, however it was written in the repository variable: with or without
+ * https://, with or without /say. (Written bare, a browser takes it for a page on this site.)
+ */
+export function collectorUrl(raw: string | undefined): string {
+  let u = (raw ?? '').trim();
+  if (!u) return '';
+  if (!/^https?:\/\//i.test(u)) u = `https://${u}`;
+  try {
+    const url = new URL(u);
+    if (url.pathname === '/' || url.pathname === '') url.pathname = '/say';
+    return url.toString();
+  } catch {
+    return '';
+  }
+}
+
+const URL_TO = collectorUrl((import.meta as unknown as { env?: Record<string, string | undefined> }).env?.VITE_SAY_LOG_URL);
 
 export const sayLogOn = (): boolean => {
   if (!URL_TO) return false;
