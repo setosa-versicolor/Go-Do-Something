@@ -626,7 +626,7 @@ export function App() {
           Show key events in Madison
         </label>
         <p>Map shapes and “from the map” places © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors.</p>
-        {sayLogOn() && <p>What you type in the “say it” box is sent to us, with nothing that says who or where you are, so the app can learn to understand more. Taps aren't sent. Nor is anything else.</p>}
+        {sayLogOn() && <p>Data from your use of the app is used for continuous improvement but is not sold or given to others.</p>}
         {results && <p>“Usually open” means the hours haven't been checked by hand yet, so confirm before a long trip. Travel times are estimates. Your history stays on this device.</p>}
       </footer>
 
