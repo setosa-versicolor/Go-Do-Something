@@ -384,11 +384,17 @@ function choose(ranked: Candidate[], req: Request, memory: Memory): Candidate[] 
   const replacing = (req.keep?.length ?? 0) > 0;
   const rng = random(req.seed);
   const allEvents = req.intent.today || req.intent.kinds.includes('music') || req.intent.kinds.includes('show');
+  // When they named a kind of thing ("music & shows", "coffee"), every seat goes to that kind, or to something
+  // on tonight in the same family (a dance night or a market for a gig), while there is any. Not a dumpling shop.
+  const named = req.intent.kinds;
+  const inFamily = (c: Candidate) => named.length === 0 || named.includes(c.option.category)
+    || (c.option.kind === 'event' && named.some((k) => GROUP[k] === GROUP[c.option.category]));
   while (chosen.length < 3) {
     // Dated events are the spice, not the meal: the list of places is the product. No more than two of the
     // three seats go to them, unless what's on (or a stage) is exactly what was asked for.
     const eventsFull = !allEvents && chosen.filter((x) => x.option.kind === 'event').length >= TUNING.maxEvents;
-    const pool = ranked.filter((c) => !chosen.includes(c) && !(eventsFull && c.option.kind === 'event'));
+    const open = ranked.filter((c) => !chosen.includes(c) && !(eventsFull && c.option.kind === 'event'));
+    const pool = open.some(inFamily) ? open.filter(inFamily) : open;
     if (pool.length === 0) break;
     const top = ranked[0]!.score;
 
