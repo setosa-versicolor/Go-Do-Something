@@ -19,7 +19,6 @@ import type { Diorama, Live, Pin, Pose, SkyInput } from './scene';
 import { partOfDay, skyAt } from './sky';
 import { Intro } from './intro';
 import { logSay, sayLogOn } from './say-log';
-import { visitsOn } from './visits';
 import { VibeIcon, vibeLabel, VibeSheet } from './vibe';
 import { forgetEverything, loadForecast, loadLog, loadBeams, loadMode, loadStart, loadTheme, markIntroSeen, saveForecast, saveLog, saveBeams, saveMode, saveStart, saveTheme, seenIntro, type Theme } from './store';
 
@@ -645,7 +644,6 @@ export function App() {
         </label>
         <p>Map shapes and “from the map” places © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors.</p>
         {sayLogOn() && <p>Data from your use of the app is used for continuous improvement but is not sold or given to others.</p>}
-        {visitsOn() && <p>Visits are counted with Cloudflare Web Analytics, without cookies.</p>}
         {results && <p>“Usually open” means the hours haven't been checked by hand yet, so confirm before a long trip. Travel times are estimates. Your history stays on this device.</p>}
       </footer>
 

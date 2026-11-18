@@ -175,7 +175,7 @@ The "or say it" box is where the app finds out what it doesn't understand, so wh
 
 ## Counting visits
 
-How many people use the site, over time, comes from Cloudflare Web Analytics. It sets no cookies and stores nothing on the device, so its numbers are visits and page views, not a count of distinct people across days. It is off until a token is set, and a browser that asks not to be tracked (Global Privacy Control, or Do Not Track) is not counted. When it is on, the footer says so.
+How many people use the site, over time, comes from Cloudflare Web Analytics. It sets no cookies and stores nothing on the device, so its numbers are visits and page views, not a count of distinct people across days. It is off until a token is set, and a browser that asks not to be tracked (Global Privacy Control, or Do Not Track) is not counted.
 
 **Set it up (once, about five minutes):**
 
