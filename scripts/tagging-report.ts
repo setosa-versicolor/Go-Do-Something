@@ -5,15 +5,17 @@
 //   npm run tagging                    # print the report
 //   npm run tagging -- --record        # …and add this run to tagging/history.jsonl
 //   npm run tagging -- --misses        # …and list every miss on the dev set
-//   npm run tagging -- --raise-floor   # …and lift tagging/baseline.json to these scores, wherever they are higher
+//   npm run tagging -- --compare main  # …and grade the rules as they were on main against the same answer key
+//   npm run tagging -- --raise-floor   # …and set tagging/baseline.json to these scores over the whole key (see below)
 //
 // The process this serves is in tagging/PLAYBOOK.md.
 
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { city, venues } from '../src/cities/madison';
 import { judge, markOneOffs, toOption, type RawEvent } from '../src/core/events';
-import { grade, profile, type GoldenItem, type Grade } from '../src/core/tagging';
+import { FLOOR_FIELDS, floorItems, grade, profile, type Floor, type GoldenItem, type Grade } from '../src/core/tagging';
 import type { Option } from '../src/core/types';
+import { rulesFrom } from './rules-from';
 
 const read = (path: string) => JSON.parse(readFileSync(new URL(`../tagging/${path}`, import.meta.url), 'utf8'));
 const golden = (read('golden.json') as { items: GoldenItem[] }).items;
@@ -65,20 +67,47 @@ if (process.argv.includes('--record')) {
   console.log('\nRecorded in tagging/history.jsonl');
 }
 
+const compareRef = process.argv.includes('--compare') ? process.argv[process.argv.indexOf('--compare') + 1] : undefined;
+if (compareRef) {
+  // The fair before-and-after: the old rules and the new, graded on exactly the same listings and labels.
+  const old = await rulesFrom(compareRef);
+  console.log(`\n## The rules on ${compareRef} against the same answer key\n`);
+  console.log('| set | listings | keep or drop | kind | in/out | kids | turn-up | moods: precision | recall | F1 |');
+  console.log('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+  for (const [name, now] of [['dev', dev], ['holdout', holdout]] as const) {
+    console.log(line(`${name}, ${compareRef}`, grade(golden.filter((g) => g.split === name), old)));
+    console.log(line(`${name}, now`, now));
+  }
+}
+
 if (process.argv.includes('--raise-floor')) {
-  // A ratchet: the floor only ever goes up.
-  const FIELDS = ['keep', 'category', 'setting', 'kids', 'dropIn', 'moodF1'] as const;
-  const floor = read('baseline.json') as { about: string; set: string; dev: Record<string, number>; holdout: Record<string, number> };
-  const lifted: string[] = [];
-  for (const [name, g] of [['dev', dev], ['holdout', holdout]] as const) {
-    for (const f of FIELDS) {
-      if (g[f] > (floor[name][f] ?? 0)) {
-        lifted.push(`${name}.${f} ${floor[name][f] ?? 0} → ${g[f]}`);
+  // The floor is graded only on the items it was set on, so it is a ratchet on those items.
+  // Setting it again: first the tagger must hold the old floor on the old items; then the floor covers the
+  // whole key, at today's scores. Numbers can come out lower than before when the key gained harder listings.
+  // That's not the tagger getting worse, and the review guard checks the old items still hold.
+  const floor = read('baseline.json') as Floor;
+  const short: string[] = [];
+  for (const name of ['dev', 'holdout'] as const) {
+    const was = grade(floorItems(golden, floor, name), tag);
+    for (const f of FLOOR_FIELDS) if (was[f] < (floor[name][f] ?? 0)) short.push(`${name}.${f} ${was[f]} < ${floor[name][f]}`);
+  }
+  if (short.length) {
+    console.log(`\nThe floor was not set: on the items it was set on, the tagger is below it (${short.join(', ')}).`);
+    process.exitCode = 1;
+  } else {
+    const moved: string[] = [];
+    const items = { dev: [] as string[], holdout: [] as string[] };
+    for (const [name, g] of [['dev', dev], ['holdout', holdout]] as const) {
+      items[name] = golden.filter((x) => x.split === name).map((x) => x.id);
+      for (const f of FLOOR_FIELDS) {
+        if (g[f] !== floor[name][f]) moved.push(`${name}.${f} ${floor[name][f] ?? '–'} → ${g[f]}`);
         floor[name][f] = g[f];
       }
     }
+    const grew = (['dev', 'holdout'] as const).map((n) => items[n].length - (floor.items?.[n] ?? items[n]).length);
+    floor.items = items;
+    floor.set = new Date().toISOString().slice(0, 10);
+    writeFileSync(new URL('../tagging/baseline.json', import.meta.url), JSON.stringify(floor, null, 2) + '\n');
+    console.log(`\nFloor set on ${items.dev.length} dev and ${items.holdout.length} holdout items (+${grew[0]}, +${grew[1]}). ${moved.length ? `Moved: ${moved.join(', ')}` : 'No number moved.'}`);
   }
-  floor.set = new Date().toISOString().slice(0, 10);
-  writeFileSync(new URL('../tagging/baseline.json', import.meta.url), JSON.stringify(floor, null, 2) + '\n');
-  console.log(lifted.length ? `\nFloor raised: ${lifted.join(', ')}` : '\nNothing beat the floor; it stays where it was.');
 }

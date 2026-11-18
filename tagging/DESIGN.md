@@ -7,7 +7,7 @@ A proposal, not yet built. It extends the process in `PLAYBOOK.md`; nothing here
 The weekly review is sound on one sample, but the sample doesn't move.
 
 1. **The answer key comes from one snapshot.** Every review labels from `raw-latest.json`, a single fetch taken on review day. The key is 67 listings, all from Monday to Wednesday of one November week. Nothing from a weekend, nothing from summer, nothing the calendars said on the other six days. The morning deploy fetches every day and throws the raw listings away.
-2. **The floor gets in the way of a growing key.** `baseline.json` holds aggregate scores. When the key grows with harder listings, the aggregate can fall with no change to the tagger, and the only remedy is to edit the floor by hand. That is the one move the guardrails least want a scheduled session making.
+2. **The floor gets in the way of a growing key.** `baseline.json` holds aggregate scores. When the key grows with harder listings, the aggregate can fall with no change to the tagger, and the only remedy is to edit the floor by hand. That is the one move the guardrails least want a scheduled session making. *(Interim fix, 2026-11-17: the floor now records the items it was set on and is graded only on them, and reviews are judged old rules against new on the same key with `--compare`. Part 2's locks are still the fuller answer.)*
 3. **Nothing asks whether a choice gets an answer.** The profile measures what share of events carry a mood, and what share answer each tap on its own. It never asks the question a person asks: *I picked Music & shows, with friends, and Offbeat. Did anything come back that is all three?*
 
 ## How big the third problem is today

@@ -157,3 +157,26 @@ export function profile(listings: number, events: Option[], dropped: Record<stri
     reach,
   };
 }
+
+/** The fields the floor holds a line on. */
+export const FLOOR_FIELDS = ['keep', 'category', 'setting', 'kids', 'dropIn', 'moodF1'] as const;
+
+/**
+ * The floor (tagging/baseline.json): the scores the tagger must keep, and the answer-key items they were set on.
+ * It is graded only on those items, so adding harder listings to the key can't fail it; a listing joins the floor
+ * the next time the floor is set. See PLAYBOOK.md, "The floor".
+ */
+export interface Floor {
+  about: string;
+  set: string;
+  items: Record<'dev' | 'holdout', string[]>;
+  dev: Record<string, number>;
+  holdout: Record<string, number>;
+}
+
+/** The items of one split that a floor was set on. A floor with no list was set on the whole split. */
+export function floorItems(golden: GoldenItem[], floor: Pick<Floor, 'items'> | null | undefined, split: 'dev' | 'holdout'): GoldenItem[] {
+  const ids = floor?.items?.[split];
+  const inSplit = golden.filter((g) => g.split === split);
+  return ids ? inSplit.filter((g) => ids.includes(g.id)) : inSplit;
+}

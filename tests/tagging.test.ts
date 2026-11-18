@@ -1,18 +1,19 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { toOption } from '../src/core/events';
-import { grade, profile, type GoldenItem } from '../src/core/tagging';
+import { floorItems, grade, profile, type Floor, type GoldenItem } from '../src/core/tagging';
 import { CATEGORIES, MOODS } from '../src/core/types';
 import { city, venues } from '../src/cities/madison';
 import { at, option } from './helpers';
 
 // The tagging of loaded events is measured, and the measure may only go up.
 // tagging/golden.json is the answer key (real listings, labelled by hand);
-// tagging/baseline.json is the floor. The process is in tagging/PLAYBOOK.md.
+// tagging/baseline.json is the floor, graded only on the items it was set on,
+// so adding harder listings to the key can't fail it. The process is in tagging/PLAYBOOK.md.
 
 const read = (name: string) => JSON.parse(readFileSync(new URL(`../tagging/${name}`, import.meta.url), 'utf8'));
 const golden = (read('golden.json') as { items: GoldenItem[] }).items;
-const floor = read('baseline.json') as Record<'dev' | 'holdout', Record<string, number>>;
+const floor = read('baseline.json') as Floor;
 const tag = (listing: GoldenItem['listing']) => toOption(listing, venues, city.center);
 
 describe('the answer key', () => {
@@ -38,7 +39,11 @@ describe('the answer key', () => {
 });
 
 describe.each(['dev', 'holdout'] as const)('tagging accuracy on the %s set', (split) => {
-  const g = grade(golden.filter((x) => x.split === split), tag);
+  const g = grade(floorItems(golden, floor, split), tag);
+  it('the floor names only items in the key, in this split', () => {
+    const ids = new Set(golden.filter((x) => x.split === split).map((x) => x.id));
+    for (const id of floor.items[split]) expect(ids.has(id), id).toBe(true);
+  });
   it.each(Object.entries(floor[split]))('%s is no worse than the floor', (metric, least) => {
     expect(g[metric as keyof typeof g], `${metric} fell below the floor in tagging/baseline.json`).toBeGreaterThanOrEqual(least);
   });
