@@ -4,7 +4,7 @@ import { openIntervals } from '../src/core/hours';
 import { match, statusLine } from '../src/core/match';
 import { sunFor } from '../src/core/sun';
 import { DAY, HOUR, MIN, toLocal } from '../src/core/time';
-import { GROUP } from '../src/core/types';
+import { GROUP, type Option } from '../src/core/types';
 import { city, places } from '../src/cities/madison';
 import { at, option, request, TZ, weatherOf, world } from './helpers';
 
@@ -253,6 +253,27 @@ describe('three different things', () => {
       expect(ids(r), `seed ${seed}`).not.toContain('dumplings');
       expect(r.picks).toHaveLength(3);
     }
+  });
+
+  it('asked for a stage, keeps a left-turn seat for a gig in a bar', () => {
+    const gig = (id: string, category: 'music' | 'show', n: number, over: Partial<Option> = {}) => option({
+      id, kind: 'event', category, moods: { lively: 1 }, gem: 0.4, dropIn: true, rules: [],
+      hood: `Hood ${n}`, lat: city.center.lat + 0.004 * n, lng: city.center.lng - 0.004 * n,
+      when: { start: at(2026, 11, 18, 18), end: at(2026, 11, 18, 21) }, ...over,
+    });
+    // Two touring shows that outscore everything, as a ticketing feed would bring.
+    const options = [
+      gig('arena-a', 'music', 1, { gem: 1 }), gig('theatre-b', 'show', 2, { gem: 1 }), gig('hall-c', 'music', 3, { gem: 1 }),
+      gig('pub-band', 'music', 4, { atBar: true }), gig('bar-jazz', 'music', 5, { atBar: true }),
+      option({ id: 'arcade', category: 'play', moods: { lively: 1 }, gem: 0.9 }),
+    ];
+    let barSeat = 0;
+    for (let seed = 1; seed <= 25; seed++) {
+      const r = match(request(at(2026, 11, 18, 18), 'music show', { seed, durationMin: 180 }), world({ options }));
+      expect(ids(r).slice(0, 2), `seed ${seed}`).not.toContain('pub-band');
+      if (r.picks.some((p) => p.option.atBar)) barSeat++;
+    }
+    expect(barSeat).toBeGreaterThanOrEqual(20);
   });
 
   it('replaces one pick and leaves the other two alone', () => {

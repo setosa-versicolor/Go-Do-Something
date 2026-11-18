@@ -206,6 +206,7 @@ export function judge(raw: RawEvent, venues: Venue[], center: LatLng): Verdict {
       moods, gem: kind.category === 'market' ? 0.6 : 0.4, when: { start: raw.start, end },
       dropIn,
       hoursTrust: 'solid', url: raw.url, source: raw.source, venue: venueName, placeId: venue?.placeId,
+      ...(venue?.bar ? { atBar: true } : {}),
     },
   };
 }
