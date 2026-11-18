@@ -101,6 +101,8 @@ export interface Option extends LatLng {
   /** Feed events: where it is, and the curated place it's held at, if we know one. */
   venue?: string;
   placeId?: string;
+  /** Feed events: held in a bar or a restaurant, not a concert hall or a theatre. Where local music lives. */
+  atBar?: boolean;
 }
 
 export interface City {

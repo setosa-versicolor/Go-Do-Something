@@ -29,6 +29,11 @@ describe('event listings', () => {
     expect(o.when!.end - o.when!.start).toBe(2 * HOUR); // assumed length when none is given
   });
 
+  it('marks an event held in a bar or a restaurant, and not one in a theatre', () => {
+    expect(toOption(raw({ venue: 'Harmony Bar and Grill' }), venues, city.center)!.atBar).toBe(true);
+    expect(toOption(raw({ title: 'Gaslight', description: 'A play.', venue: 'Overture Center-Playhouse' }), venues, city.center)!.atBar).toBeUndefined();
+  });
+
   it('lets you turn up late to an open mic, a DJ night or a band in a bar, but not a concert', () => {
     const mic = toOption(raw({ title: 'Open Mic', description: '', venue: "Mickey's Tavern", start: at(2026, 11, 15, 22), end: at(2026, 11, 16, 0) }), venues, city.center)!;
     expect(mic).toMatchObject({ what: "Open mic at Mickey's Tavern", dropIn: true });

@@ -384,23 +384,33 @@ function choose(ranked: Candidate[], req: Request, memory: Memory): Candidate[] 
   const replacing = (req.keep?.length ?? 0) > 0;
   const rng = random(req.seed);
   const allEvents = req.intent.today || req.intent.kinds.includes('music') || req.intent.kinds.includes('show');
+  // When they named a kind of thing ("music & shows", "coffee"), every seat goes to that kind, or to something
+  // on tonight in the same family (a dance night or a market for a gig), while there is any. Not a dumpling shop.
+  const named = req.intent.kinds;
+  const inFamily = (c: Candidate) => named.length === 0 || named.includes(c.option.category)
+    || (c.option.kind === 'event' && named.some((k) => GROUP[k] === GROUP[c.option.category]));
   while (chosen.length < 3) {
     // Dated events are the spice, not the meal: the list of places is the product. No more than two of the
     // three seats go to them, unless what's on (or a stage) is exactly what was asked for.
     const eventsFull = !allEvents && chosen.filter((x) => x.option.kind === 'event').length >= TUNING.maxEvents;
-    const pool = ranked.filter((c) => !chosen.includes(c) && !(eventsFull && c.option.kind === 'event'));
+    const open = ranked.filter((c) => !chosen.includes(c) && !(eventsFull && c.option.kind === 'event'));
+    const pool = open.some(inFamily) ? open.filter(inFamily) : open;
     if (pool.length === 0) break;
     const top = ranked[0]!.score;
 
-    // The third pick is a left turn: still a real fit, but not the obvious next one.
+    // The third pick is a left turn: still a real fit, but not the obvious next one. Asked for a stage, a gig in a
+    // bar or a restaurant counts as a turn even beside two other gigs, and is the one leaned to: the touring act
+    // at the theatre will rank well on its own, and this keeps a seat for the band down the street.
     if (chosen.length === 2 && !replacing) {
+      const stage = named.includes('music') || named.includes('show');
+      const barRoom = (c: Candidate) => stage && c.option.atBar === true && !chosen.some((x) => x.option.atBar);
       const turns = pool.filter(
-        (c) => c.score >= top * TUNING.wildcardFloor && chosen.every((x) => x.option.category !== c.option.category),
+        (c) => c.score >= top * TUNING.wildcardFloor && (chosen.every((x) => x.option.category !== c.option.category) || barRoom(c)),
       );
       if (turns.length > 1) {
         const weights = turns.map((c) => {
           const fresh = memory.lastShown.has(c.option.id) ? 1 : 1.5;
-          const elsewhere = chosen.every((x) => GROUP[x.option.category] !== GROUP[c.option.category]) ? 2 : 1;
+          const elsewhere = chosen.every((x) => GROUP[x.option.category] !== GROUP[c.option.category]) || (stage && c.option.atBar) ? 2 : 1;
           // A left turn should be worth taking: lean to what we'd vouch for, and to the odd.
           const worth = (0.6 + (c.option.gem ?? 0.5)) * (1 + 0.5 * (c.option.moods.odd ?? 0));
           return Math.max(0.01, c.score) ** 2 * fresh * elsewhere * worth;
