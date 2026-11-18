@@ -119,19 +119,19 @@ At first every combination counts the same, with the five event-heavy tiles repo
 | When | Who | What | Gates anything? |
 | --- | --- | --- | --- |
 | Every morning, after the deploy's fetch | GitHub Actions, no model | Archive the day's raw listings with their published tags. Run the profile and the live grid. Append to `live.jsonl`. If a calendar returns nothing, or coverage, "can't classify", or the number of dark combinations moves well past its four-week range, open or update one "tagging watch" issue. | No |
-| Every Monday (the existing task) | Scheduled Claude session | The playbook, changed as follows. Read the week's `live.jsonl` and dark combinations first. Label 10 random (script-drawn) and 10 to 15 targeted listings from the archive. Fix 1 to 3 patterns, choosing by blind combinations as well as by misses. Re-tag the archive and label 10 changed listings. Pass the sentinels, the locks and `npm run build`. Lock. Open a pull request. | Its pull request must pass `npm test`; a person merges |
-| First Monday of the month | Scheduled Claude session (new) | Check the checkers. Re-label 10 random existing items blind and report how often the new label disagrees with the old one: that is the labeller's own consistency, and any disagreement goes to the owner rather than being settled by the session. Report live accuracy and combination recall month on month. Retire combinations that have had no supply on the key or live for three months. Say whether the rules have stopped improving, which is when tagging by a language model becomes worth the API key. | No: it reports, in a pull request or an issue |
+| Every Monday | Claude Code in GitHub Actions (`tagging-review.yml`) | The playbook, changed as follows. Read the week's `live.jsonl` and dark combinations first. Label 10 random (script-drawn) and 10 to 15 targeted listings from the archive. Fix 1 to 3 patterns, choosing by blind combinations as well as by misses. Re-tag the archive and label 10 changed listings. Pass the sentinels, the locks and `npm run build`. Lock. Open a pull request. | Its changes must pass the guard, `npm test` and the build before a pull request is opened; a person merges |
+| First Monday of the month | The same workflow, in its monthly mode | Check the checkers. Re-label 10 random existing items blind and report how often the new label disagrees with the old one: that is the labeller's own consistency, and any disagreement goes to the owner rather than being settled by the reviewer. Report live accuracy and combination recall month on month. Retire combinations that have had no supply on the key or live for three months. Say whether the rules have stopped improving, which is when tagging by a language model becomes worth the API key. | No: it reports, in a pull request or an issue |
 
 Each layer catches what the one below it misses. The daily job is cheap and dumb and never sleeps. The weekly session changes things, but only inside the locks. The monthly session watches for the weekly one drifting: grading itself kindly, labelling to fit its rules, or chasing combinations nobody asks for.
 
 ### Where each part runs, and how it gets to push
 
-A scheduled task that starts a fresh session each time can't have the repository attached, so it can't push or open a pull request. Nothing here relies on one.
+Everything runs in GitHub Actions. A scheduled Claude task was tried first and can't do this job: tested on 2026-11-17, a firing started a new session with no repository attached, even though the task was bound to a session that had one, so it could neither push nor open a pull request.
 
-- **The daily job runs in GitHub Actions**, with the workflow's own token: `contents: write` on the job that appends to `tagging-data`, nothing more. No Claude session is involved, so the problem doesn't arise.
-- **The weekly review fires into a standing session.** It was created once with the repository attached, and each firing wakes that same session instead of starting a new one. Its setup check on 2026-11-17 showed it can push branches and open pull requests. It can't delete remote branches (HTTP 403), so finished review branches stay behind unless GitHub's "automatically delete head branches" setting is on.
-- **The monthly check fires into the same standing session**, with a different message, rather than starting a session of its own.
-- Each firing begins by pushing its new branch and stops at once, quoting the error, if that is refused. A broken permission then costs one failed run, not a week of work that can't be saved.
+- **The daily job** uses the workflow's own token: `contents: write` on the job that appends to `tagging-data`, nothing more. No model is involved.
+- **The weekly review** is `.github/workflows/tagging-review.yml`: Mondays, and on demand from the Actions tab. Claude Code runs on the owner's plan through the `CLAUDE_CODE_OAUTH_TOKEN` secret. It has two jobs, so the model never holds a token that can write. In the first, Claude follows the playbook with read-only access and leaves its changes in the workspace. In the second, no model is involved: it applies those changes to a fresh copy of the same commit and checks the guardrails with `scripts/review-guard.ts`. It runs the tests and the build without credentials, then pushes `tagging-review/<date>` and opens the pull request.
+- **The monthly check** will be a second mode of the same workflow, on the first Monday.
+- **Failure is loud.** A review that stops, makes no change, breaks a guardrail or fails the tests fails the run. GitHub emails the owner about failed scheduled runs, and the run's summary says why. Finished branches are deleted when their pull request is merged (a repository setting).
 
 ### What stops it from fooling itself
 
@@ -145,7 +145,7 @@ A scheduled task that starts a fresh session each time can't have the repository
 
 1. **Measurement, one pull request.** Combination grading in `src/core/tagging.ts` (should, do, blind, precision; through `match()`). The live grid and dark combinations in `npm run tagging`. Locks and `accepted.json` replacing the aggregate floor in `tests/tagging.test.ts`, with today's key locked as the starting point. `sample` on golden items, `--sample` and `--churn` in the report script. No change to what users see.
 2. **The archive, one pull request.** `--raw` in the deploy's events step; a job with write access to `tagging-data` only, which appends and runs the live monitor. The deploy keeps read-only access to `main`.
-3. **The schedule.** Update the weekly task's instructions and `PLAYBOOK.md` to match; create the monthly task.
+3. **The schedule.** The weekly workflow exists (`tagging-review.yml`, with `scripts/review-guard.ts`). Update its instructions and `PLAYBOOK.md` as steps 1 and 2 land, and add the monthly mode.
 4. **Later, each the owner's decision:** counting taps for weighting; tagging by a model, judged against this same key.
 
 ## Decisions for the owner

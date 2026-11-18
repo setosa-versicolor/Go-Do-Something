@@ -48,7 +48,7 @@ Every run can be appended to `tagging/history.jsonl` (`--record`), which is how 
 7. **Check nothing else broke.** `npm test` and `npm run build` must pass. Run `npm run explain -- "<a request the change should affect>"` for two or three requests and read the picks as a person would.
 8. **Record and ratchet.** `npm run tagging -- --record --raise-floor`.
 9. **Write it up** at the bottom of this file under "Review notes": the date, what the numbers were and are, the pattern fixed, what you looked at and left alone, and what the next review should look at first. Keep each entry short.
-10. **Open a pull request**, do not push to `main`. Title it "Tagging review, <date>". In the body: the before and after table, the patterns fixed, every label you added that you were least sure of (so a person can check them), and anything you think needs a human decision. A person merges it.
+10. **Open a pull request**, do not push to `main`. Title it "Tagging review, <date>". In the body: the before and after table, the patterns fixed, every label you added that you were least sure of (so a person can check them), and anything you think needs a human decision. A person merges it. When the review runs on its schedule (`.github/workflows/tagging-review.yml`), the reviewer writes the body to `.review/PR_BODY.md` and the workflow opens the pull request, after `npm run review-guard` has checked the guardrails below and the tests and build have passed. The guard rejects a change to any file a review may not touch, a fall in the floor, an answer key item removed or moved between dev and holdout, and a rewritten history. It lists every existing label that changed, for a person to check.
 
 ## How to label
 
