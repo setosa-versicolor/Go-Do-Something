@@ -75,12 +75,33 @@ const ADULTS_ONLY = /\b(21\+|21 ?(and|&) ?(over|up|older)\b|18\+|18 ?(and|&) ?(o
 
 const CANT_GO = /\b(sold out|cancel(l)?ed|postponed)\b/i;
 
+// A social dance is something you do, not a show you watch. It says so by naming a dance people join in
+// (a contra dance, a milonga, a swing dance) or by the "open dance" that follows the lesson. A dance form on
+// its own is not enough: "Tango Fire" at Overture is a show.
+/** The old folk forms: the whole room dances, a caller or a teacher walks you through it, and few would have thought of it. */
+const FOLK_DANCE = /\b(contra ?danc\w*|english country danc\w*|folk danc\w*|square danc\w*|barn dance|c[eè]ilidh|polka (club|dance|party|lesson))\b/i;
+const SOCIAL_DANCE = /\b(open danc(e|ing)|social danc(e|ing)|dance lessons?|no partner needed|milonga|(swing|salsa|tango|bachata|ballroom|lindy|two-step|line) (danc\w*|club|night|social|lessons?)|west coast swing|lindy hop)\b/i;
+/** Words that are filler for most listings but, at a social dance, are the dance: the swing club's weekly night, the "lesson/practice" before the open dance. */
+const DANCE_WORDS_NOT_FILLER = /\b(club|practice)\b/gi;
+
+// What a children's program is about, read from its own description. A children's calendar presets one set of
+// moods for everything it lists; a program about moving, music, science or stories says which it is.
+const PROGRAM_CUES: [Mood, RegExp][] = [
+  ['move', /\b(move|moving|movement|dances?|dancing|obstacle course|balance)\b/i],
+  ['lively', /\b(music|musical|sing|singing|songs?|rhythm)\b/i],
+  ['learn', /\b(science|scientists?|learn about)\b/i],
+  ['cozy', /\b(stor(y|ies)|storytime|read-aloud|picture books?)\b/i],
+];
+
 const KINDS: { category: Category; label: string; re: RegExp; moods: Partial<Record<Mood, number>>; dropIn?: boolean; outdoor?: boolean }[] = [
   { category: 'market', label: 'Market', re: /\b(market|fair|festival|bazaar)\b/i, moods: { lively: 1, showoff: 0.6, eat: 0.6 }, dropIn: true },
   { category: 'talk', label: 'Reading', re: /\b(reading|author|poet(ry)?|book launch|in conversation|storytelling)\b/i, moods: { learn: 1, think: 0.6, date: 0.6 } },
   { category: 'talk', label: 'Talk', re: /\b(lecture|talk|panel)\b/i, moods: { learn: 1, think: 0.6 } },
   { category: 'show', label: 'Game', re: /\b(hockey|basketball|football|volleyball|soccer|baseball|roller derby|wrestling)\b/i, moods: { lively: 1, showoff: 0.6, kids: 0.6 } },
   { category: 'show', label: 'Film', re: /\b(film|screening|cinema|movie)\b/i, moods: { date: 0.6, cozy: 0.6, learn: 0.6 } },
+  // Before shows, so that a contra dance or a tango night is something you do, not something you watch.
+  { category: 'play', label: 'Folk dance', re: FOLK_DANCE, moods: { move: 1, lively: 0.6, odd: 0.6, date: 0.6 }, dropIn: true },
+  { category: 'play', label: 'Social dance', re: SOCIAL_DANCE, moods: { move: 1, lively: 0.6, date: 0.6 }, dropIn: true },
   { category: 'show', label: 'Show', re: /\b(comedy|stand-?up|improv|theat(er|re)|dance|ballet|opera|burlesque|drag)\b/i, moods: { lively: 1, date: 0.6 } },
   // Nobody waits for the first act of an open mic or a jam: you turn up when you like.
   { category: 'music', label: 'Open mic', re: /\b(open mic|open[- ]mike|open jam|open stage|jam session|bluegrass jam|song circle)\b/i, moods: { lively: 1, date: 0.6 }, dropIn: true },
@@ -138,7 +159,8 @@ export function judge(raw: RawEvent, venues: Venue[], center: LatLng): Verdict {
   if (miles(here, center) > MAX_MILES) return { dropped: 'out of town' };
   const text = `${title} ${description} ${(raw.tags ?? []).join(' ')}`;
   if (CANT_GO.test(text)) return { dropped: 'sold out or cancelled' };
-  if (!raw.preset && FILLER.test(text)) return { dropped: 'filler' };
+  const dance = FOLK_DANCE.test(text) || SOCIAL_DANCE.test(text);
+  if (!raw.preset && FILLER.test(dance ? text.replace(DANCE_WORDS_NOT_FILLER, '') : text)) return { dropped: 'filler' };
   // Fall back on what the venue is known for, using the plainest label for it.
   // A cinema or a club is known for what it does: a title with "parade" in it there is still a film, not a parade.
   const kind = raw.preset ?? KINDS.find((k) => k.re.test(text) && !(k.outdoor && venue?.usual)) ?? [...KINDS].reverse().find((k) => k.category === venue?.usual);
@@ -159,8 +181,19 @@ export function judge(raw: RawEvent, venues: Venue[], center: LatLng): Verdict {
   const adults = ADULTS_ONLY.test(text);
   const families = !adults && FOR_FAMILIES.test(text);
   const kids: Option['kids'] = raw.preset?.kids ?? (adults ? 0 : families ? 2 : ALL_AGES.test(text) ? 1 : venue?.bar ? 0 : 1);
+  // A children's program: kids, plus what its description says it is about, rather than the calendar's one guess for all.
+  const kindMoods = raw.preset?.kids === 2
+    ? { kids: raw.preset.moods.kids ?? 1, ...Object.fromEntries(PROGRAM_CUES.filter(([, re]) => re.test(description)).map(([m]) => [m, 0.6])) }
+    : kind.moods;
+  // A band in a bar plays for a couple of hours to whoever walks in; a concert hall wants you in your seat at the start.
+  const dropIn = ('dropIn' in kind ? kind.dropIn ?? false : false) || (kind.category === 'music' && Boolean(venue?.bar) && length >= 90);
+  // Something you drop in on at a bar comes with a drink: the band, the polka night, the board games.
+  const atTheBar = Boolean(venue?.bar) && dropIn;
   // An outdoor event is also an answer to "outside"; a family one to "kids". Neither is taken away from what it already was.
-  const moods = { ...kind.moods, ...(outdoors ? { nature: Math.max(kind.moods.nature ?? 0, 0.6) } : {}), ...(families ? { kids: 1 } : {}) };
+  const moods = {
+    ...kindMoods, ...(outdoors ? { nature: Math.max(kindMoods.nature ?? 0, 0.6) } : {}), ...(families ? { kids: 1 } : {}),
+    ...(atTheBar ? { drink: Math.max(kindMoods.drink ?? 0, 0.6) } : {}),
+  };
   return {
     option: {
       id: `${raw.source}:${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 48)}:${raw.start / MIN}`,
@@ -169,10 +202,9 @@ export function judge(raw: RawEvent, venues: Venue[], center: LatLng): Verdict {
       story: description ? blurb(description) : `${kind.label} at ${venueName}.`,
       price: raw.preset?.price ?? priceOf(description), setting: outdoors ? 'out' : 'in', minutes: [Math.min(45, length), length],
       kids,
-      // A band in a bar plays for a couple of hours to whoever walks in; a concert hall wants you in your seat at the start.
       // A fair or a festival is worth more of a detour than a Tuesday gig.
       moods, gem: kind.category === 'market' ? 0.6 : 0.4, when: { start: raw.start, end },
-      dropIn: ('dropIn' in kind ? kind.dropIn ?? false : false) || (kind.category === 'music' && Boolean(venue?.bar) && length >= 90),
+      dropIn,
       hoursTrust: 'solid', url: raw.url, source: raw.source, venue: venueName, placeId: venue?.placeId,
     },
   };

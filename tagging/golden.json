@@ -510,7 +510,7 @@
     "by": "Claude (Fable 5.2), in session",
     "on": "2026-11-16"
    },
-   "why": "A lesson, then open dancing.",
+   "why": "A lesson, then open dancing until 9: arriving an hour in, you still get the open dance, so it is drop-in (corrected 2026-11-17 to match the other lesson-then-open-dance nights).",
    "listing": {
     "source": "isthmus",
     "description": "Lesson 6:15 pm, open dance, 7-9 pm Tuesdays. $10.",
@@ -529,7 +529,7 @@
      "lively",
      "date"
     ],
-    "dropIn": false
+    "dropIn": true
    }
   },
   {
@@ -1882,6 +1882,642 @@
      "move"
     ],
     "kids": 2
+   }
+  },
+  {
+   "id": "2026-11-17/00",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "Bop standards in a downtown cocktail-bar basement: drop in, drink, a good date.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Standards/bop. Free.",
+    "url": "https://isthmus.com/events/russ-johnson-quartet-lucille/?occ_dtstart=2026-11-18T20:00",
+    "title": "Russ Johnson Quartet",
+    "start": 1795053600000,
+    "end": 1795060800000,
+    "venue": "Lucille"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "lively",
+     "drink",
+     "date",
+     "cozy"
+    ],
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-17/01",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A free meal service, not an outing.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Free meal, noon, Wednesday-Thursday, Neighborhood House.",
+    "url": "https://isthmus.com/events/walk-in-meals-wed-thu/?occ_dtstart=2026-11-18T12:00",
+    "title": "Walk-in Meals",
+    "start": 1795024800000,
+    "venue": "Neighborhood House"
+   },
+   "expect": {
+    "keep": false
+   }
+  },
+  {
+   "id": "2026-11-17/02",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "Bingo: left out by policy.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Ages 18 &amp;amp; up. Free.",
+    "url": "https://isthmus.com/events/bingo-bad-art/?occ_dtstart=2026-11-19T19:00",
+    "title": "Bingo",
+    "start": 1795136400000,
+    "venue": "Bad Art Co., Oregon"
+   },
+   "expect": {
+    "keep": false
+   }
+  },
+  {
+   "id": "2026-11-17/03",
+   "split": "holdout",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A noir-jazz trio in a neighbourhood pub: turn up any time.",
+   "listing": {
+    "source": "isthmus",
+    "description": "media release: Tank! is an instrumental trio from Madison playing original noir jazz. Matthew Nelson, guitar; Gary Chin, upright bass; Jay Hughes, drums. The originals draw on postwar American music like bebop, jump blues, swing, Latin, and film-noir harmony. The set also includes Mingus and Mancini.",
+    "url": "https://isthmus.com/events/tank-green-room/?occ_dtstart=2026-11-19T18:00",
+    "title": "Tank!",
+    "start": 1795132800000,
+    "end": 1795140000000,
+    "venue": "The Green Room Public House"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "lively",
+     "drink",
+     "date"
+    ],
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-17/04",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A paid weekly class.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Class led by Harper Hazelmare, 6:30 pm Thursdays. $12.",
+    "url": "https://isthmus.com/events/buddhist-wisdom-for-daily-life-thursdays/?occ_dtstart=2026-11-19T18:30",
+    "title": "Buddhist Wisdom for Daily Life",
+    "start": 1795134600000,
+    "venue": "Kadampa Meditation Center Madison"
+   },
+   "expect": {
+    "keep": false
+   }
+  },
+  {
+   "id": "2026-11-17/05",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "Art projects and games for families at a rec centre, come and go.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Art projects, games &amp;amp; more for all ages. $5/family.",
+    "url": "https://isthmus.com/events/family-fun-night-WPCRC/?occ_dtstart=2026-11-20T17:30",
+    "title": "Family Fun Night",
+    "start": 1795217400000,
+    "end": 1795224600000,
+    "venue": "Warner Park Community Recreation Center"
+   },
+   "expect": {
+    "keep": true,
+    "category": "play",
+    "setting": "in",
+    "moods": [
+     "kids"
+    ],
+    "kids": 2,
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-17/06",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "The dance faculty's annual concert: a dance performance to watch, seated from the start.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Annual faculty concert, 8 pm on 11/19-20 and 2:30 pm, 11/21, Lathrop Hall-H’Doubler Performance Space. $27 ($19 students).",
+    "url": "https://isthmus.com/events/uw-dance-department-faculty-2026/?occ_dtstart=2026-11-19T20:00",
+    "title": "UW Dance Department",
+    "start": 1795140000000,
+    "venue": "UW Lathrop Hall-H'Doubler Performance Space"
+   },
+   "expect": {
+    "keep": true,
+    "category": "show",
+    "setting": "in",
+    "moods": [
+     "date",
+     "think"
+    ],
+    "kids": 1,
+    "dropIn": false
+   }
+  },
+  {
+   "id": "2026-11-17/07",
+   "split": "holdout",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "An exhibition opening in the Union's gallery: wander in during the two hours.",
+   "listing": {
+    "source": "isthmus",
+    "description": "11/20-1/22, UW Memorial Union-Main Gallery (reception 5:30-7:30 pm, 11/20).",
+    "url": "https://isthmus.com/events/the-joyful-urgency-of-dickey-lee-stafford-reception/?occ_dtstart=2026-11-20T17:30",
+    "title": "The Joyful Urgency of Dickey Lee Stafford reception",
+    "start": 1795217400000,
+    "end": 1795224600000,
+    "venue": "UW Memorial Union-Main Gallery"
+   },
+   "expect": {
+    "keep": true,
+    "category": "museum",
+    "setting": "in",
+    "moods": [
+     "think",
+     "date"
+    ],
+    "kids": 1,
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-17/08",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A country/rock band in a bowling-alley bar.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Country/rock.",
+    "url": "https://isthmus.com/events/wayne-road-bowl-a-vard/?occ_dtstart=2026-11-20T20:00",
+    "title": "Wayne Road",
+    "start": 1795226400000,
+    "end": 1795239000000,
+    "venue": "Bowl-A-Vard Lanes"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "lively",
+     "drink"
+    ],
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-17/09",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "Trivia: left out by policy.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Hosted by Premier Trivia, 6 pm Wednesdays. Free.",
+    "url": "https://isthmus.com/events/trivia-java-cat/?occ_dtstart=2026-11-18T18:00",
+    "title": "Trivia",
+    "start": 1795046400000,
+    "venue": "Java Cat"
+   },
+   "expect": {
+    "keep": false
+   }
+  },
+  {
+   "id": "2026-11-17/10",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A weekly swing dance you join, 18+. Play, with move, not a show.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Ages 18+, 7:30-10 pm Wednesdays. $10.",
+    "url": "https://isthmus.com/events/jumptown-swing-dance-wednesdays/?occ_dtstart=2026-11-18T19:30",
+    "title": "Jumptown Swing Dance",
+    "start": 1795051800000,
+    "end": 1795060800000,
+    "venue": "Cafe Coda"
+   },
+   "expect": {
+    "keep": true,
+    "category": "play",
+    "setting": "in",
+    "moods": [
+     "move",
+     "lively",
+     "date"
+    ],
+    "kids": 0
+   }
+  },
+  {
+   "id": "2026-11-17/11",
+   "split": "holdout",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "Polka lesson then open dance to a live band in a music bar: you dance, it's a party, and it's not what you'd have thought of.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Dance lesson 6:30 pm, open dance with DB Polka Express and DJ Shotski 7 pm. $12 ($10 adv.).",
+    "url": "https://isthmus.com/events/4-lakes-polka-club-bur-oak/?occ_dtstart=2026-11-20T18:30",
+    "title": "Four Lakes Polka Club",
+    "start": 1795221000000,
+    "end": 1795235400000,
+    "venue": "The Bur Oak"
+   },
+   "expect": {
+    "keep": true,
+    "category": "play",
+    "setting": "in",
+    "moods": [
+     "move",
+     "lively",
+     "odd",
+     "drink",
+     "date"
+    ],
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-17/12",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "International folk dancing, a lesson then open dancing for hours, free. Something you do, and unusual.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Lesson 6 pm, open dance 7-9:45 pm Thursdays, Gates of Heaven. Free/donations.",
+    "url": "https://isthmus.com/events/madison-folk-dance-unlimited-thursdays-winter/?occ_dtstart=2026-11-19T18:00",
+    "title": "Madison Folk Dance Unlimited",
+    "start": 1795132800000,
+    "end": 1795146300000,
+    "venue": "Gates of Heaven"
+   },
+   "expect": {
+    "keep": true,
+    "category": "play",
+    "setting": "in",
+    "moods": [
+     "move",
+     "lively",
+     "odd"
+    ],
+    "kids": 1,
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-17/13",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "An afternoon tango social. You dance; a good date.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Madison Tango Society dance, 3-5 pm third Saturdays. $5.",
+    "url": "https://isthmus.com/events/milonga-matinee-third-saturday/?occ_dtstart=2026-11-21T15:00",
+    "title": "Milonga Matinee",
+    "start": 1795294800000,
+    "end": 1795302000000,
+    "venue": "Cafe Coda"
+   },
+   "expect": {
+    "keep": true,
+    "category": "play",
+    "setting": "in",
+    "moods": [
+     "move",
+     "date"
+    ],
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-17/14",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A Chicago blues band in a corner bar.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Blues.",
+    "url": "https://isthmus.com/events/cash-box-kings-crystal/?occ_dtstart=2026-11-21T20:00",
+    "title": "Cash Box Kings",
+    "start": 1795312800000,
+    "venue": "Crystal Corner Bar"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "lively",
+     "drink"
+    ],
+    "kids": 0,
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-17/15",
+   "split": "holdout",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A Cajun band in a neighbourhood bar on a Sunday afternoon.",
+   "listing": {
+    "source": "isthmus",
+    "description": "$10 donation.",
+    "url": "https://isthmus.com/events/Cajun-Strangers-harmony-bar/?occ_dtstart=2026-11-22T17:00",
+    "title": "The Cajun Strangers",
+    "start": 1795388400000,
+    "end": 1795397400000,
+    "venue": "Harmony Bar and Grill"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "lively",
+     "drink",
+     "date"
+    ],
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-17/16",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A Children's Museum music session for babies and toddlers.",
+   "listing": {
+    "source": "mcm",
+    "title": "Li&#8217;l Music with Junko",
+    "description": "<p>Do you have a dancing baby? Discover Junko&#8217;s weekly music session where babies and toddlers can explore their natural love of rhythm. Together, you and your tiny dancer will bounce, sway, and rock with the music while learning simple rhythm patterns. They&#8217;ll build critical social skills over the weeks as they interact with new faces and watch the other babies in the room, and strengthen their bond with you through lap songs and movement activities. </p>\n<p>It&#8217;s a wonderful way to get out of the house and connect with your baby or toddler through music and movement!</p>\n<p>Leader Junko Yamauchi Stewart is a multitalented musician and educator, and founder of BENI Daiko Taiko Ensemble.</p> ",
+    "start": 1795030200000,
+    "end": 1795033800000,
+    "venue": "Madison Children's Museum",
+    "url": "https://madisonchildrensmuseum.org/event/lil-music-with-junko-12/",
+    "tags": [
+     "1 to 2 years",
+     "Under 1"
+    ],
+    "preset": {
+     "label": "Kids’ program",
+     "category": "play",
+     "moods": {
+      "kids": 1,
+      "cozy": 0.6
+     },
+     "kids": 2,
+     "price": 2
+    }
+   },
+   "expect": {
+    "keep": true,
+    "category": "play",
+    "setting": "in",
+    "moods": [
+     "kids",
+     "lively"
+    ],
+    "kids": 2
+   }
+  },
+  {
+   "id": "2026-11-17/17",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A Children's Museum make-and-take: build a bird feeder and learn about winter birds.",
+   "listing": {
+    "source": "mcm",
+    "title": "Exploration Station: Bird Feeders",
+    "description": "<p>When the weather turns cold, our feathered neighbors could use a little help! Create your own bird feeder and discover how you can support backyard birds when food becomes harder to find. Take your feeder home, hang it outside, and watch for hungry visitors. It&#8217;s a simple way to share a little kindness with nature!</p> ",
+    "start": 1795278600000,
+    "end": 1795284000000,
+    "venue": "Madison Children's Museum",
+    "url": "https://madisonchildrensmuseum.org/event/exploration-station-bird-feeders/",
+    "tags": [
+     "1 to 2 years",
+     "10 to 12 years",
+     "3 to 5 years",
+     "6 to 9 years"
+    ],
+    "preset": {
+     "label": "Kids’ program",
+     "category": "play",
+     "moods": {
+      "kids": 1,
+      "cozy": 0.6
+     },
+     "kids": 2,
+     "price": 2
+    }
+   },
+   "expect": {
+    "keep": true,
+    "category": "play",
+    "setting": "in",
+    "moods": [
+     "kids",
+     "learn"
+    ],
+    "kids": 2
+   }
+  },
+  {
+   "id": "2026-11-17/18",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A Children's Museum clay-making session.",
+   "listing": {
+    "source": "mcm",
+    "title": "Clay Day",
+    "description": "<p>Squish it, shape it, roll it, and build with it! Each week, Laurie and museum staff lead a new hands-on project featuring air-dry, polymer, or ceramic clay. Learn techniques for shaping and decorating while giving yourself plenty of room to experiment. Whether you&#8217;re making something practical, playful, or completely unexpected, Clay Day is a chance to discover what your hands and imagination can create.</p> ",
+    "start": 1795201200000,
+    "end": 1795208400000,
+    "venue": "Madison Children's Museum",
+    "url": "https://madisonchildrensmuseum.org/event/clay-day-58/",
+    "tags": [],
+    "preset": {
+     "label": "Kids’ program",
+     "category": "play",
+     "moods": {
+      "kids": 1,
+      "cozy": 0.6
+     },
+     "kids": 2,
+     "price": 2
+    }
+   },
+   "expect": {
+    "keep": true,
+    "category": "play",
+    "setting": "in",
+    "moods": [
+     "kids"
+    ],
+    "kids": 2
+   }
+  },
+  {
+   "id": "2026-11-17/19",
+   "split": "holdout",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "Brazilian pagode at a brewery after work: drop in with a beer.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Brazilian.",
+    "url": "https://isthmus.com/events/saideira-pagode-working-draft/?occ_dtstart=2026-11-19T17:00",
+    "title": "Saideira Pagode",
+    "start": 1795129200000,
+    "end": 1795136400000,
+    "venue": "Working Draft Beer Company"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "lively",
+     "drink"
+    ],
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-17/20",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A monthly guided walk in a city park: outdoors, on foot, meet at the entrance at the start.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Friends of Hoyt Park event, 6:30 pm third Thursdays, meet by main entrance. Free.",
+    "url": "https://isthmus.com/events/nature-walk-hoyt-park/?occ_dtstart=2026-11-19T18:30",
+    "title": "Nature Walk",
+    "start": 1795134600000,
+    "venue": "Hoyt Park"
+   },
+   "expect": {
+    "keep": true,
+    "category": "trail",
+    "setting": "out",
+    "moods": [
+     "nature",
+     "move"
+    ],
+    "kids": 1,
+    "dropIn": false
+   }
+  },
+  {
+   "id": "2026-11-17/21",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude (Opus 5.5), scheduled review",
+    "on": "2026-11-17"
+   },
+   "why": "A free old-time jam: bring an instrument and join in, come when you like.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Bring music &amp;amp; instruments. Free/donations.",
+    "url": "https://isthmus.com/events/wild-hog-in-the-woods-hootenanny-wil-mar/?occ_dtstart=2026-11-21T14:00",
+    "title": "Wild Hog in the Woods Hootenanny",
+    "start": 1795291200000,
+    "end": 1795300200000,
+    "venue": "Wil-Mar Center"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "lively",
+     "odd"
+    ],
+    "kids": 1,
+    "dropIn": true
    }
   }
  ]

@@ -33,9 +33,20 @@ The key is split: `dev` listings are for tuning against, `holdout` listings are 
 
 Every run can be appended to `tagging/history.jsonl` (`--record`), which is how progress over months is read.
 
+## Grading fairly: same listings, before and after
+
+A score only means something next to another score taken on **the same listings with the same labels**. Growing the key with harder listings lowers the aggregate with no change to the tagger, so "this week's number against last week's number" mixes up two things: the rules changing and the test changing. Every comparison in a review is therefore one of two kinds, and never anything else:
+
+- **Old rules against new rules, on today's key.** `npm run tagging -- --compare main` grades the rules as they are on `main` against the same answer key, labels and all, beside the rules now. This is the before-and-after. Dev should improve; holdout must not get worse on any of keep, kind, in/out, kids, turn-up or mood F1.
+- **The floor, on the items it was set on.** See below.
+
+Never judge a change by comparing today's scores with the floor numbers, or with a past review's table, when the key has grown in between. And with only 20-odd holdout listings, one listing moves a holdout number by about 5 points: read a small holdout change as one or two listings, and say which.
+
 ## The floor
 
-`tagging/baseline.json` holds the lowest acceptable accuracy on each set. `npm test` fails below it. It is a ratchet: `npm run tagging -- --raise-floor` lifts it to the current scores wherever they are higher, and nothing lowers it automatically.
+`tagging/baseline.json` holds the lowest acceptable accuracy on each set, **and the list of answer-key items it was set on** (`items`). `npm test` grades the floor only on those items, so adding new listings to the key, however hard, can never fail it. A listing joins the floor the next time the floor is set.
+
+`npm run tagging -- --raise-floor` sets it: it first checks the tagger still meets the old floor on the old items (and refuses if not), then sets the floor to today's scores over the whole key and records the new item list. When the key has gained hard listings, some aggregate numbers come out lower than the old ones. That is expected and correct: they are numbers over a bigger, harder set, and the old items are still held to the old numbers by the check before. Never edit the numbers or the item list by hand; the guard rejects a floor number that isn't the tagger's real score.
 
 ## One review, step by step
 
@@ -44,11 +55,11 @@ Every run can be appended to `tagging/history.jsonl` (`--record`), which is how 
 3. **Grow the answer key by about 20 listings.** Pick from `raw-latest.json` listings that are not already in the key. Do not pick at random only: half at random, half from where the tagger is weakest (a silent mood, a tap with 0% reach, the "couldn't classify" drops, kinds of event the key has few of). Label each one as a thoughtful local would, following "How to label" below. Give every fourth one `"split": "holdout"`. Leave out anything you can't call either way.
 4. **Find the biggest pattern in the misses**, not the biggest single miss. "Every social dance is tagged as a show to watch" is a pattern. "This one band has an odd name" is not.
 5. **Fix that pattern** in `src/core/events.ts` (the kinds, the cues) or `src/cities/madison/venues.ts` (what a venue is). One to three patterns per review. Prefer a rule that reads as common sense to one that only fits the sample. Add a unit test in `tests/events.test.ts` for each new rule, with a case it must catch and a near-miss it must not.
-6. **Measure again.** `npm run tagging`. A change is good if dev improves **and holdout does not get worse**. If holdout falls, the rule is too narrow or too greedy: rework it or drop it.
+6. **Measure again**, fairly: `npm run tagging -- --compare main`, which grades the old rules and the new on the same, grown key. A change is good if dev improves **and holdout does not get worse** than the old rules on the same listings. If holdout falls, the rule is too narrow or too greedy: rework it or drop it. Do not compare with the floor numbers or the last review's table (see "Grading fairly"). If the floor tests in `npm test` fail, the new rules broke something on the listings the floor was set on: look at those misses, they are real.
 7. **Check nothing else broke.** `npm test` and `npm run build` must pass. Run `npm run explain -- "<a request the change should affect>"` for two or three requests and read the picks as a person would.
-8. **Record and ratchet.** `npm run tagging -- --record --raise-floor`.
+8. **Record and set the floor.** `npm run tagging -- --record --raise-floor`. The floor now covers the listings you added; some of its numbers may come out lower than before because those listings are harder. Say so in the write-up, with the `--compare` table that shows the rules themselves did not get worse.
 9. **Write it up** at the bottom of this file under "Review notes": the date, what the numbers were and are, the pattern fixed, what you looked at and left alone, and what the next review should look at first. Keep each entry short.
-10. **Open a pull request**, do not push to `main`. Title it "Tagging review, <date>". In the body: the before and after table, the patterns fixed, every label you added that you were least sure of (so a person can check them), and anything you think needs a human decision. A person merges it. When the review runs on its schedule (`.github/workflows/tagging-review.yml`), the reviewer writes the body to `.review/PR_BODY.md` and the workflow opens the pull request, after `npm run review-guard` has checked the guardrails below and the tests and build have passed. The guard rejects a change to any file a review may not touch, a fall in the floor, an answer key item removed or moved between dev and holdout, and a rewritten history. It lists every existing label that changed, for a person to check.
+10. **Open a pull request**, do not push to `main`. Title it "Tagging review, <date>". In the body: the before and after table, the patterns fixed, every label you added that you were least sure of (so a person can check them), and anything you think needs a human decision. A person merges it. When the review runs on its schedule (`.github/workflows/tagging-review.yml`), the reviewer writes the body to `.review/PR_BODY.md` and the workflow opens the pull request, after `npm run review-guard` has checked the guardrails below and the tests and build have passed. The guard rejects a change to any file a review may not touch; new rules that fall below the old floor on the items it was set on; a floor number that isn't the tagger's real score, or an item dropped from the floor; holdout doing worse than the old rules on the same listings; an answer key item removed or moved between dev and holdout; and a rewritten history. It puts the old-rules-against-new table in the pull request, and lists every existing label that changed, for a person to check.
 
 ## How to label
 
@@ -67,7 +78,8 @@ Changing an existing label is allowed when it is plainly wrong. Say which and wh
 ## Guardrails
 
 - The answer key is the standard, and you are also the one being graded against it. The honest way through that: label before you look at the tagger's output, hold a quarter out, and list your least certain labels for a person to check.
-- Do not lower the floor to get a change through. If the key changed in a way that legitimately moves a score down (a wrong label fixed), edit the number by hand and say why in the pull request.
+- Never edit the floor by hand. Set it only with `--raise-floor`. Adding hard listings to the key is not a reason to stop a review: the floor ignores them until it is set again, and the fair test is `--compare main`. If you corrected a plainly wrong label and that moves the old floor out of reach, stop and say so; that is for a person.
+- Hard listings belong in the key, in whichever split the every-fourth rule puts them. Never leave one out, or choose its split, because of what it will do to a score.
 - Do not touch the places list, the matcher's scoring (`src/core/match.ts`) or anything in `src/ui/` in a tagging review. If the numbers say the matcher should use the tags differently, write that up for a person.
 - Do not loosen "keep" to raise coverage. Coverage is worth nothing if what's added is filler.
 - Keep the rules readable. If a pattern can't be caught by a rule a person could explain, write it down as a case for tagging by a language model (see below) and leave it.
@@ -97,3 +109,28 @@ Patterns seen and not yet fixed, biggest first:
 6. **Films rated R are "fine with kids"**, and films are dropped when the description mentions a "club" or a "class" in passing.
 7. **Children's Museum programs all carry "cozy"** and never "move" or "learn", because the source presets one set of moods for everything.
 8. **Games and making** (board games in a brewery, Lego night) have no kind of their own.
+
+### 2026-11-17: social dances, drinks at the bar, children's programs; and a fairer floor
+
+This review ran on its schedule and stopped: its five new holdout listings were harder than the first sixteen, so the holdout aggregate fell below the old floor (keep 93.8% → 85.7%, turn-up 75% → 72.7%) although the new rules did no harm on the original listings. The owner landed its work by hand, and changed how scores are compared so it doesn't happen again (see "Grading fairly" and "The floor" above).
+
+Key grown by 22 listings (17 dev, 5 holdout): 10 at random, 12 at weak spots. Old rules against new, on the same 89 listings:
+
+| set | rules | keep | kind | in/out | kids | turn-up | mood P | mood R | mood F1 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| dev (68) | before | 81% | 82% | 100% | 96% | 86% | 69% | 57% | 62% |
+| dev (68) | after | 85% | 94% | 100% | 96% | 96% | 83% | 80% | 82% |
+| holdout (21) | before | 81% | 83% | 100% | 100% | 70% | 78% | 66% | 71% |
+| holdout (21) | after | 86% | 92% | 100% | 100% | 73% | 85% | 89% | 87% |
+
+Fixed (patterns 1, 3 and 7 of the baseline list):
+
+- **Social dances** (contra, English country, folk, polka, cèilidh, square, swing, tango, milonga, salsa, ballroom, anything with an "open dance") are `play` with `move`, dropped in on; the old folk forms are also `odd`. "club" and "practice" no longer drop them as filler; "class" still does.
+- **Something you drop in on at a bar carries `drink`**: the band, the open mic, the polka night.
+- **Children's Museum programs** get `kids` plus what their own description says (moving, music, science, stories), not the calendar's blanket `cozy`.
+
+Label corrected: 2026-11-16/23, the West Coast Swing Club ("Lesson 6:15 pm, open dance 7-9 pm"), from not drop-in to drop-in. Arriving an hour in, you still get the open dance, and the other three lesson-then-open-dance nights in the key were labelled drop-in.
+
+Left alone, for the owner: the Majestic is `bar: true` in `venues.ts`, which makes its concerts drop-in and now `drink`; the label for Fox Stevenson there says a concert hall. The only evidence is a holdout listing, so it wasn't touched.
+
+Next: `drink` went from 6% to 38% of the week's events; check a sample of what now carries it. Then pattern 2, "lively" (87% of events) and "date" (81%) as defaults. The two hardest new holdout listings ("Saideira Pagode, *Brazilian.*" at Working Draft, an exhibition-opening reception at the Union gallery) are dropped as "can't tell what it is"; a rule for them has to come from dev listings like them, not from these.

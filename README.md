@@ -178,7 +178,7 @@ How well loaded events are tagged is measured, and the measure may only go up.
 
 - `tagging/golden.json` is the answer key: real listings, each labelled by hand with what it should come out as. A quarter are held out for judging.
 - `npm run tagging` grades the tagger against the key (keep or drop, kind, indoors or out, kids, turn-up, and moods by precision and recall) and profiles the week's listings: coverage, how evenly the moods are spread, which moods no event carries, and what share of events each tile, companion and vibe can reach.
-- `tagging/baseline.json` is the floor. `npm test` fails below it, and it only ratchets up.
+- `tagging/baseline.json` is the floor, and the answer-key items it was set on. `npm test` fails below it on those items, so new listings can't fail it until the floor is set again. `npm run tagging -- --compare main` grades the old rules and the new on the same listings: the fair before-and-after.
 - `tagging/history.jsonl` keeps every recorded run.
 - `tagging/PLAYBOOK.md` is the process: grow the key, find the biggest pattern in the misses, fix it, measure, write it up, open a pull request. A scheduled Claude Code session runs it weekly.
 

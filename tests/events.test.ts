@@ -105,6 +105,44 @@ describe('event listings', () => {
     expect(toOption(raw({ title: 'A Poet', description: 'Poetry reading. $45', venue: "A Room of One's Own" }), venues, city.center)).toMatchObject({ category: 'talk', price: 3 });
   });
 
+  it('calls a social dance something you do, with move, and does not drop it for its "club" or its "practice"', () => {
+    const o = (over: Partial<RawEvent>) => toOption(raw(over), venues, city.center);
+    // The swing club's weekly night, and the tango lesson/practice before the open dance, are the dance itself.
+    expect(o({ title: 'Madison West Coast Swing Club', description: 'Lesson 6:15 pm, open dance, 7-9 pm Tuesdays. $10.', venue: 'Dancesport' })).toMatchObject({ category: 'play', what: 'Social dance at Dancesport', dropIn: true, moods: { move: 1 } });
+    expect(o({ title: 'Tango Tuesday', description: 'Lessons/practice 7 pm, open dance 8:30-10:30 pm Tuesdays.' })).toMatchObject({ category: 'play', moods: { move: 1, date: 0.6 } });
+    // The old folk forms are odd as well: few would have thought of a contra dance or a polka night.
+    expect(o({ title: 'Madison Contra Dance', description: '7:30-9:30 pm Tuesdays. Donations.', venue: 'Wil-Mar Center' })).toMatchObject({ category: 'play', what: 'Folk dance at Wil-Mar Center', moods: { move: 1, odd: 0.6 } });
+    expect(o({ title: 'Four Lakes Polka Club', description: 'Dance lesson 6:30 pm, open dance with a live band 7 pm.', venue: 'The Bur Oak' })).toMatchObject({ category: 'play', moods: { move: 1, odd: 0.6 } });
+    expect(o({ title: 'Salsa Dance', description: '$10.' })!.moods.odd).toBeUndefined();
+    // Near misses: a dance performance is a show to watch; a dance form in a show's name doesn't make it a social dance;
+    // a club that isn't a dance is still filler, and so is a dance class.
+    expect(o({ title: 'UW Dance Department', description: 'Annual faculty concert.', venue: 'UW Lathrop Hall-H\'Doubler Performance Space' })).toMatchObject({ category: 'show' });
+    expect(o({ title: 'Tango Fire', description: 'Argentina\'s touring tango show.', venue: 'Overture Center-Capitol Theater' })).toMatchObject({ category: 'show' });
+    expect(o({ title: 'Madison Area Run Club', description: 'Weekly social run.' })).toBeNull();
+    expect(o({ title: 'Ballroom Dance Class', description: 'Six-week course, register online.' })).toBeNull();
+  });
+
+  it('gives a drink to what you drop in on at a bar, and not to a concert hall or a bar that is only the venue', () => {
+    const o = (over: Partial<RawEvent>) => toOption(raw(over), venues, city.center)!;
+    // A blues band in a corner bar, an open mic in a tavern: a drink is part of it.
+    expect(o({ title: 'Cash Box Kings', description: 'Blues.', venue: 'Crystal Corner Bar', end: at(2026, 11, 12, 22) }).moods.drink).toBe(0.6);
+    expect(o({ title: 'Open Mic', description: '', venue: "Mickey's Tavern" }).moods.drink).toBe(0.6);
+    // A listening room isn't a bar, and a short set at a bar isn't a night there.
+    expect(o({}).moods.drink).toBeUndefined();
+    expect(o({ venue: "Mickey's Tavern", end: at(2026, 11, 12, 20) }).moods.drink).toBeUndefined();
+  });
+
+  it("reads what a children's program is about instead of calling every one cozy", () => {
+    const preset = { label: 'Kids’ program', category: 'play' as const, moods: { kids: 1, cozy: 0.6 }, kids: 2 as const, price: 2 as const };
+    const program = (title: string, description: string) => toOption(raw({ source: 'mcm', title, description, venue: "Madison Children's Museum", end: at(2026, 11, 12, 20), preset }), venues, city.center)!.moods;
+    expect(program("Let's Move!", 'Movement games, obstacle courses and dances.')).toEqual({ kids: 1, move: 0.6 });
+    expect(program('Music Time', 'Tim leads children in singing and other musical activities.')).toEqual({ kids: 1, lively: 0.6 });
+    expect(program('Dairy Air', 'Explore the science of breathing.')).toEqual({ kids: 1, learn: 0.6 });
+    expect(program('Stories Across Generations', 'A storytime with beloved picture books.')).toEqual({ kids: 1, cozy: 0.6 });
+    // Near miss: art that says none of these is for kids, and nothing more.
+    expect(program('Messy Art', 'Young children freely explore art materials. Come make a beautiful mess!')).toEqual({ kids: 1 });
+  });
+
   it('cleans markup and double-encoded entities', () => {
     expect(clean('7 &amp;amp; 9 pm. <b>$20</b>&nbsp;adv.')).toBe('7 & 9 pm. $20 adv.');
   });
