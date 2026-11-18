@@ -1,4 +1,4 @@
-// What people type into the "or say it" box is, apart from the visit counter (visits.ts), the one thing this app sends
+// What people type into the "or say it" box is the one thing this app sends
 // anywhere: the words, what the app made of them, and nothing about who typed
 // them. It goes to the collector in worker/ so the app can learn to understand
 // more. Taps on tiles are never sent, nor is anything else.

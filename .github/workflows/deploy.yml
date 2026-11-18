@@ -35,12 +35,10 @@ jobs:
       # Same for the map tier: the committed copy is used if this fails.
       - run: npm run nearby
         continue-on-error: true
-      # Where typed requests are sent (worker/README.md), and the visit counter's token (README, "Counting
-      # visits"). Unset means nothing is sent.
+      # Where typed requests are sent (worker/README.md). Unset means nothing is sent.
       - run: npm run build
         env:
           VITE_SAY_LOG_URL: ${{ vars.SAY_LOG_URL }}
-          VITE_CF_ANALYTICS_TOKEN: ${{ vars.CF_ANALYTICS_TOKEN }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

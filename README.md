@@ -29,7 +29,7 @@ A static site. No accounts, no API keys, and one optional collector (see "What p
 | Matching | `src/core/match.ts` | One pure function. The only copy of the logic. |
 | Memory | `localStorage` | Stays on the device. Location is used in memory only and never stored. |
 | What people type | `worker/`, a Cloudflare Worker | Optional, and off until set up. The words typed in the "say it" box and what the app made of them. Nothing about who typed. |
-| Visit counts | Cloudflare Web Analytics | Optional, and off until set up. Page views and visits over time, without cookies. See "Counting visits". |
+| Visit counts | Cloudflare Web Analytics | Added by Cloudflare at the edge (automatic setup), not by the app. See "Counting visits". |
 | Deploy | `.github/workflows/deploy.yml` | GitHub Pages, on push to `main` and every morning (to refresh events). Cost: nothing. |
 
 To turn on deploys: repo Settings → Pages → Source: GitHub Actions.
@@ -165,7 +165,7 @@ Looked at and not used: Visit Madison's feed has dates but no times, so we can't
 
 ## What people type
 
-The "or say it" box is where the app finds out what it doesn't understand, so what's typed there can be collected. Apart from the visit counter (next section), it is the only thing the app ever sends anywhere, and it is off until the collector is set up.
+The "or say it" box is where the app finds out what it doesn't understand, so what's typed there can be collected. It is the only thing the app itself ever sends anywhere, and it is off until the collector is set up.
 
 - **What is sent:** the words (200 characters at most), the phrases the app understood, whether it understood none, how many picks came back, and the time the person had. **What is kept with it:** the hour it arrived. **What is never sent or kept:** location, IP address, cookies, any identifier, the exact minute, and anything about taps on tiles.
 - **When it is on,** the footer says so in plain words. A browser that asks not to be tracked (Global Privacy Control, or Do Not Track) sends nothing.
@@ -175,15 +175,7 @@ The "or say it" box is where the app finds out what it doesn't understand, so wh
 
 ## Counting visits
 
-How many people use the site, over time, comes from Cloudflare Web Analytics. It sets no cookies and stores nothing on the device, so its numbers are visits and page views, not a count of distinct people across days. It is off until a token is set, and a browser that asks not to be tracked (Global Privacy Control, or Do Not Track) is not counted.
-
-**Set it up (once, about five minutes):**
-
-1. In the Cloudflare dashboard: Analytics & Logs → Web Analytics → Add a site. Enter `dosomethingmadison.com`, and choose the manual JavaScript snippet (not automatic setup, which needs the site's DNS on Cloudflare).
-2. From the snippet it shows, copy the `token` value: 32 letters and digits.
-3. In the GitHub repository: Settings → Secrets and variables → Actions → Variables → New repository variable. Name `CF_ANALYTICS_TOKEN`, value the token. The next deploy turns counting on. Deleting the variable turns it off.
-
-**Reading it:** the same Web Analytics page in Cloudflare, with a chart of visits and page views over time and breakdowns by page, referrer, country and device.
+Visits and page views over time come from Cloudflare Web Analytics, set up on the domain with Cloudflare's automatic setup: Cloudflare adds its cookieless beacon to the page as it serves it, so there is nothing for it in this repository. Read the numbers in the Cloudflare dashboard under Web Analytics. The site is one page that never reloads, so a visit is one page view; watch visits. Don't add a beacon snippet to the page as well, or visits are counted twice.
 
 ## The tagging review
 
