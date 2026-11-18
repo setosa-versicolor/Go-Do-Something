@@ -105,7 +105,7 @@ const KINDS: { category: Category; label: string; re: RegExp; moods: Partial<Rec
   { category: 'show', label: 'Show', re: /\b(comedy|stand-?up|improv|theat(er|re)|dance|ballet|opera|burlesque|drag)\b/i, moods: { lively: 1, date: 0.6 } },
   // Nobody waits for the first act of an open mic or a jam: you turn up when you like.
   { category: 'music', label: 'Open mic', re: /\b(open mic|open[- ]mike|open jam|open stage|jam session|bluegrass jam|song circle)\b/i, moods: { lively: 1, date: 0.6 }, dropIn: true },
-  { category: 'music', label: 'DJ night', re: /\bdjs?\b/i, moods: { lively: 1, drink: 0.6 }, dropIn: true },
+  { category: 'music', label: 'DJ night', re: /\bdjs?\b/i, moods: { lively: 1 }, dropIn: true },
   { category: 'music', label: 'Live music', re: /\b(concert|band|jazz|blues|quartet|trio|symphony|orchestra|songwriter|recital|choir|bluegrass|folk)\b/i, moods: { lively: 1, date: 0.6 } },
   // Last, so that a film or a play with one of these words in its title is still a film or a play.
   { category: 'trail', label: 'Outing', re: /\b(hike|nature walk|birding|bird (walk|hike|count)|ski|snowshoe\w*|ice skating|skating party|sledding|stargaz\w+|paddle|bike ride|full moon walk|candlelight)\b/i, moods: { nature: 1, move: 0.6 }, outdoor: true },
@@ -187,7 +187,7 @@ export function judge(raw: RawEvent, venues: Venue[], center: LatLng): Verdict {
     : kind.moods;
   // A band in a bar plays for a couple of hours to whoever walks in; a concert hall wants you in your seat at the start.
   const dropIn = ('dropIn' in kind ? kind.dropIn ?? false : false) || (kind.category === 'music' && Boolean(venue?.bar) && length >= 90);
-  // Something you drop in on at a bar comes with a drink: the band, the polka night, the board games.
+  // Something you drop in on at a bar comes with a drink: the band, the DJ, the polka night, the board games. Elsewhere it doesn't.
   const atTheBar = Boolean(venue?.bar) && dropIn;
   // An outdoor event is also an answer to "outside"; a family one to "kids". Neither is taken away from what it already was.
   const moods = {
