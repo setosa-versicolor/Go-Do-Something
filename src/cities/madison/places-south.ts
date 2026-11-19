@@ -160,4 +160,23 @@ export const PLACES_SOUTH: Option[] = [
     story: "Down a staircase into the basement of the Italian Workmen's Club, in what is left of Madison's old Italian neighborhood: low ceiling, Christmas lights all year, thin-crust pizza. It changed hands in 2024 and the new owner kept the pizza as it was and the doors open later.",
     nudge: "Start with the garlic bread, then split a thin-crust pizza; the New Haven, with shallots, roasted garlic and pecorino, is the one the owner points to. Go early on weekends and Badger game days, and call 608-257-2874 before a Sunday visit, since listings disagree about Sundays.",
   }),
+  // ---------------- south side & Fitchburg (2026-11-18)
+  // sources: https://www.thefarmwi.com/licaris-bar-grill-tops-madison-burger-week/, https://www.restaurantji.com/wi/madison/licaris-bar-and-grill-/, https://www.madtownlife.com/directory-fish_frys/fish-frys/licaris-bar-grill/
+  place({
+    id: 'licaris', name: "Licari's Bar & Grill", what: 'Family tavern with three straight Burger Week wins',
+    category: 'bar', hood: 'South Side', lat: 43.0364, lng: -89.4071, price: 1, setting: 'in', minutes: [40, 75], kids: 1,
+    moods: 'eat! drink lively', hours: 'mo,tu 08:00-22:00; we,th 08:00-23:00; fr 08:00-24:00; sa 08:00-23:00; su 08:00-20:00', gem: 0.75,
+    why: { eat: 'The first spot to win Madison Burger Week three years running, most recently with The 65\'er.', drink: 'A family tavern on Emil Street since 1961, with Old Fashioneds and regulars at the bar.' },
+    story: "A neighborhood bar and grill that started near West Washington in the 1940s and has been on Emil Street since 1961. Larry Schmidt bought it in 1981 and his family still runs it. In 2026 it became the first place to win Madison Burger Week three years in a row, with a burger called The 65'er.",
+    nudge: "Get a burger, The 65'er or the pull tab popper, with cheese curds and an Old Fashioned. On Friday there's a cod fish fry with slaw and fries. It gets busy and service can lag, so grab a high-top and settle in.",
+  }),
+  // sources: https://www.travelwisconsin.com/food-drink/bars-taverns/the-rusty-bee-lounge, https://rustybeelounge.com/, https://www.restaurantji.com/wi/fitchburg/the-rusty-bee-lounge-/, https://wanderlog.com/place/details/12131488/the-rusty-bee-lounge, https://www.facebook.com/people/The-Rusty-Bee-Lounge/61555376094713/
+  place({
+    id: 'rusty-bee-lounge', name: 'The Rusty Bee Lounge', what: 'A cocktail lounge with a big yard and food trucks',
+    category: 'bar', hood: 'Fitchburg', lat: 43.0073, lng: -89.3931, price: 2, setting: 'both', minutes: [45, 120], kids: 1,
+    moods: 'drink! lively! eat kids', hours: 'mo-th 15:00-24:00; fr 14:00-01:00; sa 12:00-01:00; su 12:00-24:00', url: 'https://rustybeelounge.com/', gem: 0.7,
+    why: { drink: 'Cocktails made with real citrus, like a cucumber mint spritz, carried out to a yard.', lively: 'Lawn games, a fire pit and a rotating food truck, with the patio full on any nice day.', eat: 'No kitchen, just whichever local food truck is parked out back that day.' },
+    story: "A cocktail bar on Cheryl Parkway that works like a beer garden: a modern lounge inside with a pool table, darts and tabletop shuffleboard, and outside a big yard with patio tables, lawn games, a fire pit and a small playground. The bar has no kitchen of its own; local food trucks rotate through, most reliably on weekends.",
+    nudge: "Come on a weekend afternoon, when a truck is most likely parked out back, and check their Facebook page for who's coming. Order a cocktail, get food from the truck, and take both to a yard table or the fire pit. Dogs are fine on the patio.",
+  }),
 ];

@@ -346,4 +346,63 @@ export const PLACES_WEST: Option[] = [
     story: "A baker and a pastry chef took the space next to their bakery and made a French bistro with twelve tables and a kitchen you can sit at. Dinner is meant to be coursed and slow: small bites, hors d'oeuvres, then mains that take the time they take, with an all-European wine list.",
     nudge: "Reserve on Resy; books open 30 days out, and the kitchen bar seats go first and only until 7:30. Order in courses the way the menu suggests and leave room for dessert. Open Wednesday to Saturday, last seating at 9.",
   }),
+  // ---------------- Middleton & far west (Reddit-guided pass, 2026-11-18)
+  // sources: https://www.craftsmantableandtap.com/, https://v2-craftsmantableandtap.getbento.com/about-us, https://www.travelwisconsin.com/dining/craftsman-table-tap-196805, https://www.opentable.com/r/craftsman-table-and-tap-middleton, https://tasteatlas.com/CraftsmanTableTap
+  place({
+    id: 'craftsman-table-tap', name: 'Craftsman Table & Tap', what: 'A Middleton Hills pub known for its cheese curds',
+    category: 'food', hood: 'Middleton', lat: 43.1067, lng: -89.4976, price: 2, setting: 'both', minutes: [45, 80], kids: 1,
+    moods: 'eat! drink lively', hours: 'mo-th 11:00-21:00; fr 11:00-22:00; sa 09:30-22:00; su 09:30-21:00', url: 'https://www.craftsmantableandtap.com/', gem: 0.6,
+    why: { eat: 'Carr Valley curds sorted by size, battered, fried and served with house buttermilk ranch.' },
+    story: "A neighborhood pub in Middleton Hills since 2012, doing hearty pub food with a long list of craft beer and cocktails. The cheese curds come fresh from Carr Valley Cheese, are sorted by size before they are battered, and have won local best-of polls for years.",
+    nudge: "Start with the curds while they're hot, then a burger or sandwich and a local tap. Saturday after 4 there is a prime rib special in king or queen cuts, and weekend brunch runs 9:30 to 3 with a fully garnished Bloody Mary. Happy hour is weekdays 3 to 5:30 at the tables.",
+  }),
+  // sources: https://grapewater.wine, https://visitmiddleton.com/front-porch-series-grape-water-wine-bar/, https://www.travelwisconsin.com/food-drink/bars-taverns/grape-water-wine-bar
+  place({
+    id: 'grape-water', name: 'Grape Water Wine Bar', what: 'A self-pour wine bar in downtown Middleton',
+    category: 'bar', hood: 'Middleton', lat: 43.0954, lng: -89.5105, price: 2, setting: 'in', minutes: [40, 90], kids: 0,
+    moods: 'drink! date! cozy', hours: 'tu-th 16:00-22:00; fr 16:00-23:00; sa 15:00-23:00', url: 'https://grapewater.wine', gem: 0.7,
+    trust: 'solid', checked: '2026-11-18',
+    why: { drink: 'Scan a card and pour yourself a taste, so you can try five wines without committing to one.', date: 'Small pours and no pressure make it easy to talk, wander the taps and compare notes.' },
+    story: "Nicki Prestigiacomo left a job in IT and opened this wine bar on Hubbard Avenue in 2017, with a motto about unsnobbing the wine bar. The wines sit in Italian-made dispensers that hold them at temperature; you load a card, choose a wine and a pour size, and settle up when you leave. Bourbon is on tap too.",
+    nudge: "Start with small pours and work along the row; that is what most people do. Order a Salvatore's pizza or build a charcuterie plate, since outside food is no longer allowed. Closed Sundays and Mondays.",
+  }),
+  // sources: https://louisiannes.com, https://visitmiddleton.com/meet-your-neighbor-louisiannes-etc/, https://www.travelwisconsin.com/food-drink/restaurants/louisianne-s
+  place({
+    id: 'louisiannes', name: "Louisianne's Etc.", what: 'Cajun and Creole supper, downstairs, with piano',
+    category: 'food', hood: 'Middleton', lat: 43.0955, lng: -89.5111, price: 3, setting: 'in', minutes: [75, 120], kids: 1,
+    moods: 'eat! date! cozy', hours: 'tu-sa 17:00-21:00', url: 'https://louisiannes.com', gem: 0.8,
+    best: ['night'],
+    why: { eat: 'Etouffee and jambalaya from a chef who has been in this kitchen since it opened in 1992.', date: 'A cozy room down a flight of stairs off Hubbard Avenue, with jazz and blues piano on weekends.' },
+    story: "You step down from Hubbard Avenue into a cozy room dressed to feel like the French Quarter. Louisianne's opened in 1992, and chef Kevin Ostrand has run the kitchen the whole time: more than twenty dinners, Cajun and Creole standards like etouffee and jambalaya, nightly specials and a long wine list.",
+    nudge: "Book a Friday or Saturday, when a pianist plays jazz and blues from 5:30. Order the etouffee or jambalaya, or ask what the special is, and pick a bottle from the list. Reservations are encouraged; it's closed Sundays and Mondays.",
+  }),
+  // sources: https://dhabaindianbistro.com, https://isthmus.com/food-drink/dhaba-indian-bistro-doesnt-even-need-a-buffet, https://www.travelwisconsin.com/restaurants/dhaba-indian-bistro-222585
+  place({
+    id: 'dhaba-indian-bistro', name: 'Dhaba Indian Bistro', what: 'Indian bistro in Middleton, with lobster korma',
+    category: 'food', hood: 'Middleton', lat: 43.0899, lng: -89.5264, price: 2, setting: 'in', minutes: [40, 75], kids: 1,
+    moods: 'eat! date cozy', hours: 'tu-su 11:00-14:30,17:00-22:00', url: 'https://dhabaindianbistro.com', gem: 0.7,
+    trust: 'solid', checked: '2026-11-18',
+    why: { eat: 'A west side Indian kitchen that cooks lunch to order instead of setting out a buffet.' },
+    story: "A dhaba is an Indian truck-stop diner; this one, in a Greenway Boulevard storefront in Middleton, is a good deal more dressed up than that. There is no lunch buffet. At midday you get a slightly shorter menu in smaller portions at lower prices, and at night the menu runs to a lobster korma, not a common sight on Madison menus.",
+    nudge: "Order the lobster korma, which is mild, sweet and nutty, plus lamb biryani and the karhi pakora, chickpea fritters in a yellow yogurt gravy. Save room for the kheer. Lunch ends at 2:30 sharp, and it's closed Mondays.",
+  }),
+  // sources: https://visitmiddleton.com/?p=21805, https://isthmus.com/food-drink/gobi-lasooni-at-amber-indian-cuisine-one-dish/, https://www.travelwisconsin.com/restaurants/amber-indian-cuisine-320227
+  place({
+    id: 'amber-indian', name: 'Amber Indian Cuisine', what: 'North and south Indian, plus Indo-Chinese',
+    category: 'food', hood: 'Middleton', lat: 43.0970, lng: -89.5007, price: 2, setting: 'in', minutes: [35, 60], kids: 1,
+    moods: 'eat! cozy', hours: 'daily 11:30-15:00,16:30-21:30', gem: 0.6,
+    why: { eat: 'A plain plaza dining room with a long menu that reaches from tikka masala to Indo-Chinese cauliflower.' },
+    story: "A big dining room, seating 150, in a plain shopping plaza on University Avenue in Middleton. Co-owners Bala Polachi and chef Masi Parimanam cook dishes from northern and southern India along with Indo-Chinese plates, and Isthmus singled out the gobi lasooni, a garlicky cauliflower dish like gobi manchurian without the soy.",
+    nudge: "Order the gobi lasooni, about a dozen big fried florets for $9, at whatever heat you like, then chicken tikka masala or the vegetable biryani. Lunch runs until 3, and it reopens for dinner at 4:30.",
+  }),
+  // sources: http://www.olivacuisine.com, https://isthmus.com/locations/oliva/, https://wetheitalians.com/news/restaurant-review-oliva-italian-and-mediterranean-cuisine-standout-after-13-years
+  place({
+    id: 'oliva', name: 'Oliva', what: 'Family-run Italian and Turkish kitchen on High Point',
+    category: 'food', hood: 'Far West', lat: 43.0762, lng: -89.5186, price: 2, setting: 'in', minutes: [40, 75], kids: 1,
+    moods: 'eat! cozy', hours: 'daily 11:00-21:00', url: 'http://www.olivacuisine.com', gem: 0.7,
+    trust: 'solid', checked: '2026-11-18',
+    why: { eat: 'A menu that runs from baba ghanoush and kebabs to lasagna and pizza, all of it from one family.' },
+    story: "A big, family-owned room off the Beltline on the far west side that has been serving Italian and Turkish food side by side since late 2008. Mezes like hummus, kisir and baba ghanoush, grilled kebabs, hand-made pizzas, baked pastas, and a Turkish wine list. The menu is long enough that a regular could come weekly for a year.",
+    nudge: "Split a few of the Turkish starters, the kisir and baba ghanoush, then pick one Italian plate and one kebab and trade halves. Ask about the Turkish wines. Prices are gentle and there is room for a family or a table of friends.",
+  }),
 ];
