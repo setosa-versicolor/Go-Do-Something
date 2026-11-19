@@ -176,6 +176,15 @@ export const PLACES_NORTH_EAST: Option[] = [
     story: "A city conservation park on the Monona border: a chain of ponds and marsh full of birds, with a glacial ridge above them that carries a group of effigy mounds. No playground, no ballfield, no dogs. Just the paths.",
     nudge: "Do the loop around the ponds, then climb to the ridge for the mounds. Go early when the birds are busy. Leave the dog at home; conservation parks don't allow them.",
   }),
+  place({
+    id: 'san-damiano', name: 'San Damiano', what: 'A former friary lawn on a bluff over Lake Monona',
+    category: 'view', hood: 'Monona', lat: 43.0775, lng: -89.3267, price: 0, setting: 'out', minutes: [30, 90], kids: 1,
+    moods: 'nature! date! think cozy', hours: 'daily 06:00-22:00', best: ['sunset'], gem: 0.85,
+    url: 'https://www.mymonona.com/1580/Frequently-Asked-Questions',
+    why: { nature: 'Ten acres of lawn and old trees above a thousand feet of Lake Monona shore.', date: 'A limestone bluff that looks straight across the lake at the Capitol as the sun goes down.' },
+    story: "Ten acres on a limestone bluff above Lake Monona, with a thousand feet of shoreline and a straight view across the water to the Capitol. Ho-Chunk ancestors gathered here and a burial mound remains; Norbertine priests studied in the 1890s Frank Allis house for decades. Monona bought it in 2021 and keeps it open as a park.",
+    nudge: "Come an hour before sunset, take a picnic table facing the Capitol, and stay until the dome lights up. Parking is a handful of spaces by the house, so bike or walk in if you can. Dogs on leash, and well clear of the mound.",
+  }),
 
   // ------------------------------------------------------------- sun prairie
   place({
