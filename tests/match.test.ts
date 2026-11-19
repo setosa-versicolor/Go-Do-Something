@@ -482,8 +482,9 @@ describe('vibes', () => {
 
 describe('when everything that fits is too far', () => {
   it('says how far it looked and names the nearest miss, not the things nobody asked for', () => {
+    // A Monday morning: the far west side's bakery and kitchens are closed, so everything that fits is too far.
     const farWest = { lat: 43.058, lng: -89.503 };
-    const r = match(request(at(2026, 11, 13, 9), 'food', { origin: farWest, mode: 'bike', durationMin: 60 }), world());
+    const r = match(request(at(2026, 11, 16, 9), 'food', { origin: farWest, mode: 'bike', durationMin: 60 }), world());
     expect(r.picks).toEqual([]);
     expect(r.note).toMatch(/within about 18 minutes by bike/);
     expect(r.note).toMatch(/The nearest is .+, about \d+ minutes away/);

@@ -3,6 +3,7 @@
 //
 //   npm run explain -- "date night" --at 2026-11-13T19:00 --hours 3 --mode walk --weather
 //
+// --from starts from one of the city's areas (e.g. --from "the west side") instead of the Capitol.
 // --at is Madison wall time. Without --weather, weather is unknown (as offline).
 
 import { city, places } from '../src/cities/madison';
@@ -26,6 +27,9 @@ const atArg = flag('at');
 const hours = flag('hours');
 const mode = (flag('mode') ?? 'drive') as Mode;
 const seed = Number(flag('seed') ?? 1);
+const from = flag('from');
+const origin = from ? city.starts.find((s) => s.name === from) : city.center;
+if (!origin) throw new Error(`--from: no area called "${from}". Try one of: ${city.starts.map((s) => s.name).join(', ')}`);
 const say = args.join(' ');
 
 const now = atArg ? parseLocalInput(atArg, city.tz) ?? Date.now() : Date.now();
@@ -42,11 +46,11 @@ const options = [...places, ...events];
 const weather = useWeather ? await fetchWeather(city.center, Date.now()) : null;
 const live = useWeather ? await fetchLive(city.center) : null;
 const result = match(
-  { now, start, durationMin: hours ? Number(hours) * 60 : intent.durationMin ?? 120, origin: city.center, mode, intent, seed },
+  { now, start, durationMin: hours ? Number(hours) * 60 : intent.durationMin ?? 120, origin, mode, intent, seed },
   { city, options, weather, live, memory: summarize([], options, now) },
 );
 
-console.log(`\n"${say}" — ${fmtDay(start, now, city.tz)} at ${fmtTime(start, city.tz)}, ${mode}, heard: [${intent.heard.join(', ')}]`);
+console.log(`\n"${say}" — ${fmtDay(start, now, city.tz)} at ${fmtTime(start, city.tz)}, ${mode}${from ? ` from ${from}` : ''}, heard: [${intent.heard.join(', ')}]`);
 console.log(`weather: ${result.conditions.known ? result.conditions.summary : 'unknown'} · sunset ${fmtTime(result.sun.sunset, city.tz)}`);
 const head = headline(now, weather, live, result.sun, city.tz);
 if (head) console.log(`right now: ${head.line}${head.say ? ` [asks: ${head.say}]` : ''}`);
