@@ -286,6 +286,17 @@ export const PLACES_NORTH_EAST: Option[] = [
     nudge: "Order something with the mole, a burrito or enchiladas, and add a tamale. Seating is tight, so go off-peak or take it home. Tuesdays are tacos and Thursdays are tamales.",
   }),
 
+  // sources: https://isthmus.com/food-drink/one-dish-lotza-motza-burger-at-players-sports-bar-grill/, https://www.eatdrinkmadison.com/details.php?b=621, https://playerssportsbar2.netwaiter.com/
+  // The Monday smash burger deal (about $5 or $6) is from a local's report; no listing online confirms it or its price.
+  place({
+    id: 'players-sports-bar', name: 'Players Sports Bar & Grill', what: "A cash-only sports bar at Schenk's Corners, for burgers",
+    category: 'bar', hood: 'Atwood', lat: 43.0906, lng: -89.3544, price: 1, setting: 'in', minutes: [30, 75], kids: 0,
+    moods: 'eat! drink lively', hours: 'daily 11:00-02:00', url: 'https://www.eatdrinkmadison.com/details.php?b=621', gem: 0.6,
+    why: { eat: 'Half-pound burgers on Jenifer Street Market beef, and a cheap smash burger deal on Mondays.', drink: "A cash-only corner bar on Winnebago with pool, darts and the game on." },
+    story: "A sports bar on Winnebago Street at Schenk's Corners that has become an east side burger institution. The patties are about half a pound of beef from Jenifer Street Market, the weekly Burger of the Week can get outrageous, and the Lotza Motza comes with garlic sauce, pepperoni, mozzarella and fried mozzarella sticks on top. Pool, darts, and nightly drink specials.",
+    nudge: "Come on a Monday for the smash burger deal, around $5 or $6 (ask, since it isn't posted online). Any other day, ask what the Burger of the Week is or get the Lotza Motza. Bring cash: they don't take cards.",
+  }),
+
   // ---------------- north side (2026-11-18)
   // sources: https://www.banzomadison.com, https://lauerrealtygroup.com/spotlight-banzo-sherman, https://www.travelwisconsin.com/food-drink/restaurants/banzo
   place({
