@@ -14,7 +14,8 @@
     "nearby": "tsx scripts/fetch-nearby.ts",
     "tagging": "tsx scripts/tagging-report.ts",
     "says": "tsx scripts/says-report.ts",
-    "review-guard": "tsx scripts/review-guard.ts"
+    "review-guard": "tsx scripts/review-guard.ts",
+    "boot-lakes": "tsx scripts/boot-lakes.ts"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",
