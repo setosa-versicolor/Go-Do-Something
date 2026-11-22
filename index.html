@@ -20,16 +20,70 @@
     </script>
   </head>
   <body>
-    <!-- Shown from the first byte until the page is ready, then faded away by the app. -->
-    <div id="boot" aria-hidden="true">Do Something · Madison</div>
+    <!--
+      Shown from the first byte until the page is ready, then faded away by the app. While it waits, the
+      isthmus draws itself: Mendota, Monona and Wingra (the same shorelines the model is built from, in
+      src/cities/madison/shape.json, simplified), then the water fills, the Capitol lights between them
+      and a glint runs around the shores until the page is ready. No script: it has to work before any loads.
+    -->
+    <div id="boot" role="status">
+      <svg class="boot-map" viewBox="-160 -168 258 236" aria-hidden="true">
+        <defs>
+          <path id="bl-me" pathLength="100" d="M-151 -39L-149 -40L-145 -33L-135 -27L-134 -25L-134 -22L-129 -17L-122 -13L-111 -14L-108 -16L-92 -27L-85 -30L-73 -37L-71 -37L-66 -30L-62 -27L-59 -26L-53 -27L-47 -31L-49 -28L-53 -26L-56 -23L-60 -22L-62 -22L-64 -20L-64 -14L-59 -8L-57 -7L-55 -8L-55 -10L-53 -10L-48 -8L-40 -8L-35 -6L-20 -5L-15 -7L-6 -13L-6 -12L-3 -12L1 -14L8 -24L11 -27L17 -39L20 -40L20 -42L18 -43L18 -45L18 -43L21 -42L22 -44L22 -47L20 -47L21 -52L23 -59L25 -59L25 -63L23 -62L20 -73L17 -78L13 -80L5 -79L2 -83L4 -89L7 -92L10 -98L12 -100L9 -109L1 -114L-16 -111L-21 -109L-21 -107L-22 -109L-24 -108L-24 -101L-27 -100L-30 -105L-27 -104L-25 -106L-25 -108L-27 -110L-30 -110L-39 -116L-36 -123L-39 -130L-39 -131L-37 -131L-38 -132L-38 -134L-39 -136L-43 -140L-34 -147L-34 -153L-36 -154L-34 -158L-29 -156L-28 -157L-32 -160L-38 -160L-38 -158L-37 -149L-44 -150L-42 -148L-46 -150L-45 -148L-51 -147L-51 -149L-51 -147L-58 -143L-58 -140L-61 -140L-62 -138L-62 -136L-67 -127L-73 -122L-77 -110L-87 -92L-99 -81L-104 -73L-107 -72L-115 -73L-122 -71L-127 -68L-129 -69L-127 -72L-129 -69L-133 -70L-138 -68L-143 -63L-149 -63L-151 -54L-149 -40Z" />
+          <path id="bl-mo" pathLength="100" d="M-23 31L-20 36L-12 37L-8 36L-6 32L-6 34L-2 34L-1 33L-3 31L-2 31L1 34L5 34L10 40L14 41L17 45L24 46L24 48L21 51L20 57L25 61L29 59L31 56L33 55L39 56L46 51L54 49L60 50L68 46L70 47L70 39L67 35L67 34L64 37L59 37L58 31L58 37L53 38L50 35L50 30L53 20L56 17L62 14L65 8L69 5L75 4L78 6L77 5L82 2L85 -6L89 -8L90 -10L88 -19L85 -24L75 -32L71 -33L54 -30L51 -28L45 -22L44 -19L39 -15L31 -10L24 -6L20 -5L12 0L7 6L1 12L-2 17L-5 17L-8 22L-11 24L-18 22L-20 22L-21 24L-23 24Z" />
+          <path id="bl-wi" pathLength="100" d="M-72 49L-71 53L-72 55L-70 53L-65 54L-58 50L-52 52L-41 50L-38 46L-39 41L-37 36L-33 35L-36 34L-40 36L-42 34L-46 35L-49 34L-50 32L-51 32L-52 33L-52 36L-60 40L-67 42Z" />
+        </defs>
+        <g class="boot-water"><use href="#bl-me" /><use href="#bl-mo" /><use href="#bl-wi" /></g>
+        <g class="boot-shore"><use href="#bl-me" /><use href="#bl-mo" /><use href="#bl-wi" /></g>
+        <g class="boot-glint"><use href="#bl-me" /><use href="#bl-mo" /><use href="#bl-wi" /></g>
+        <g class="boot-capitol"><circle class="ring" r="5" /><circle class="ring r2" r="5" /><circle class="dot" r="4.2" /></g>
+      </svg>
+      <p class="boot-name">Do Something · Madison</p>
+      <p class="boot-say"><span>Drawing the lakes…</span><span>Looking at the sky…</span><span>Seeing what’s open…</span></p>
+    </div>
     <style>
-      #boot { position: fixed; inset: 0; display: grid; place-items: center; z-index: 50; pointer-events: none;
-        font: 600 0.78rem/1 system-ui, -apple-system, sans-serif; letter-spacing: 0.18em; text-transform: uppercase;
-        color: rgb(27 37 40 / 0.55); background: #f4efe4; transition: opacity 0.7s ease-out; animation: boot-in 0.6s 0.3s both; }
-      @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) #boot { color: rgb(236 232 222 / 0.55); background: #0f1516; } }
-      :root[data-theme='dark'] #boot { color: rgb(236 232 222 / 0.55); background: #0f1516; }
+      #boot { --b-ink: rgb(27 37 40 / 0.55); --b-shore: rgb(27 37 40 / 0.42); --b-water: rgb(43 111 134 / 0.17); --b-glint: #17605a; --b-gold: #d4892f; --b-bg: #f4efe4;
+        position: fixed; inset: 0; z-index: 50; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 0 16px 6vh; background: var(--b-bg); color: var(--b-ink); transition: opacity 0.7s ease-out; animation: boot-in 0.6s 0.3s both; }
+      @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) #boot { --b-ink: rgb(236 232 222 / 0.55); --b-shore: rgb(236 232 222 / 0.4); --b-water: rgb(132 207 193 / 0.1); --b-glint: #84cfc1; --b-gold: #ffc56e; --b-bg: #0f1516; } }
+      :root[data-theme='dark'] #boot { --b-ink: rgb(236 232 222 / 0.55); --b-shore: rgb(236 232 222 / 0.4); --b-water: rgb(132 207 193 / 0.1); --b-glint: #84cfc1; --b-gold: #ffc56e; --b-bg: #0f1516; }
       #boot.gone { opacity: 0; animation: none; }
+      .boot-map { width: min(15rem, 62vw); height: auto; overflow: visible; }
+      .boot-water use { fill: var(--b-water); }
+      .boot-shore use, .boot-glint use { fill: none; stroke-linejoin: round; stroke-linecap: round; }
+      .boot-shore use { stroke: var(--b-shore); stroke-width: 1.6; }
+      .boot-glint use { stroke: var(--b-glint); stroke-width: 2.6; stroke-dasharray: 7 93; opacity: 0; }
+      .boot-capitol .dot { fill: var(--b-gold); }
+      .boot-capitol .ring { fill: none; stroke: var(--b-gold); stroke-width: 1.4; opacity: 0; }
+      .boot-name { margin: 1.4rem 0 0; font: 600 0.78rem/1 system-ui, -apple-system, sans-serif; letter-spacing: 0.18em; text-transform: uppercase; }
+      .boot-say { display: grid; margin: 0.7rem 0 0; font: italic 400 1rem/1.3 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif; }
+      .boot-say span { grid-area: 1 / 1; text-align: center; }
+      .boot-say span + span { visibility: hidden; }
+      @media (prefers-reduced-motion: no-preference) {
+        /* The shores draw in one after another, then the water fills and the Capitol lights. */
+        .boot-shore use { stroke-dasharray: 100; animation: boot-draw 1.5s cubic-bezier(0.55, 0, 0.3, 1) 0.35s both; }
+        .boot-shore use:nth-child(2) { animation-delay: 0.65s; animation-duration: 1.2s; }
+        .boot-shore use:nth-child(3) { animation-delay: 1s; animation-duration: 0.8s; }
+        .boot-water { animation: boot-fill 1s ease-out 1.5s both; }
+        .boot-capitol .dot { transform-box: fill-box; transform-origin: center; animation: boot-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) 1.8s both; }
+        /* Then it keeps moving for as long as it takes: the beacon pulses and a glint laps the shores. */
+        .boot-capitol .ring { transform-box: fill-box; transform-origin: center; animation: boot-ring 2.4s ease-out 2.1s infinite; }
+        .boot-capitol .r2 { animation-delay: 3.3s; }
+        .boot-glint use { animation: boot-glint 3.6s linear 2s infinite; }
+        .boot-glint use:nth-child(2) { animation-duration: 2.8s; animation-delay: 2.3s; }
+        .boot-glint use:nth-child(3) { animation-duration: 1.9s; animation-delay: 2.6s; }
+        .boot-say span { opacity: 0; animation: boot-say 6.6s ease-in-out 0.35s infinite; }
+        .boot-say span + span { visibility: visible; }
+        .boot-say span:nth-child(2) { animation-delay: 2.55s; }
+        .boot-say span:nth-child(3) { animation-delay: 4.75s; }
+      }
       @keyframes boot-in { from { opacity: 0; } }
+      @keyframes boot-draw { 0% { stroke-dashoffset: 100; opacity: 0; } 2% { opacity: 1; } 100% { stroke-dashoffset: 0; } }
+      @keyframes boot-fill { from { opacity: 0; } }
+      @keyframes boot-pop { from { transform: scale(0); } }
+      @keyframes boot-ring { from { transform: scale(1); opacity: 0.75; } to { transform: scale(5); opacity: 0; } }
+      @keyframes boot-glint { 0% { stroke-dashoffset: 100; opacity: 0; } 8%, 85% { opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+      @keyframes boot-say { 0% { opacity: 0; transform: translateY(0.3em); } 4%, 29% { opacity: 1; transform: none; } 33%, 100% { opacity: 0; transform: translateY(-0.2em); } }
     </style>
     <div id="app"></div>
     <script type="module" src="/src/ui/main.tsx"></script>
