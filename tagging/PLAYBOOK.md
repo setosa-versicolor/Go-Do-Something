@@ -134,3 +134,32 @@ Label corrected: 2026-11-16/23, the West Coast Swing Club ("Lesson 6:15 pm, open
 Left alone, for the owner: the Majestic is `bar: true` in `venues.ts`, which makes its concerts drop-in and now `drink`; the label for Fox Stevenson there says a concert hall. The only evidence is a holdout listing, so it wasn't touched.
 
 Next: `drink` went from 6% to 38% of the week's events; check a sample of what now carries it. Then pattern 2, "lively" (87% of events) and "date" (81%) as defaults. The two hardest new holdout listings ("Saideira Pagode, *Brazilian.*" at Working Draft, an exhibition-opening reception at the Union gallery) are dropped as "can't tell what it is"; a rule for them has to come from dev listings like them, not from these.
+
+### 2026-11-23: classical music, open mics, films
+
+Ran on its schedule. Listings refreshed on a Monday, so this time the key reaches the weekend (Thanksgiving week); the Isthmus feed stopped at page 18 with 299 listings read. Key grown by 21 (16 dev, 5 holdout): 11 at random, 10 at weak spots (quiet music, nature, talks, odd, food). Old rules against new, on the same 110 listings:
+
+| set | rules | keep | kind | in/out | kids | turn-up | mood P | mood R | mood F1 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| dev (84) | before | 82% | 96% | 100% | 93% | 94% | 79% | 76% | 78% |
+| dev (84) | after | 82% | 96% | 100% | 93% | 94% | 84% | 82% | 83% |
+| holdout (26) | before | 85% | 94% | 100% | 86% | 79% | 81% | 84% | 83% |
+| holdout (26) | after | 85% | 94% | 100% | 86% | 79% | 85% | 89% | 87% |
+
+Fixed (part of pattern 2, moods as defaults):
+
+- **Classical music** (a recital, chamber music, an orchestra, a string quartet, a named classical instrument, the School of Music's series) is its own kind: `date`, `cozy`, `think`, seated from the start, not `lively`. Outdoors (Concerts on the Square) it is lively as well. "Quartet" or "trio" alone still means a band.
+- **Open mics and jams** no longer carry `date`. Every open mic in the key is labelled without it.
+- **Films** carry `think` instead of `learn`; a documentary carries both.
+
+Week's profile: "lively" 96% → 93% of events, "date" 82% → 72%, "think" 2% → 5%, "cozy" 1% → 4%, mood diversity 0.61 → 0.65. The floor came out lower on some numbers (dev keep 85% → 82%, holdout kids 100% → 86%) because the new listings are harder; `main` scores the same on them. In holdout, Zoo Lights is dropped and the Dark Holiday Bazaar at Crucible is called not-for-kids because Crucible is a bar.
+
+Looked at and left alone:
+
+- **Bands in bars and "date".** The key is split about evenly (jazz at Lucille or Leopold's labelled a date; blues at the Crystal Corner or rock at a bowling alley not). No readable rule separates them; a case for a model.
+- **"drink"** (46% of events): mostly right (bands, DJs, open mics at bars and taprooms). Wrong for a craft fair at the VFW post and the Dark Holiday Bazaar at Crucible (a market at a bar is not a drink), and the Edgewater's holiday tree lighting is called live music because "Live music" comes before "Outdoor event" in the kinds.
+- **Unknown venues** drop the Wisconsin Baroque Ensemble (St. Andrew's Episcopal) and the Bird & Nature Adventure (Aldo Leopold Nature Center). Adding venues is allowed in `venues.ts`, but the nature centre is also a place, so check the places list isn't the better home: for the owner.
+- **Music at a restaurant** (a pianist through dinner at Zafferano) comes out lively, not drop-in, and without `eat`. One listing; wait for more.
+- `npm run explain` reads the published events file, which `--dry` doesn't refresh, so it showed no events this week; the picks it showed were all places.
+
+Next: "lively" is still on 93% of events. Shows (a Broadway musical, a dance concert) are the next biggest source; then the market-at-a-bar `drink`, and the tree lighting's kind.

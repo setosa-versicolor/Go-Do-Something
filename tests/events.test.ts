@@ -137,6 +137,29 @@ describe('event listings', () => {
     expect(o({ venue: "Mickey's Tavern", end: at(2026, 11, 12, 20) }).moods.drink).toBeUndefined();
   });
 
+  it('hears classical music as seated and quiet, not lively, and does not mistake a jazz quartet for it', () => {
+    const o = (over: Partial<RawEvent>) => toOption(raw(over), venues, city.center)!;
+    const recital = o({ title: 'Conor Nelson', description: 'UW Mead Witter School of Music Faculty Artist Series. $20.', venue: 'UW Hamel Music Center-Collins Recital Hall' });
+    expect(recital).toMatchObject({ category: 'music', what: expect.stringMatching(/^Classical concert/), dropIn: false, moods: { date: 0.6, cozy: 0.6, think: 0.6 } });
+    expect(recital.moods.lively).toBeUndefined();
+    expect(o({ title: 'Wisconsin Chamber Orchestra', description: 'A holiday program with strings.', venue: 'Orpheum Theater' }).moods.lively).toBeUndefined();
+    // Near miss: a quartet in a bar is a jazz band, lively as ever.
+    expect(o({ title: 'Ben Dameron Quartet', description: 'Standards/originals. Free.', venue: 'Cafe Coda' })).toMatchObject({ what: 'Live music at Cafe Coda', moods: { lively: 1 } });
+  });
+
+  it('does not call an open mic a date, though a band still can be', () => {
+    const o = (over: Partial<RawEvent>) => toOption(raw(over), venues, city.center)!;
+    expect(o({ title: 'Open Mic', description: '10 pm Sundays. Free.', venue: "Mickey's Tavern", start: at(2026, 11, 15, 22), end: at(2026, 11, 16, 0) }).moods.date).toBeUndefined();
+    // Near miss: a band at a club keeps its date.
+    expect(o({}).moods.date).toBe(0.6);
+  });
+
+  it('calls a film something to think about, and only a documentary something to learn from', () => {
+    const film = (description: string) => toOption(raw({ title: 'WUD Film Presents: Autumn Sonata', description, venue: 'Union South' }), venues, city.center)!.moods;
+    expect(film('Free.')).toEqual({ date: 0.6, cozy: 0.6, think: 0.6 });
+    expect(film('A documentary screening about the gold standard.')).toMatchObject({ think: 0.6, learn: 0.6 });
+  });
+
   it("reads what a children's program is about instead of calling every one cozy", () => {
     const preset = { label: 'Kids’ program', category: 'play' as const, moods: { kids: 1, cozy: 0.6 }, kids: 2 as const, price: 2 as const };
     const program = (title: string, description: string) => toOption(raw({ source: 'mcm', title, description, venue: "Madison Children's Museum", end: at(2026, 11, 12, 20), preset }), venues, city.center)!.moods;
