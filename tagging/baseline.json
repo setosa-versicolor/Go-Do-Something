@@ -1,6 +1,6 @@
 {
   "about": "The floor. tests/tagging.test.ts fails if the tagger scores below any of these on the answer-key items listed in `items`, the ones the floor was set on; listings added to the key since are not graded against it until the floor is set again. Set it only with `npm run tagging -- --raise-floor`, which first checks the old floor still holds on the old items, then sets it over the whole key at the current scores. The review guard rejects a number that is not the tagger's real score. See PLAYBOOK.md.",
-  "set": "2026-11-18",
+  "set": "2026-11-23",
   "items": {
     "dev": [
       "2026-11-16/00",
@@ -70,7 +70,23 @@
       "2026-11-17/17",
       "2026-11-17/18",
       "2026-11-17/20",
-      "2026-11-17/21"
+      "2026-11-17/21",
+      "2026-11-23/00",
+      "2026-11-23/01",
+      "2026-11-23/02",
+      "2026-11-23/04",
+      "2026-11-23/05",
+      "2026-11-23/06",
+      "2026-11-23/08",
+      "2026-11-23/09",
+      "2026-11-23/10",
+      "2026-11-23/12",
+      "2026-11-23/13",
+      "2026-11-23/14",
+      "2026-11-23/16",
+      "2026-11-23/17",
+      "2026-11-23/18",
+      "2026-11-23/20"
     ],
     "holdout": [
       "2026-11-16/03",
@@ -93,23 +109,28 @@
       "2026-11-17/07",
       "2026-11-17/11",
       "2026-11-17/15",
-      "2026-11-17/19"
+      "2026-11-17/19",
+      "2026-11-23/03",
+      "2026-11-23/07",
+      "2026-11-23/11",
+      "2026-11-23/15",
+      "2026-11-23/19"
     ]
   },
   "dev": {
-    "keep": 0.853,
-    "category": 0.944,
+    "keep": 0.821,
+    "category": 0.955,
     "setting": 1,
-    "kids": 0.957,
-    "dropIn": 0.957,
-    "moodF1": 0.815
+    "kids": 0.931,
+    "dropIn": 0.935,
+    "moodF1": 0.83
   },
   "holdout": {
-    "keep": 0.857,
-    "category": 0.923,
+    "keep": 0.846,
+    "category": 0.938,
     "setting": 1,
-    "kids": 1,
-    "dropIn": 0.727,
-    "moodF1": 0.868
+    "kids": 0.857,
+    "dropIn": 0.786,
+    "moodF1": 0.87
   }
 }
