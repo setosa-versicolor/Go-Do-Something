@@ -2519,6 +2519,553 @@
     "kids": 1,
     "dropIn": true
    }
+  },
+  {
+   "id": "2026-11-23/00",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "Trivia: left out by policy.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Hosted by America's Pub Quiz, 7 pm Mondays. Free. RSVP: 608-291-0750.",
+    "url": "https://isthmus.com/events/turbo-trivia-headquarters/?occ_dtstart=2026-11-30T19:00",
+    "title": "Turbo Trivia",
+    "start": 1796086800000,
+    "venue": "Headquarters, Oregon"
+   },
+   "expect": {
+    "keep": false
+   }
+  },
+  {
+   "id": "2026-11-23/01",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A standing meditation practice, not an outing.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Tōmyōji Temple session, 7 pm Wednesdays or 10:30 am Sundays, Quarry Arts Building. Donations.",
+    "url": "https://isthmus.com/events/zen-meditation-practice-tomyoji-sunday/?occ_dtstart=2026-11-29T10:30",
+    "title": "Zen Meditation Practice",
+    "start": 1795969800000,
+    "venue": "Quarry Arts Building"
+   },
+   "expect": {
+    "keep": false
+   }
+  },
+  {
+   "id": "2026-11-23/02",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A free early-evening set in a Willy Street tavern: drop in with a drink.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Second &amp;amp; fourth Wednesdays (usually). Free.",
+    "url": "https://isthmus.com/events/ced-baetch-fourth-wed/?occ_dtstart=2026-11-25T17:30",
+    "title": "Ced Ba'etch'",
+    "start": 1795649400000,
+    "end": 1795658400000,
+    "venue": "Mickey's Tavern"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "lively",
+     "drink"
+    ],
+    "kids": 0,
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-23/03",
+   "split": "holdout",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "Belleville is more than 12 miles out.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Classic rock.",
+    "url": "https://isthmus.com/events/britton-rea-sarah-krahn-hop-garden-belleville/?occ_dtstart=2026-11-25T18:00",
+    "title": "Britton Rea & Sarah Krahn",
+    "start": 1795651200000,
+    "end": 1795662000000,
+    "venue": "Hop Garden, Belleville"
+   },
+   "expect": {
+    "keep": false
+   }
+  },
+  {
+   "id": "2026-11-23/04",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A songwriters' workshop circle (feedback, writing exercises): for people who write songs, not an outing.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Song sharing, feedback, and writing exercises, 6:30 pm last Mondays. Free.",
+    "url": "https://isthmus.com/events/songwriters-circle-muso/?occ_dtstart=2026-11-30T18:30",
+    "title": "Songwriters Circle",
+    "start": 1796085000000,
+    "venue": "Muso"
+   },
+   "expect": {
+    "keep": false
+   }
+  },
+  {
+   "id": "2026-11-23/05",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "Knitting social: left out by policy.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Fiber arts social, 7-8:30 pm Tuesdays. Free.",
+    "url": "https://isthmus.com/events/knit-night-tuesdays/?occ_dtstart=2026-11-24T19:00",
+    "title": "Knit Night",
+    "start": 1795568400000,
+    "venue": "Communication"
+   },
+   "expect": {
+    "keep": false
+   }
+  },
+  {
+   "id": "2026-11-23/06",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A late open mic in a tavern: come and go, have a drink. Not a date.",
+   "listing": {
+    "source": "isthmus",
+    "description": "10 pm Sundays. Free.",
+    "url": "https://isthmus.com/events/open-mic-mickeys/?occ_dtstart=2026-11-29T22:00",
+    "title": "Open Mic",
+    "start": 1796011200000,
+    "venue": "Mickey's Tavern"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "lively",
+     "drink"
+    ],
+    "kids": 0,
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-23/07",
+   "split": "holdout",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A holiday burlesque cabaret by a dance company at a music bar: a show to watch, from the start, adults.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Dance Fabulous presents \"A Holiday Variety Burlesque Cabaret Spectacular,\" 7:30 pm, 11/24 &amp;amp; 27 and 1 and 7:30 pm, 11/28. $30.",
+    "url": "https://isthmus.com/events/ho-ho-ho/?occ_dtstart=2026-11-28T13:00",
+    "title": "Disc-Ho Ho HO!",
+    "start": 1795892400000,
+    "venue": "The Bur Oak"
+   },
+   "expect": {
+    "keep": true,
+    "category": "show",
+    "setting": "in",
+    "moods": [
+     "lively",
+     "date"
+    ],
+    "kids": 0,
+    "dropIn": false
+   }
+  },
+  {
+   "id": "2026-11-23/08",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A touring Broadway musical at Overture Hall: seated from curtain, a night out to show off, gentle rather than lively.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Touring Broadway production, 11/24-29, Overture Center-Overture Hall, at 7:30 pm Tuesday-Wednesday, 1 &amp;amp; 7:30 pm Friday, 2 &amp;amp; 7:30 pm Saturday and 1 &amp;amp; 6:30 pm Sunday.",
+    "url": "https://isthmus.com/events/maybe-happy-ending-2026/?occ_dtstart=2026-11-28T14:00",
+    "title": "Maybe Happy Ending",
+    "start": 1795896000000,
+    "venue": "Overture Center-Overture Hall"
+   },
+   "expect": {
+    "keep": true,
+    "category": "show",
+    "setting": "in",
+    "moods": [
+     "date",
+     "showoff"
+    ],
+    "kids": 1,
+    "dropIn": false
+   }
+  },
+  {
+   "id": "2026-11-23/09",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A free vintage country/bluegrass band at a VFW post's hall and bar.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Free. Vintage country/bluegrass.",
+    "url": "https://isthmus.com/events/northern-comfort-vfw-7591/?occ_dtstart=2026-11-25T18:30",
+    "title": "Northern Comfort",
+    "start": 1795653000000,
+    "end": 1795660200000,
+    "venue": "VFW Post 7591-Cottage Grove Road"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "lively",
+     "drink"
+    ],
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-23/10",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A club's sparring practice for its members.",
+   "listing": {
+    "source": "isthmus",
+    "description": "The Saber Legion Madison chapter sparring session, 6:30 pm Tuesdays, Vilas Park (by the tennis courts). Free/donations.",
+    "url": "https://isthmus.com/events/saber-combat-club-tuesdays/?occ_dtstart=2026-11-24T18:30",
+    "title": "Saber Combat Club",
+    "start": 1795566600000,
+    "venue": "Vilas Park"
+   },
+   "expect": {
+    "keep": false
+   }
+  },
+  {
+   "id": "2026-11-23/11",
+   "split": "holdout",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A faculty recital in the UW recital hall: seated, quiet, from the start. Not lively.",
+   "listing": {
+    "source": "isthmus",
+    "description": "UW Mead Witter School of Music Faculty Artist Series. $20.",
+    "url": "https://isthmus.com/events/conor-nelson-hamel/?occ_dtstart=2026-11-23T19:30",
+    "title": "Conor Nelson",
+    "start": 1795483800000,
+    "venue": "UW Hamel Music Center-Collins Recital Hall"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "date",
+     "think",
+     "cozy"
+    ],
+    "kids": 1,
+    "dropIn": false
+   }
+  },
+  {
+   "id": "2026-11-23/12",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "Baroque chamber music in a church, reception after: seated, unhurried, a good date.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Chamber music. $20 ($10 students; reception follows at 2422 Kendall Ave. #2).",
+    "url": "https://isthmus.com/events/wisconsin-baroque-ensemble-st-andrews/?occ_dtstart=2026-11-28T19:30",
+    "title": "Wisconsin Baroque Ensemble",
+    "start": 1795915800000,
+    "venue": "St. Andrew's Episcopal Church"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "date",
+     "think",
+     "cozy"
+    ],
+    "kids": 1,
+    "dropIn": false
+   }
+  },
+  {
+   "id": "2026-11-23/13",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A holiday Charlie Brown concert with strings and a youth choir, matinee and evening: put on for families, seated.",
+   "listing": {
+    "source": "isthmus",
+    "description": "\"A Charlie Brown Christmas With Strings,\" with vocals by Madison Youth Choir members, 3 &amp;amp; 7:30 pm. $70-$25.",
+    "url": "https://isthmus.com/events/wisconsin-chamber-orchestra-with-mr-chair/?occ_dtstart=2026-11-28T15:00",
+    "title": "Wisconsin Chamber Orchestra with Mr. Chair",
+    "start": 1795899600000,
+    "venue": "Orpheum Theater"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "kids",
+     "cozy",
+     "date"
+    ],
+    "kids": 2,
+    "dropIn": false
+   }
+  },
+  {
+   "id": "2026-11-23/14",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A free guided bird and nature outing for all ages at a nature centre: outdoors, meet at the start.",
+   "listing": {
+    "source": "isthmus",
+    "description": "With Friends of Urban Nature, all ages. Free. RSVP.",
+    "url": "https://isthmus.com/events/bird-nature-outing-edna/?occ_dtstart=2026-11-28T10:00",
+    "title": "Bird & Nature Adventure",
+    "start": 1795881600000,
+    "venue": "Aldo Leopold Nature Center, Monona"
+   },
+   "expect": {
+    "keep": true,
+    "category": "trail",
+    "setting": "out",
+    "moods": [
+     "nature",
+     "move",
+     "learn",
+     "kids"
+    ],
+    "kids": 1,
+    "dropIn": false
+   }
+  },
+  {
+   "id": "2026-11-23/15",
+   "split": "holdout",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "Holiday light displays walked outdoors at the zoo: for families, a winter date, enter any time in the window.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Holiday light displays &amp;amp; activities, entry from 4:30-7:30 pm Fridays-Sundays, 11/20-12/20, Vilas Zoo (closing time is 8 pm), plus 11/25 and 12/21-23. $12 (free ages 3 &amp;amp; under).",
+    "url": "https://isthmus.com/events/zoo-lights/?occ_dtstart=2026-11-25T16:30",
+    "title": "Zoo Lights",
+    "start": 1795645800000,
+    "end": 1795656600000,
+    "venue": "Henry Vilas Zoo"
+   },
+   "expect": {
+    "keep": true,
+    "category": "view",
+    "setting": "out",
+    "moods": [
+     "kids",
+     "showoff",
+     "nature",
+     "date"
+    ],
+    "kids": 2,
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-23/16",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A brewing-history talk by a brewmaster at a brewery: learn something, beer in hand.",
+   "listing": {
+    "source": "isthmus",
+    "description": "History talk by brewmaster Kirby Nelson.",
+    "url": "https://isthmus.com/events/craft-breweries-turn-50/?occ_dtstart=2026-11-27T16:30",
+    "title": "Craft Breweries Turn 50",
+    "start": 1795818600000,
+    "venue": "Lake Louie Brewing/Wisconsin Brewing Co., Verona"
+   },
+   "expect": {
+    "keep": true,
+    "category": "talk",
+    "setting": "in",
+    "moods": [
+     "learn",
+     "drink"
+    ],
+    "dropIn": false
+   }
+  },
+  {
+   "id": "2026-11-23/17",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A juggling club's open weekly session: a standing hobby social, like knit night.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Open juggling, 2 pm Sundays, Madison Circus Space; and 7 pm Thursdays, First Congregational United Church of Christ (during fall/winter).",
+    "url": "https://isthmus.com/events/madison-area-jugglers-club-sundays/?occ_dtstart=2026-11-29T14:00",
+    "title": "Madison Area Jugglers",
+    "start": 1795982400000,
+    "end": 1795989600000,
+    "venue": "Madison Circus Space"
+   },
+   "expect": {
+    "keep": false
+   }
+  },
+  {
+   "id": "2026-11-23/18",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "Music and a philosopher in conversation (viola and piano): seated, thoughtful, a good date.",
+   "listing": {
+    "source": "isthmus",
+    "description": "\"When music moves you, is the feeling in the music, or in you?\" with philosopher Phil Mack, and music by Madlen Breckbill, viola, and Micah Behr, piano. $25.",
+    "url": "https://isthmus.com/events/samtala-token-creek/?occ_dtstart=2026-11-28T14:30",
+    "title": "Samtalä | Musicians in Dialogue",
+    "start": 1795897800000,
+    "venue": "First Unitarian Society"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "think",
+     "learn",
+     "date"
+    ],
+    "kids": 1,
+    "dropIn": false
+   }
+  },
+  {
+   "id": "2026-11-23/19",
+   "split": "holdout",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A dark-themed holiday makers' bazaar with Krampus and aerialists: wander in, unusual.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Local artists &amp;amp; other vendors, Krampus, aerialists, kids' activities. $5 admission (free ages under 12).",
+    "url": "https://isthmus.com/events/dark-holiday-bazaar/?occ_dtstart=2026-11-29T13:00",
+    "title": "Dark Holiday Bazaar",
+    "start": 1795978800000,
+    "end": 1795993200000,
+    "venue": "Crucible"
+   },
+   "expect": {
+    "keep": true,
+    "category": "market",
+    "setting": "in",
+    "moods": [
+     "odd",
+     "lively",
+     "showoff"
+    ],
+    "kids": 1,
+    "dropIn": true
+   }
+  },
+  {
+   "id": "2026-11-23/20",
+   "split": "dev",
+   "labelled": {
+    "by": "Claude, scheduled review",
+    "on": "2026-11-23"
+   },
+   "why": "A pianist playing through dinner at an Italian restaurant: a dinner date with music, not a gig.",
+   "listing": {
+    "source": "isthmus",
+    "description": "Piano, 6 pm Wednesdays.",
+    "url": "https://isthmus.com/events/borris-/?occ_dtstart=2026-11-25T18:00",
+    "title": "Borris",
+    "start": 1795651200000,
+    "end": 1795658400000,
+    "venue": "Zafferano Ristorante, Fitchburg"
+   },
+   "expect": {
+    "keep": true,
+    "category": "music",
+    "setting": "in",
+    "moods": [
+     "eat",
+     "date",
+     "cozy"
+    ],
+    "kids": 1,
+    "dropIn": true
+   }
   }
  ]
 }
