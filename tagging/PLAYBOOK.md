@@ -134,3 +134,28 @@ Label corrected: 2026-11-16/23, the West Coast Swing Club ("Lesson 6:15 pm, open
 Left alone, for the owner: the Majestic is `bar: true` in `venues.ts`, which makes its concerts drop-in and now `drink`; the label for Fox Stevenson there says a concert hall. The only evidence is a holdout listing, so it wasn't touched.
 
 Next: `drink` went from 6% to 38% of the week's events; check a sample of what now carries it. Then pattern 2, "lively" (87% of events) and "date" (81%) as defaults. The two hardest new holdout listings ("Saideira Pagode, *Brazilian.*" at Working Draft, an exhibition-opening reception at the Union gallery) are dropped as "can't tell what it is"; a rule for them has to come from dev listings like them, not from these.
+
+### 2026-11-23: classical music, "date" at open mics, films; and the first weekend listings
+
+Listings refreshed 2026-11-24 (Thanksgiving week): 320, and the Isthmus feed ran to the end this time, so the key now has Friday-to-Sunday listings. Key grown by 24 (18 dev, 6 holdout): 11 drawn at random (seeded), 13 at weak spots (classical concerts, the zoo lights and a bird walk for "outside", children's shows, jams, a documentary, a makers' market, an art opening). Old rules against new, on the same 113 listings:
+
+| set | rules | keep | kind | in/out | kids | turn-up | mood P | mood R | mood F1 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| dev (86) | before | 86% | 92% | 100% | 94% | 94% | 77% | 75% | 76% |
+| dev (86) | after | 86% | 92% | 100% | 94% | 94% | 86% | 83% | 85% |
+| holdout (27) | before | 82% | 87% | 100% | 100% | 77% | 84% | 84% | 84% |
+| holdout (27) | after | 82% | 87% | 100% | 100% | 77% | 86% | 86% | 86% |
+
+Holdout moved only on moods, about one listing's worth. Some floor numbers came out lower when it was set again (holdout keep 86% → 81%, kind 92% → 87%): those are the new, harder listings, not the rules; the table above is the fair test.
+
+Fixed (part of pattern 2 of the baseline list, and pattern 4):
+
+- **Classical music is not lively.** Recitals, string quartets, chamber music, baroque, orchestras (not jazz, folk or pops ones; not choirs) are a `Concert`: `think`, `cozy`, `date`. Outdoors (the chamber orchestra on the Square) it stays lively.
+- **An open mic or a jam is not a date**, and the folk jams you join in on (bluegrass jam, song circle, choro jam, shanty sing, sing-along, hootenanny) are `odd`, like the folk dances.
+- **Films are to think about, not to learn from**: `date`, `cozy`, `think`. A documentary is `learn` and `think`, not a date.
+
+Week: "date" 82% → 71% of events, "odd" 2% → 7%, "think" 2% → 5%; "lively" 95% → 94%; "learn" 3% → 2% (films lost it).
+
+Left alone: "date" on a band in a bar (the key disagrees with itself: some bar gigs labelled date, most not; a person should settle the standard). The Sea Shanty Sing and the Choro Jam at Muso still get `date`, because Muso's venue default gives them "Live music", not "Open mic". Kids in the Rotunda (a band playing for children at Overture) isn't seen as a family event and is called a show. The Wisconsin Baroque Ensemble's church, St. Andrew's Episcopal, isn't in `venues.ts`. Lego Night, the hootenanny, and the `date` on the Pigeon children's musical are still misses.
+
+Next: a children's show is never a date (one rule, mostly in the families branch). Then the Muso and Cafe Coda venue defaults, which carry `date` onto everything there. "lively" is still on 94% of events: most of that is bar music, where it belongs, so watch "date" and "drink" rather than "lively". Nothing this week was tagged `nature`: Zoo Lights is dropped as "can't tell what it is", and the bird walks and seniors' hike at Aldo Leopold Nature Center and Pheasant Branch are dropped as "unknown venue", though both are in the places list. Adding those two to `venues.ts` is the cheapest win for "Outside".
