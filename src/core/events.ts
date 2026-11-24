@@ -93,18 +93,28 @@ const PROGRAM_CUES: [Mood, RegExp][] = [
   ['cozy', /\b(stor(y|ies)|storytime|read-aloud|picture books?)\b/i],
 ];
 
+// Classical music, by its forms and its players. A jazz or a folk orchestra is not one, nor is a choir: anyone may sing in a community choir.
+const CLASSICAL = /\b(recital|string quartet|chamber (music|orchestra|ensemble|players)|baroque|symphony|philharmonic|(?<!(jazz|folk|pops|big band|latin) )orchestra|sonatas?|cellist|pianist|violinist)\b/i;
+
+// Music you join in on, the old way: the bluegrass jam, the song circle, the shanty sing. Like the folk dances, few would have thought of it.
+const FOLK_JOIN_IN = /\b(bluegrass jam|old[- ]time jam|choro jam|fiddle jam|song circle|hootenanny|shant(y|ies)|sing-?along)\b/i;
+
 const KINDS: { category: Category; label: string; re: RegExp; moods: Partial<Record<Mood, number>>; dropIn?: boolean; outdoor?: boolean }[] = [
   { category: 'market', label: 'Market', re: /\b(market|fair|festival|bazaar)\b/i, moods: { lively: 1, showoff: 0.6, eat: 0.6 }, dropIn: true },
   { category: 'talk', label: 'Reading', re: /\b(reading|author|poet(ry)?|book launch|in conversation|storytelling)\b/i, moods: { learn: 1, think: 0.6, date: 0.6 } },
   { category: 'talk', label: 'Talk', re: /\b(lecture|talk|panel)\b/i, moods: { learn: 1, think: 0.6 } },
   { category: 'show', label: 'Game', re: /\b(hockey|basketball|football|volleyball|soccer|baseball|roller derby|wrestling)\b/i, moods: { lively: 1, showoff: 0.6, kids: 0.6 } },
-  { category: 'show', label: 'Film', re: /\b(film|screening|cinema|movie)\b/i, moods: { date: 0.6, cozy: 0.6, learn: 0.6 } },
+  // A documentary is something to learn from and think over; any other film is a cozy date and something to think about.
+  { category: 'show', label: 'Film', re: /\bdocumentar(y|ies)\b/i, moods: { learn: 1, think: 0.6 } },
+  { category: 'show', label: 'Film', re: /\b(film|screening|cinema|movie)\b/i, moods: { date: 0.6, cozy: 0.6, think: 0.6 } },
   // Before shows, so that a contra dance or a tango night is something you do, not something you watch.
   { category: 'play', label: 'Folk dance', re: FOLK_DANCE, moods: { move: 1, lively: 0.6, odd: 0.6, date: 0.6 }, dropIn: true },
   { category: 'play', label: 'Social dance', re: SOCIAL_DANCE, moods: { move: 1, lively: 0.6, date: 0.6 }, dropIn: true },
   { category: 'show', label: 'Show', re: /\b(comedy|stand-?up|improv|theat(er|re)|dance|ballet|opera|burlesque|drag)\b/i, moods: { lively: 1, date: 0.6 } },
-  // Nobody waits for the first act of an open mic or a jam: you turn up when you like.
-  { category: 'music', label: 'Open mic', re: /\b(open mic|open[- ]mike|open jam|open stage|jam session|bluegrass jam|song circle)\b/i, moods: { lively: 1, date: 0.6 }, dropIn: true },
+  // Classical music is seated and quiet: a good date, warm, something to sit with. Not lively (unless it's outdoors: see judge).
+  { category: 'music', label: 'Concert', re: CLASSICAL, moods: { think: 0.6, cozy: 0.6, date: 0.6 } },
+  // Nobody waits for the first act of an open mic or a jam: you turn up when you like. It's a room of players taking turns, not a date.
+  { category: 'music', label: 'Open mic', re: /\b(open mic|open[- ]mike|open jam|open stage|jam session|bluegrass jam|song circle)\b/i, moods: { lively: 1 }, dropIn: true },
   { category: 'music', label: 'DJ night', re: /\bdjs?\b/i, moods: { lively: 1 }, dropIn: true },
   { category: 'music', label: 'Live music', re: /\b(concert|band|jazz|blues|quartet|trio|symphony|orchestra|songwriter|recital|choir|bluegrass|folk)\b/i, moods: { lively: 1, date: 0.6 } },
   // Last, so that a film or a play with one of these words in its title is still a film or a play.
@@ -184,7 +194,8 @@ export function judge(raw: RawEvent, venues: Venue[], center: LatLng): Verdict {
   // A children's program: kids, plus what its description says it is about, rather than the calendar's one guess for all.
   const kindMoods = raw.preset?.kids === 2
     ? { kids: raw.preset.moods.kids ?? 1, ...Object.fromEntries(PROGRAM_CUES.filter(([, re]) => re.test(description)).map(([m]) => [m, 0.6])) }
-    : kind.moods;
+    // Classical music is quiet in a hall. Out on the lawn (the chamber orchestra on the Square) it's a picnic with music, and lively.
+    : kind.label === 'Concert' && outdoors ? { lively: 1, date: 0.6 } : kind.moods;
   // A band in a bar plays for a couple of hours to whoever walks in; a concert hall wants you in your seat at the start.
   const dropIn = ('dropIn' in kind ? kind.dropIn ?? false : false) || (kind.category === 'music' && Boolean(venue?.bar) && length >= 90);
   // Something you drop in on at a bar comes with a drink: the band, the DJ, the polka night, the board games. Elsewhere it doesn't.
@@ -193,6 +204,7 @@ export function judge(raw: RawEvent, venues: Venue[], center: LatLng): Verdict {
   const moods = {
     ...kindMoods, ...(outdoors ? { nature: Math.max(kindMoods.nature ?? 0, 0.6) } : {}), ...(families ? { kids: 1 } : {}),
     ...(atTheBar ? { drink: Math.max(kindMoods.drink ?? 0, 0.6) } : {}),
+    ...(kind.category === 'music' && FOLK_JOIN_IN.test(text) ? { odd: Math.max(kindMoods.odd ?? 0, 0.6) } : {}),
   };
   return {
     option: {

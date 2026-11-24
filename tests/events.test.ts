@@ -137,6 +137,40 @@ describe('event listings', () => {
     expect(o({ venue: "Mickey's Tavern", end: at(2026, 11, 12, 20) }).moods.drink).toBeUndefined();
   });
 
+  it('calls classical music seated and quiet, not lively, and leaves jazz and choirs as they were', () => {
+    const o = (over: Partial<RawEvent>) => toOption(raw(over), venues, city.center)!;
+    // A student string quartet, a chamber orchestra: think, cozy, a date; never lively.
+    expect(o({ title: 'Rabin String Quartet', description: 'Mead Witter School of Music student recital. Free.', venue: 'UW Hamel Music Center-Collins Recital Hall' })).toMatchObject({ category: 'music', what: 'Concert at UW Hamel Music Center-Collins Recital Hall', dropIn: false, moods: { think: 0.6, cozy: 0.6, date: 0.6 } });
+    expect(o({ title: 'Wisconsin Chamber Orchestra', description: 'Masterworks. $25-$70.', venue: 'Overture Center-Overture Hall' }).moods.lively).toBeUndefined();
+    // Near miss: the same orchestra on the Square in July is a picnic with music (see the outdoor test above).
+    expect(o({ title: 'Wisconsin Chamber Orchestra', description: 'Concerts on the Square.', venue: 'Capitol Square', start: at(2026, 7, 8, 19) }).moods.lively).toBe(1);
+    // Near misses: a jazz quartet in a cocktail bar, a jazz orchestra, and a community choir are still lively.
+    expect(o({ title: 'Ben Dameron Quartet', description: 'Standards/originals. Free.', venue: 'Lucille' }).moods.lively).toBe(1);
+    expect(o({ title: 'Madison Jazz Orchestra', description: 'Big band swing. $10.' }).moods.lively).toBe(1);
+    expect(o({ title: 'Cheers, Madison', description: 'Community choir. Free.', venue: 'Garver Feed Mill' }).moods.lively).toBe(1);
+  });
+
+  it('does not call an open mic or a jam a date, and calls the folk jams you join in on odd', () => {
+    const o = (over: Partial<RawEvent>) => toOption(raw(over), venues, city.center)!;
+    expect(o({ title: 'Open Mic', description: 'Free.', venue: 'Friends Applaud' }).moods.date).toBeUndefined();
+    expect(o({ title: 'Bluegrass Jam', description: 'Southern Wisconsin Bluegrass Music Association, 7 pm Tuesdays.', venue: 'Muso' }).moods).toEqual({ lively: 1, odd: 0.6 });
+    expect(o({ title: 'Madison Song Circle', description: '5 pm Wednesdays. Free.', venue: 'Muso' }).moods.odd).toBe(0.6);
+    // Near misses: a jazz jam, an open mic and a band in a bar are not odd; a band is still a date.
+    expect(o({ title: 'Django Jazz Jam', description: '7 pm Tuesdays. Free.' }).moods.odd).toBeUndefined();
+    expect(o({ title: 'Open Mic', description: '', venue: "Mickey's Tavern" }).moods.odd).toBeUndefined();
+    expect(o({}).moods).toMatchObject({ lively: 1, date: 0.6 });
+  });
+
+  it('calls a film something to think about, and a documentary something to learn from rather than a date', () => {
+    const o = (over: Partial<RawEvent>) => toOption(raw(over), venues, city.center)!;
+    expect(o({ title: 'WUD Film Presents: Autumn Sonata (1978)', description: 'Sweden | 99 min | PG | Dir. Ingmar Bergman.', venue: 'Union South' })).toMatchObject({ category: 'show', what: 'Film at Union South', moods: { date: 0.6, cozy: 0.6, think: 0.6 } });
+    const doc = o({ title: 'NAZA', description: 'Screening of a documentary featuring whistleblowers. Free.', venue: 'Union South' });
+    expect(doc).toMatchObject({ category: 'show', what: 'Film at Union South', dropIn: false });
+    expect(doc.moods).toEqual({ learn: 1, think: 0.6 });
+    // Near miss: a lecture that mentions a documentary is still a talk.
+    expect(o({ title: 'Making a Documentary', description: 'A talk by the director.', venue: 'Union South' }).category).toBe('talk');
+  });
+
   it("reads what a children's program is about instead of calling every one cozy", () => {
     const preset = { label: 'Kids’ program', category: 'play' as const, moods: { kids: 1, cozy: 0.6 }, kids: 2 as const, price: 2 as const };
     const program = (title: string, description: string) => toOption(raw({ source: 'mcm', title, description, venue: "Madison Children's Museum", end: at(2026, 11, 12, 20), preset }), venues, city.center)!.moods;
